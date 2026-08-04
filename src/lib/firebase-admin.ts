@@ -4,6 +4,22 @@ import { getAuth } from "firebase-admin/auth";
 
 let adminApp: App | null = null;
 
+function decodePrivateKey(): string | null {
+  const b64 = process.env.FIREBASE_ADMIN_PRIVATE_KEY_BASE64;
+  if (b64) {
+    try {
+      return Buffer.from(b64, "base64").toString("utf-8");
+    } catch {}
+  }
+
+  const raw = process.env.FIREBASE_ADMIN_PRIVATE_KEY;
+  if (raw) {
+    return raw.replace(/\\n/g, "\n").replace(/\\r/g, "\r").trim();
+  }
+
+  return null;
+}
+
 function getAdminApp(): App {
   if (adminApp) return adminApp;
   if (getApps().length > 0) {
@@ -13,17 +29,7 @@ function getAdminApp(): App {
 
   const projectId = process.env.FIREBASE_ADMIN_PROJECT_ID;
   const clientEmail = process.env.FIREBASE_ADMIN_CLIENT_EMAIL;
-  let privateKey = process.env.FIREBASE_ADMIN_PRIVATE_KEY;
-
-  if (privateKey) {
-    privateKey = privateKey
-      .replace(/\\n/g, "\n")
-      .replace(/\\r/g, "\r")
-      .trim();
-    if (!privateKey.includes("-----BEGIN")) {
-      privateKey = "-----BEGIN PRIVATE KEY-----\n" + privateKey + "\n-----END PRIVATE KEY-----";
-    }
-  }
+  const privateKey = decodePrivateKey();
 
   if (projectId && clientEmail && privateKey) {
     try {

@@ -16,11 +16,17 @@ function getAdminApp(): App {
   const privateKey = process.env.FIREBASE_ADMIN_PRIVATE_KEY?.replace(/\\n/g, "\n");
 
   if (projectId && clientEmail && privateKey) {
-    adminApp = initializeApp({
-      credential: cert({ projectId, clientEmail, privateKey }),
-    });
+    try {
+      adminApp = initializeApp({
+        credential: cert({ projectId, clientEmail, privateKey }),
+      });
+    } catch (e) {
+      console.warn("Firebase Admin cert failed, using project-only mode:", e);
+      adminApp = initializeApp({
+        projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+      });
+    }
   } else {
-    console.warn("⚠️ Firebase Admin credentials not set. Using project-only mode.");
     adminApp = initializeApp({
       projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
     });

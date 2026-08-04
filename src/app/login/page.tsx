@@ -10,33 +10,45 @@ export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    // Simulate login
-    setTimeout(() => {
-      localStorage.setItem("auth", JSON.stringify({ username, loggedIn: true }));
+    setError("");
+
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || "Login failed");
+        setLoading(false);
+        return;
+      }
+
+      localStorage.setItem("auth", JSON.stringify(data));
       router.push("/dashboard");
-    }, 1000);
+    } catch {
+      setError("Something went wrong");
+      setLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen flex bg-white">
-      {/* Left Side - Illustration */}
       <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-orange-50 via-orange-50/50 to-blue-50 overflow-hidden">
         <div className="absolute inset-0">
           <div className="absolute top-20 left-20 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
           <div className="absolute bottom-20 right-20 w-80 h-80 bg-blue-400/5 rounded-full blur-3xl" />
         </div>
-
-        {/* Decorative cityscape shapes */}
-        <svg
-          className="absolute bottom-0 left-0 w-full h-80 opacity-10"
-          viewBox="0 0 800 300"
-          fill="none"
-        >
+        <svg className="absolute bottom-0 left-0 w-full h-80 opacity-10" viewBox="0 0 800 300" fill="none">
           <rect x="50" y="150" width="60" height="150" rx="4" fill="#f97316" />
           <rect x="130" y="100" width="40" height="200" rx="4" fill="#f97316" />
           <rect x="190" y="180" width="50" height="120" rx="4" fill="#f97316" />
@@ -48,22 +60,16 @@ export default function LoginPage() {
           <rect x="660" y="160" width="40" height="140" rx="4" fill="#f97316" />
           <rect x="720" y="110" width="60" height="190" rx="4" fill="#f97316" />
         </svg>
-
-        {/* Delivery illustration placeholder */}
         <div className="absolute bottom-32 left-1/2 -translate-x-1/2">
           <div className="w-64 h-40 bg-white/60 rounded-2xl border border-white/80 shadow-xl backdrop-blur-sm flex items-center justify-center">
             <div className="text-center">
               <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
                 <Warehouse className="w-10 h-10 text-primary" />
               </div>
-              <p className="text-sm font-medium text-foreground/60">
-                Warehouse Management
-              </p>
+              <p className="text-sm font-medium text-foreground/60">Warehouse Management</p>
             </div>
           </div>
         </div>
-
-        {/* Floating elements */}
         <div className="absolute top-40 right-20 w-16 h-16 bg-white rounded-xl shadow-lg flex items-center justify-center animate-bounce">
           <span className="text-2xl">📦</span>
         </div>
@@ -72,40 +78,34 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Right Side - Login Form */}
       <div className="flex-1 flex flex-col">
-        {/* Header */}
         <div className="flex items-center justify-between px-8 py-5">
           <Link href="/" className="flex items-center gap-2">
             <div className="w-9 h-9 bg-primary rounded-lg flex items-center justify-center">
               <Warehouse className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-bold text-foreground">
-              Stock<span className="text-primary">Flow</span>
-            </span>
+            <span className="text-xl font-bold text-foreground">Stock<span className="text-primary">Flow</span></span>
           </Link>
           <button className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground border border-border rounded-lg px-3 py-1.5 transition-colors">
-            <Globe className="w-4 h-4" />
-            English
+            <Globe className="w-4 h-4" /> English
           </button>
         </div>
 
-        {/* Form */}
         <div className="flex-1 flex items-center justify-center px-8">
           <div className="w-full max-w-md">
             <div className="bg-card rounded-2xl shadow-xl border border-border p-8">
-              <h1 className="text-2xl font-bold text-foreground">
-                Welcome back!
-              </h1>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Please log in with your username and password
-              </p>
+              <h1 className="text-2xl font-bold text-foreground">Welcome back!</h1>
+              <p className="mt-2 text-sm text-muted-foreground">Please log in with your username and password</p>
+
+              {error && (
+                <div className="mt-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
+                  {error}
+                </div>
+              )}
 
               <form onSubmit={handleLogin} className="mt-8 space-y-5">
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    User name
-                  </label>
+                  <label className="block text-sm font-medium text-foreground mb-2">User name</label>
                   <input
                     type="text"
                     value={username}
@@ -117,9 +117,7 @@ export default function LoginPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    Password
-                  </label>
+                  <label className="block text-sm font-medium text-foreground mb-2">Password</label>
                   <div className="relative">
                     <input
                       type={showPassword ? "text" : "password"}
@@ -134,18 +132,11 @@ export default function LoginPage() {
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                     >
-                      {showPassword ? (
-                        <EyeOff className="w-5 h-5" />
-                      ) : (
-                        <Eye className="w-5 h-5" />
-                      )}
+                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
                   </div>
                   <div className="mt-2 text-right">
-                    <button
-                      type="button"
-                      className="text-sm text-primary hover:text-primary-hover transition-colors"
-                    >
+                    <button type="button" className="text-sm text-primary hover:text-primary-hover transition-colors">
                       Forget password?
                     </button>
                   </div>
@@ -158,40 +149,20 @@ export default function LoginPage() {
                 >
                   {loading ? (
                     <span className="flex items-center justify-center gap-2">
-                      <svg
-                        className="animate-spin w-5 h-5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                      >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        />
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                        />
+                      <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                       </svg>
                       Logging in...
                     </span>
-                  ) : (
-                    "Log in"
-                  )}
+                  ) : "Log in"}
                 </button>
               </form>
 
               <div className="mt-6 text-center">
                 <p className="text-sm text-muted-foreground">
                   Don&apos;t have an account?{" "}
-                  <Link
-                    href="/signup"
-                    className="text-primary hover:text-primary-hover font-medium transition-colors"
-                  >
+                  <Link href="/signup" className="text-primary hover:text-primary-hover font-medium transition-colors">
                     Sign up
                   </Link>
                 </p>

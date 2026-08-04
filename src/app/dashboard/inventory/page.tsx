@@ -1,49 +1,44 @@
 "use client";
 
-import { Package, AlertTriangle, ArrowUpRight, ArrowDownRight } from "lucide-react";
-
-const inventory = [
-  { name: "Wireless Mouse", sku: "WM-001", warehouse: "Main Warehouse", stock: 150, min: 50, status: "Healthy" },
-  { name: "Office Chair", sku: "OC-023", warehouse: "Main Warehouse", stock: 45, min: 20, status: "Healthy" },
-  { name: "USB Cable 2m", sku: "UC-045", warehouse: "Branch A", stock: 500, min: 100, status: "Healthy" },
-  { name: "Standing Desk", sku: "SD-067", warehouse: "Main Warehouse", stock: 12, min: 15, status: "Low" },
-  { name: "Monitor Stand", sku: "MS-089", warehouse: "Branch A", stock: 0, min: 10, status: "Critical" },
-  { name: "Keyboard Pro", sku: "KP-101", warehouse: "Main Warehouse", stock: 200, min: 50, status: "Healthy" },
-  { name: "Webcam HD", sku: "WC-123", warehouse: "Branch B", stock: 85, min: 30, status: "Healthy" },
-  { name: "Desk Lamp", sku: "DL-145", warehouse: "Main Warehouse", stock: 320, min: 50, status: "Healthy" },
-];
-
-const statusConfig: Record<string, { bg: string; text: string }> = {
-  Healthy: { bg: "bg-green-50", text: "text-green-600" },
-  Low: { bg: "bg-yellow-50", text: "text-yellow-600" },
-  Critical: { bg: "bg-red-50", text: "text-red-600" },
-};
+import { useState, useEffect } from "react";
+import { Package, AlertTriangle } from "lucide-react";
 
 export default function InventoryPage() {
+  const [inventory, setInventory] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/inventory").then((r) => r.json()).then(setInventory).finally(() => setLoading(false));
+  }, []);
+
   const totalStock = inventory.reduce((a, b) => a + b.stock, 0);
   const lowItems = inventory.filter((i) => i.status === "Low" || i.status === "Critical").length;
+
+  const statusConfig: Record<string, { bg: string; text: string }> = {
+    Healthy: { bg: "bg-green-50", text: "text-green-600" },
+    Low: { bg: "bg-yellow-50", text: "text-yellow-600" },
+    Critical: { bg: "bg-red-50", text: "text-red-600" },
+  };
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-foreground">Inventory</h1>
-        <p className="text-muted-foreground text-sm mt-1">
-          Real-time stock levels across all warehouses
-        </p>
+        <p className="text-muted-foreground text-sm mt-1">Real-time stock levels across all warehouses</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-card rounded-xl border border-border p-5">
           <p className="text-sm text-muted-foreground">Total Stock Units</p>
-          <p className="text-2xl font-bold text-foreground mt-1">{totalStock.toLocaleString()}</p>
+          <p className="text-2xl font-bold text-foreground mt-1">{loading ? "..." : totalStock.toLocaleString()}</p>
         </div>
         <div className="bg-card rounded-xl border border-border p-5">
           <p className="text-sm text-muted-foreground">Low Stock Alerts</p>
-          <p className="text-2xl font-bold text-yellow-600 mt-1">{lowItems}</p>
+          <p className="text-2xl font-bold text-yellow-600 mt-1">{loading ? "..." : lowItems}</p>
         </div>
         <div className="bg-card rounded-xl border border-border p-5">
-          <p className="text-sm text-muted-foreground">Warehouses</p>
-          <p className="text-2xl font-bold text-foreground mt-1">3</p>
+          <p className="text-sm text-muted-foreground">Total Products</p>
+          <p className="text-2xl font-bold text-foreground mt-1">{loading ? "..." : inventory.length}</p>
         </div>
       </div>
 
@@ -64,31 +59,34 @@ export default function InventoryPage() {
               </tr>
             </thead>
             <tbody>
-              {inventory.map((item, i) => {
-                const cfg = statusConfig[item.status];
-                return (
-                  <tr key={i} className="border-b border-border last:border-0 hover:bg-muted/50 transition-colors">
-                    <td className="px-5 py-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 bg-muted rounded-lg flex items-center justify-center">
-                          <Package className="w-4 h-4 text-muted-foreground" />
+              {loading ? (
+                <tr><td colSpan={6} className="px-5 py-8 text-center text-muted-foreground text-sm">Loading...</td></tr>
+              ) : inventory.length === 0 ? (
+                <tr><td colSpan={6} className="px-5 py-8 text-center text-muted-foreground text-sm">No inventory data</td></tr>
+              ) : (
+                inventory.map((item, i) => {
+                  const cfg = statusConfig[item.status] || statusConfig.Healthy;
+                  return (
+                    <tr key={i} className="border-b border-border last:border-0 hover:bg-muted/50 transition-colors">
+                      <td className="px-5 py-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 bg-muted rounded-lg flex items-center justify-center"><Package className="w-4 h-4 text-muted-foreground" /></div>
+                          <span className="text-sm font-medium text-foreground">{item.name}</span>
                         </div>
-                        <span className="text-sm font-medium text-foreground">{item.name}</span>
-                      </div>
-                    </td>
-                    <td className="px-5 py-3 text-sm text-muted-foreground">{item.sku}</td>
-                    <td className="px-5 py-3 text-sm text-muted-foreground">{item.warehouse}</td>
-                    <td className="px-5 py-3 text-sm font-medium text-foreground">{item.stock}</td>
-                    <td className="px-5 py-3 text-sm text-muted-foreground">{item.min}</td>
-                    <td className="px-5 py-3">
-                      <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${cfg.bg} ${cfg.text}`}>
-                        {item.status === "Critical" && <AlertTriangle className="w-3 h-3" />}
-                        {item.status}
-                      </span>
-                    </td>
-                  </tr>
-                );
-              })}
+                      </td>
+                      <td className="px-5 py-3 text-sm text-muted-foreground">{item.sku}</td>
+                      <td className="px-5 py-3 text-sm text-muted-foreground">{item.warehouse}</td>
+                      <td className="px-5 py-3 text-sm font-medium text-foreground">{item.stock}</td>
+                      <td className="px-5 py-3 text-sm text-muted-foreground">{item.min}</td>
+                      <td className="px-5 py-3">
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${cfg.bg} ${cfg.text}`}>
+                          {item.status === "Critical" && <AlertTriangle className="w-3 h-3" />} {item.status}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>

@@ -1,0 +1,101 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Store {
+  id              String    @id @default(cuid())
+  name            String
+  description     String?
+  logo            String?
+  website         String?
+  category        String    @default("Electronics")
+  taxId           String?
+  currency        String    @default("USD")
+  timezone        String    @default("America/New_York")
+  address         String?
+  city            String?
+  state           String?
+  zipCode         String?
+  country         String?
+  ownerName       String
+  ownerEmail      String
+  ownerPhone      String?
+  emailNotifs     Boolean   @default(true)
+  orderAlerts     Boolean   @default(true)
+  lowStockAlerts  Boolean   @default(true)
+  weeklyReports   Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+
+  users           User[]
+  products        Product[]
+  orders          Order[]
+  teamMembers     TeamMember[]
+}
+
+model User {
+  id            String   @id @default(cuid())
+  username      String   @unique
+  email         String   @unique
+  password      String
+  fullName      String
+  role          String   @default("admin")
+  createdAt     DateTime @default(now())
+  storeId       String
+  store         Store    @relation(fields: [storeId], references: [id])
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  sku         String   @unique
+  category    String
+  price       Float
+  stock       Int      @default(0)
+  minStock    Int      @default(10)
+  status      String   @default("Active")
+  createdAt   DateTime @default(now())
+  storeId     String
+  store       Store    @relation(fields: [storeId], references: [id])
+}
+
+model Order {
+  id            String   @id @default(cuid())
+  orderNumber   String   @unique
+  customerName  String
+  items         Int
+  total         Float
+  status        String   @default("Pending")
+  payment       String   @default("Pending")
+  date          DateTime @default(now())
+  storeId       String
+  store         Store    @relation(fields: [storeId], references: [id])
+  shipments     Shipment[]
+}
+
+model Shipment {
+  id              String  @id @default(cuid())
+  shipmentNumber  String  @unique
+  carrier         String
+  status          String  @default("Processing")
+  origin          String
+  destination     String
+  eta             String
+  orderId         String
+  order           Order   @relation(fields: [orderId], references: [id])
+}
+
+model TeamMember {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  role      String   @default("Staff")
+  status    String   @default("Active")
+  joinedAt  DateTime @default(now())
+  storeId   String
+  store     Store    @relation(fields: [storeId], references: [id])
+}

@@ -8,6 +8,7 @@ import {
   Users, Bell, Search, Menu, X, LogOut, ChevronDown, Truck, ClipboardList,
   FileText, BellRing, ArrowLeftRight, RotateCcw, Activity, Building2, TruckIcon,
   Receipt, CreditCard, UserCircle, Wallet, BookOpen, NotebookPen, UserCog, PieChart,
+  CalendarCheck, TrendingUp,
 } from "lucide-react";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
@@ -16,6 +17,7 @@ const sidebarLinks = [
   { href: "/dashboard", label: "لوحة التحكم", icon: LayoutDashboard },
   { href: "/dashboard/pos", label: "نقطة البيع", icon: CreditCard },
   { href: "/dashboard/invoices", label: "الفواتير", icon: Receipt },
+  { href: "/dashboard/installments", label: "الأقساط", icon: CalendarCheck },
   { href: "/dashboard/customers", label: "العملاء", icon: UserCircle },
   { href: "/dashboard/products", label: "المنتجات", icon: Package },
   { href: "/dashboard/orders", label: "الطلبات", icon: ShoppingCart },
@@ -27,6 +29,7 @@ const sidebarLinks = [
   { href: "/dashboard/shipping", label: "الشحن", icon: Truck },
   { href: "/dashboard/analytics", label: "التحليلات", icon: BarChart3 },
   { href: "/dashboard/reports", label: "التقارير", icon: PieChart },
+  { href: "/dashboard/reports/profit-loss", label: "الأرباح والخسائر", icon: TrendingUp },
   { href: "/dashboard/purchase-orders", label: "طلبات الشراء", icon: FileText },
   { href: "/dashboard/warehouses", label: "المستودعات", icon: Building2 },
   { href: "/dashboard/suppliers", label: "الموردون", icon: TruckIcon },

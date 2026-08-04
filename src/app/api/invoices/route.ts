@@ -40,6 +40,7 @@ export async function POST(request: NextRequest) {
     status,
     notes,
     paymentMethod,
+    installments: numberOfInstallments,
   } = body;
 
   if (!customerName || !items || !Array.isArray(items) || items.length === 0) {
@@ -57,6 +58,7 @@ export async function POST(request: NextRequest) {
   );
   const calculatedTax = calculatedSubtotal * 0.15;
   const calculatedTotal = calculatedSubtotal + calculatedTax;
+  const finalTotal = total !== undefined ? parseFloat(total) : calculatedTotal;
 
   const docRef = await collections.invoices.add({
     invoiceNumber,
@@ -71,7 +73,7 @@ export async function POST(request: NextRequest) {
     })),
     subtotal: subtotal !== undefined ? parseFloat(subtotal) : calculatedSubtotal,
     tax: tax !== undefined ? parseFloat(tax) : calculatedTax,
-    total: total !== undefined ? parseFloat(total) : calculatedTotal,
+    total: finalTotal,
     status: status || "unpaid",
     notes: notes || "",
     paymentMethod: paymentMethod || "cash",
@@ -79,6 +81,28 @@ export async function POST(request: NextRequest) {
     createdBy: user.userId,
     createdAt: new Date().toISOString(),
   });
+
+  if (numberOfInstallments && parseInt(numberOfInstallments) > 0) {
+    const installmentCount = parseInt(numberOfInstallments);
+    const installmentAmount = finalTotal / installmentCount;
+    const startDate = new Date().toISOString().split("T")[0];
+
+    await collections.installments.add({
+      invoiceId: docRef.id,
+      invoiceNumber,
+      customerName,
+      totalAmount: finalTotal,
+      numberOfInstallments: installmentCount,
+      installmentAmount: parseFloat(installmentAmount.toFixed(2)),
+      paidInstallments: 0,
+      startDate,
+      status: "active",
+      notes: "",
+      storeId: user.storeId,
+      createdBy: user.userId,
+      createdAt: new Date().toISOString(),
+    });
+  }
 
   const created = await docRef.get();
   return NextResponse.json(

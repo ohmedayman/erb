@@ -64,22 +64,25 @@ export default function InvoicePrintPage() {
       <style>{`
         @media print {
           body * {
-            visibility: hidden;
+            visibility: hidden !important;
           }
           #invoice-content, #invoice-content * {
-            visibility: visible;
+            visibility: visible !important;
           }
           #invoice-content {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 100% !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            background: white !important;
           }
           .no-print {
             display: none !important;
           }
           @page {
-            margin: 10mm;
+            margin: 15mm;
             size: A4;
           }
         }
@@ -99,9 +102,17 @@ export default function InvoicePrintPage() {
           {/* Header */}
           <div className="flex justify-between items-start mb-8 border-b-2 border-gray-200 pb-6">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">{invoice.companyName}</h1>
-              <p className="text-sm text-gray-600 mt-1">{invoice.companyAddress}</p>
-              <p className="text-sm text-gray-600">{invoice.companyPhone}</p>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
+                  <span className="text-white text-xl font-bold">SF</span>
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900">متجر ستوك فلو</h1>
+                  <p className="text-sm text-gray-500">Stock Flow Store</p>
+                </div>
+              </div>
+              <p className="text-sm text-gray-600 mt-1">{invoice.companyAddress || "المملكة العربية السعودية"}</p>
+              <p className="text-sm text-gray-600">{invoice.companyPhone || "966-XXXXXXXXX"}</p>
             </div>
             <div className="text-left">
               <h2 className="text-xl font-bold text-gray-900">فاتورة</h2>
@@ -122,10 +133,12 @@ export default function InvoicePrintPage() {
                 <span className="text-gray-500">الهاتف: </span>
                 <span className="text-gray-900 font-medium">{invoice.customerPhone}</span>
               </div>
-              <div className="col-span-2">
-                <span className="text-gray-500">العنوان: </span>
-                <span className="text-gray-900 font-medium">{invoice.customerAddress}</span>
-              </div>
+              {invoice.customerAddress && (
+                <div className="col-span-2">
+                  <span className="text-gray-500">العنوان: </span>
+                  <span className="text-gray-900 font-medium">{invoice.customerAddress}</span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -137,7 +150,7 @@ export default function InvoicePrintPage() {
                 <th className="text-right py-3 px-4 text-xs font-semibold text-gray-700">المنتج</th>
                 <th className="text-center py-3 px-4 text-xs font-semibold text-gray-700">الكمية</th>
                 <th className="text-center py-3 px-4 text-xs font-semibold text-gray-700">السعر</th>
-                <th className="text-center py-3 px-4 text-xs font-semibold text-gray-700">الإجمالي</th>
+                <th className="text-center py-3 px-4 text-xs font-semibold text-gray-700">المجموع</th>
               </tr>
             </thead>
             <tbody>
@@ -192,6 +205,7 @@ export default function InvoicePrintPage() {
           {/* Footer */}
           <div className="text-center text-xs text-gray-400 mt-12 pt-4 border-t border-gray-100">
             <p>شكراً لتعاملكم معنا</p>
+            <p className="mt-1">متجر ستوك فلو - Stock Flow Store</p>
           </div>
         </div>
       </div>

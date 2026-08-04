@@ -22,6 +22,7 @@ export const collections = {
   employees: firestore.collection("employees"),
   invoices: firestore.collection("invoices"),
   customers: firestore.collection("customers"),
+  installments: firestore.collection("installments"),
 };
 
 export function generateId(collection: string): string {

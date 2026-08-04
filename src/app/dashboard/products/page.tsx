@@ -25,7 +25,7 @@ function BarcodeCanvas({ value, width = 200, height = 80 }: { value: string; wid
       const pattern = charCode.toString(2).padStart(7, "0");
       for (let j = 0; j < pattern.length; j++) {
         if (pattern[j] === "1") {
-          ctx.fillRect(x, 10, barWidth, 50);
+          ctx.fillRect(x, 10, barWidth, height - 30);
         }
         x += barWidth;
       }
@@ -34,7 +34,7 @@ function BarcodeCanvas({ value, width = 200, height = 80 }: { value: string; wid
 
     ctx.font = "12px monospace";
     ctx.textAlign = "center";
-    ctx.fillText(value, canvas.width / 2, 75);
+    ctx.fillText(value, canvas.width / 2, height - 8);
   }, [value, width, height]);
 
   return <canvas ref={canvasRef} width={width} height={height} className="border rounded" />;
@@ -113,84 +113,116 @@ export default function ProductsPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">المنتجات</h1>
-          <p className="text-muted-foreground text-sm mt-1">إدارة كتالوج المنتجات</p>
-        </div>
-        <button onClick={() => { setEditingProduct(null); setShowModal(true); }} className="flex items-center gap-2 bg-primary text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-primary-hover transition-colors">
-          <Plus className="w-4 h-4" /> إضافة منتج
-        </button>
-      </div>
+    <>
+      <style>{`
+        @media print {
+          body * {
+            visibility: hidden !important;
+          }
+          #barcode-print-area, #barcode-print-area * {
+            visibility: visible !important;
+          }
+          #barcode-print-area {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            z-index: 99999;
+          }
+          .no-print {
+            display: none !important;
+          }
+          @page {
+            margin: 10mm;
+            size: auto;
+          }
+        }
+      `}</style>
 
-      <div className="bg-card rounded-xl border border-border p-4">
-        <div className="flex flex-col sm:flex-row gap-3">
-          <div className="relative flex-1">
-            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <input type="text" placeholder="البحث عن منتجات..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full pl-4 pr-10 py-2 bg-muted rounded-lg text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" />
+      <div className="space-y-6 no-print">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">المنتجات</h1>
+            <p className="text-muted-foreground text-sm mt-1">إدارة كتالوج المنتجات</p>
+          </div>
+          <button onClick={() => { setEditingProduct(null); setShowModal(true); }} className="flex items-center gap-2 bg-primary text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-primary-hover transition-colors">
+            <Plus className="w-4 h-4" /> إضافة منتج
+          </button>
+        </div>
+
+        <div className="bg-card rounded-xl border border-border p-4">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="relative flex-1">
+              <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <input type="text" placeholder="البحث عن منتجات..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full pl-4 pr-10 py-2 bg-muted rounded-lg text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" />
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-card rounded-xl border border-border overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-border bg-muted/50">
+                  <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">المنتج</th>
+                  <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">الرمز</th>
+                  <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">الباركود</th>
+                  <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">الفئة</th>
+                  <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">السعر</th>
+                  <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">المخزون</th>
+                  <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">الحالة</th>
+                  <th className="text-left text-xs font-medium text-muted-foreground px-5 py-3">الإجراءات</th>
+                </tr>
+              </thead>
+              <tbody>
+                {loading ? (
+                  <tr><td colSpan={8} className="px-5 py-8 text-center text-muted-foreground text-sm">جاري التحميل...</td></tr>
+                ) : filtered.length === 0 ? (
+                  <tr><td colSpan={8} className="px-5 py-8 text-center text-muted-foreground text-sm">لم يتم العثور على منتجات</td></tr>
+                ) : (
+                  filtered.map((product) => (
+                    <tr key={product.id} className="border-b border-border last:border-0 hover:bg-muted/50 transition-colors">
+                      <td className="px-5 py-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 bg-muted rounded-lg flex items-center justify-center"><Package className="w-4 h-4 text-muted-foreground" /></div>
+                          <span className="text-sm font-medium text-foreground">{product.name}</span>
+                        </div>
+                      </td>
+                      <td className="px-5 py-3 text-sm text-muted-foreground">{product.sku}</td>
+                      <td className="px-5 py-3">
+                        <BarcodeCanvas value={product.sku || "N/A"} width={120} height={50} />
+                      </td>
+                      <td className="px-5 py-3 text-sm text-muted-foreground">{product.category}</td>
+                      <td className="px-5 py-3 text-sm font-medium text-foreground">${product.price}</td>
+                      <td className="px-5 py-3 text-sm text-foreground">{product.stock}</td>
+                      <td className="px-5 py-3">
+                        <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${product.status === "Active" ? "bg-green-50 text-green-600" : product.status === "Low Stock" ? "bg-yellow-50 text-yellow-600" : "bg-red-50 text-red-600"}`}>
+                          {product.status === "Active" ? "نشط" : product.status === "Low Stock" ? "مخزون منخفض" : "نفذ من المخزون"}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3">
+                        <div className="flex items-center justify-start gap-1">
+                          <button onClick={() => setBarcodeProduct(product)} className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors" title="طباعة باركود"><Printer className="w-4 h-4" /></button>
+                          <button onClick={() => { setEditingProduct(product); setShowModal(true); }} className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors"><Edit className="w-4 h-4" /></button>
+                          <button onClick={() => handleDelete(product.id)} className="p-1.5 text-muted-foreground hover:text-red-500 hover:bg-red-50 rounded-md transition-colors"><Trash2 className="w-4 h-4" /></button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
 
-      <div className="bg-card rounded-xl border border-border overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-border bg-muted/50">
-                <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">المنتج</th>
-                <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">الرمز</th>
-                <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">الباركود</th>
-                <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">الفئة</th>
-                <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">السعر</th>
-                <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">المخزون</th>
-                <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">الحالة</th>
-                <th className="text-left text-xs font-medium text-muted-foreground px-5 py-3">الإجراءات</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr><td colSpan={8} className="px-5 py-8 text-center text-muted-foreground text-sm">جاري التحميل...</td></tr>
-              ) : filtered.length === 0 ? (
-                <tr><td colSpan={8} className="px-5 py-8 text-center text-muted-foreground text-sm">لم يتم العثور على منتجات</td></tr>
-              ) : (
-                filtered.map((product) => (
-                  <tr key={product.id} className="border-b border-border last:border-0 hover:bg-muted/50 transition-colors">
-                    <td className="px-5 py-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 bg-muted rounded-lg flex items-center justify-center"><Package className="w-4 h-4 text-muted-foreground" /></div>
-                        <span className="text-sm font-medium text-foreground">{product.name}</span>
-                      </div>
-                    </td>
-                    <td className="px-5 py-3 text-sm text-muted-foreground">{product.sku}</td>
-                    <td className="px-5 py-3">
-                      <BarcodeCanvas value={product.sku || "N/A"} width={120} height={50} />
-                    </td>
-                    <td className="px-5 py-3 text-sm text-muted-foreground">{product.category}</td>
-                    <td className="px-5 py-3 text-sm font-medium text-foreground">${product.price}</td>
-                    <td className="px-5 py-3 text-sm text-foreground">{product.stock}</td>
-                    <td className="px-5 py-3">
-                      <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${product.status === "Active" ? "bg-green-50 text-green-600" : product.status === "Low Stock" ? "bg-yellow-50 text-yellow-600" : "bg-red-50 text-red-600"}`}>
-                        {product.status === "Active" ? "نشط" : product.status === "Low Stock" ? "مخزون منخفض" : "نفذ من المخزون"}
-                      </span>
-                    </td>
-                    <td className="px-5 py-3">
-                      <div className="flex items-center justify-start gap-1">
-                        <button onClick={() => setBarcodeProduct(product)} className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors" title="طباعة باركود"><Printer className="w-4 h-4" /></button>
-                        <button onClick={() => { setEditingProduct(product); setShowModal(true); }} className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors"><Edit className="w-4 h-4" /></button>
-                        <button onClick={() => handleDelete(product.id)} className="p-1.5 text-muted-foreground hover:text-red-500 hover:bg-red-50 rounded-md transition-colors"><Trash2 className="w-4 h-4" /></button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 no-print">
           <div className="bg-card rounded-2xl shadow-xl w-full max-w-md border border-border">
             <div className="px-6 py-4 border-b border-border flex items-center justify-between">
               <h2 className="text-lg font-semibold text-foreground">{editingProduct ? "تعديل المنتج" : "إضافة منتج"}</h2>
@@ -235,26 +267,36 @@ export default function ProductsPage() {
       )}
 
       {barcodeProduct && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-card rounded-2xl shadow-xl w-full max-w-sm border border-border">
-            <div className="px-6 py-4 border-b border-border flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-foreground">طباعة باركود</h2>
-              <button onClick={() => setBarcodeProduct(null)} className="text-muted-foreground hover:text-foreground">✕</button>
-            </div>
-            <div className="p-6 flex flex-col items-center gap-4">
-              <p className="text-sm text-muted-foreground">{barcodeProduct.name}</p>
-              <BarcodeCanvas value={barcodeProduct.sku || "N/A"} width={300} height={120} />
-              <p className="text-xs text-muted-foreground font-mono">{barcodeProduct.sku}</p>
-              <button
-                onClick={() => window.print()}
-                className="w-full flex items-center justify-center gap-2 bg-primary text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-primary-hover transition-colors"
-              >
-                <Printer className="w-4 h-4" /> طباعة
-              </button>
+        <>
+          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 no-print">
+            <div className="bg-card rounded-2xl shadow-xl w-full max-w-sm border border-border">
+              <div className="px-6 py-4 border-b border-border flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-foreground">طباعة باركود</h2>
+                <button onClick={() => setBarcodeProduct(null)} className="text-muted-foreground hover:text-foreground">✕</button>
+              </div>
+              <div className="p-6 flex flex-col items-center gap-4">
+                <p className="text-sm font-medium text-foreground">{barcodeProduct.name}</p>
+                <BarcodeCanvas value={barcodeProduct.sku || "N/A"} width={300} height={120} />
+                <p className="text-xs text-muted-foreground font-mono">{barcodeProduct.sku}</p>
+                <button
+                  onClick={() => window.print()}
+                  className="w-full flex items-center justify-center gap-2 bg-primary text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-primary-hover transition-colors"
+                >
+                  <Printer className="w-4 h-4" /> طباعة
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+
+          <div id="barcode-print-area" style={{ display: "none" }}>
+            <div style={{ textAlign: "center", padding: "20px" }}>
+              <p style={{ fontSize: "16px", fontWeight: "bold", marginBottom: "8px", fontFamily: "Arial, sans-serif" }}>{barcodeProduct.name}</p>
+              <BarcodeCanvas value={barcodeProduct.sku || "N/A"} width={300} height={120} />
+              <p style={{ fontSize: "12px", marginTop: "8px", fontFamily: "monospace" }}>{barcodeProduct.sku}</p>
+            </div>
+          </div>
+        </>
       )}
-    </div>
+    </>
   );
 }

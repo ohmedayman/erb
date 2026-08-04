@@ -1,0 +1,313 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import {
+  TrendingUp,
+  TrendingDown,
+  DollarSign,
+  Percent,
+  FileText,
+  Download,
+} from "lucide-react";
+import { auth } from "@/lib/firebase";
+
+interface MonthlyBreakdown {
+  month: string;
+  revenue: number;
+  expenses: number;
+  profit: number;
+}
+
+interface ExpenseCategory {
+  key: string;
+  label: string;
+  amount: number;
+  percentage: number;
+}
+
+interface ProfitLossData {
+  totalRevenue: number;
+  totalExpenses: number;
+  grossProfit: number;
+  netProfit: number;
+  profitMargin: number;
+  monthlyBreakdown: MonthlyBreakdown[];
+  expenseCategories: ExpenseCategory[];
+}
+
+const categoryColors: Record<string, string> = {
+  rent: "bg-blue-500",
+  utilities: "bg-yellow-500",
+  salaries: "bg-green-500",
+  marketing: "bg-purple-500",
+  transport: "bg-orange-500",
+  other: "bg-gray-500",
+};
+
+export default function ProfitLossPage() {
+  const [data, setData] = useState<ProfitLossData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const token = await auth.currentUser?.getIdToken();
+        const res = await fetch("/api/reports/profit-loss", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const json = await res.json();
+        setData(json);
+      } catch {
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const formatCurrency = (amount: number) => {
+    return amount.toLocaleString("ar-SA", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  };
+
+  const summaryCards = [
+    {
+      label: "إجمالي الإيرادات",
+      value: data?.totalRevenue ?? 0,
+      icon: TrendingUp,
+      color: "bg-green-50 text-green-600 border-green-200",
+      iconBg: "bg-green-100",
+    },
+    {
+      label: "إجمالي المصروفات",
+      value: data?.totalExpenses ?? 0,
+      icon: TrendingDown,
+      color: "bg-red-50 text-red-600 border-red-200",
+      iconBg: "bg-red-100",
+    },
+    {
+      label: "صافي الربح",
+      value: data?.netProfit ?? 0,
+      icon: DollarSign,
+      color: "bg-blue-50 text-blue-600 border-blue-200",
+      iconBg: "bg-blue-100",
+    },
+    {
+      label: "هامش الربح",
+      value: data?.profitMargin ?? 0,
+      icon: Percent,
+      suffix: "%",
+      color: "bg-purple-50 text-purple-600 border-purple-200",
+      iconBg: "bg-purple-100",
+    },
+  ];
+
+  const maxMonthlyRevenue = data?.monthlyBreakdown.length
+    ? Math.max(...data.monthlyBreakdown.map((m) => m.revenue), 1)
+    : 1;
+
+  return (
+    <div className="space-y-6" dir="rtl">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">
+            تقرير الأرباح والخسائر
+          </h1>
+          <p className="text-muted-foreground text-sm mt-1">
+            تحليل مفصل للأرباح والمصروفات
+          </p>
+        </div>
+        <button
+          disabled
+          className="flex items-center gap-2 bg-muted text-muted-foreground px-4 py-2.5 rounded-lg text-sm font-medium cursor-not-allowed"
+          title="قريباً"
+        >
+          <Download className="w-4 h-4" />
+          تصدير التقرير
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {summaryCards.map((card, i) => (
+          <div
+            key={i}
+            className={`rounded-xl p-5 border ${card.color} hover:shadow-md transition-shadow`}
+          >
+            <div className="flex items-center justify-between">
+              <div
+                className={`w-11 h-11 ${card.iconBg} rounded-xl flex items-center justify-center`}
+              >
+                <card.icon className="w-5 h-5" />
+              </div>
+            </div>
+            <div className="mt-4">
+              <p className="text-2xl font-bold">
+                {loading
+                  ? "..."
+                  : card.suffix
+                    ? `${card.value}${card.suffix}`
+                    : formatCurrency(card.value)}
+              </p>
+              <p className="text-sm mt-1 opacity-80">{card.label}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid lg:grid-cols-2 gap-6">
+        <div className="bg-card rounded-xl border border-border">
+          <div className="px-5 py-4 border-b border-border">
+            <h2 className="font-semibold text-foreground flex items-center gap-2">
+              <FileText className="w-4 h-4" />
+              التفصيل الشهري (آخر 6 أشهر)
+            </h2>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-border bg-muted/50">
+                  <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">
+                    الشهر
+                  </th>
+                  <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">
+                    الإيرادات
+                  </th>
+                  <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">
+                    المصروفات
+                  </th>
+                  <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">
+                    الربح
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {loading ? (
+                  <tr>
+                    <td
+                      colSpan={4}
+                      className="px-5 py-8 text-center text-muted-foreground text-sm"
+                    >
+                      جاري التحميل...
+                    </td>
+                  </tr>
+                ) : !data?.monthlyBreakdown?.length ? (
+                  <tr>
+                    <td
+                      colSpan={4}
+                      className="px-5 py-8 text-center text-muted-foreground text-sm"
+                    >
+                      لا توجد بيانات بعد
+                    </td>
+                  </tr>
+                ) : (
+                  data.monthlyBreakdown.map((item, i) => (
+                    <tr
+                      key={i}
+                      className="border-b border-border last:border-0 hover:bg-muted/50 transition-colors"
+                    >
+                      <td className="px-5 py-3 text-sm font-medium text-foreground">
+                        {item.month}
+                      </td>
+                      <td className="px-5 py-3 text-sm text-green-600 font-medium">
+                        {formatCurrency(item.revenue)} ر.س
+                      </td>
+                      <td className="px-5 py-3 text-sm text-red-600 font-medium">
+                        {formatCurrency(item.expenses)} ر.س
+                      </td>
+                      <td className="px-5 py-3">
+                        <span
+                          className={`text-sm font-semibold ${
+                            item.profit >= 0
+                              ? "text-green-600"
+                              : "text-red-600"
+                          }`}
+                        >
+                          {item.profit >= 0 ? "+" : ""}
+                          {formatCurrency(item.profit)} ر.س
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div className="bg-card rounded-xl border border-border">
+          <div className="px-5 py-4 border-b border-border">
+            <h2 className="font-semibold text-foreground flex items-center gap-2">
+              <DollarSign className="w-4 h-4" />
+              توزيع المصروفات حسب الفئة
+            </h2>
+          </div>
+          <div className="p-5">
+            {loading ? (
+              <p className="text-sm text-muted-foreground text-center py-8">
+                جاري التحميل...
+              </p>
+            ) : !data?.expenseCategories?.length ? (
+              <p className="text-sm text-muted-foreground text-center py-8">
+                لا توجد مصروفات بعد
+              </p>
+            ) : (
+              <div className="space-y-4">
+                <div className="flex h-4 rounded-full overflow-hidden">
+                  {data.expenseCategories.map((cat, i) => (
+                    <div
+                      key={i}
+                      className={`${
+                        categoryColors[cat.key] || "bg-gray-400"
+                      } transition-all duration-500`}
+                      style={{
+                        width: `${Math.max(cat.percentage, 2)}%`,
+                      }}
+                    />
+                  ))}
+                </div>
+                <div className="space-y-3">
+                  {data.expenseCategories.map((cat, i) => (
+                    <div key={i} className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div
+                            className={`w-3 h-3 rounded-full ${
+                              categoryColors[cat.key] || "bg-gray-400"
+                            }`}
+                          />
+                          <span className="text-sm text-foreground">
+                            {cat.label}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="text-xs text-muted-foreground">
+                            {cat.percentage.toFixed(1)}%
+                          </span>
+                          <span className="text-sm font-medium text-foreground">
+                            {formatCurrency(cat.amount)} ر.س
+                          </span>
+                        </div>
+                      </div>
+                      <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all duration-500 ${
+                            categoryColors[cat.key] || "bg-gray-400"
+                          }`}
+                          style={{
+                            width: `${Math.max(cat.percentage, 2)}%`,
+                          }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -1,54 +1,54 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { verifyFirebaseToken } from "@/lib/auth";
+import { collections } from "@/lib/firestore";
 
-function getTokenUser(req: NextRequest) {
-  const token = req.cookies.get("token")?.value;
-  if (!token) return null;
-  try {
-    const parts = token.split(".");
-    const payload = JSON.parse(atob(parts[1]));
-    return { userId: payload.userId, storeId: payload.storeId };
-  } catch {
-    return null;
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const user = await verifyFirebaseToken(request);
+  if (!user) {
+    return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
   }
-}
-
-export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const user = getTokenUser(req);
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id } = await params;
-  const order = await prisma.order.findFirst({
-    where: { id, storeId: user.storeId },
-    include: { shipments: true },
-  });
+  const doc = await collections.orders.doc(id).get();
 
-  if (!order) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  return NextResponse.json(order);
+  if (!doc.exists || doc.data()?.storeId !== user.storeId) {
+    return NextResponse.json({ error: "غير موجود" }, { status: 404 });
+  }
+
+  return NextResponse.json({ id: doc.id, ...doc.data() });
 }
 
-export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const user = getTokenUser(req);
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const user = await verifyFirebaseToken(request);
+  if (!user) {
+    return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
+  }
 
   const { id } = await params;
-  const body = await req.json();
+  const doc = await collections.orders.doc(id).get();
 
-  const existing = await prisma.order.findFirst({
-    where: { id, storeId: user.storeId },
-  });
-  if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (!doc.exists || doc.data()?.storeId !== user.storeId) {
+    return NextResponse.json({ error: "غير موجود" }, { status: 404 });
+  }
 
-  const order = await prisma.order.update({
-    where: { id },
-    data: {
-      customerName: body.customerName ?? existing.customerName,
-      items: body.items !== undefined ? parseInt(body.items) : existing.items,
-      total: body.total !== undefined ? parseFloat(body.total) : existing.total,
-      status: body.status ?? existing.status,
-      payment: body.payment ?? existing.payment,
-    },
-  });
+  const existing = doc.data()!;
+  const body = await request.json();
 
-  return NextResponse.json(order);
+  const updateData: Record<string, unknown> = {
+    customerName: body.customerName ?? existing.customerName,
+    items: body.items !== undefined ? parseInt(body.items) : existing.items,
+    total: body.total !== undefined ? parseFloat(body.total) : existing.total,
+    status: body.status ?? existing.status,
+    payment: body.payment ?? existing.payment,
+  };
+
+  await collections.orders.doc(id).update(updateData);
+  const updated = await collections.orders.doc(id).get();
+  return NextResponse.json({ id: updated.id, ...updated.data() });
 }

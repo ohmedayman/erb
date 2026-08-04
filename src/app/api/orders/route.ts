@@ -1,56 +1,58 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { verifyFirebaseToken } from "@/lib/auth";
+import { collections } from "@/lib/firestore";
 
-function getTokenUser(req: NextRequest) {
-  const token = req.cookies.get("token")?.value;
-  if (!token) return null;
-  try {
-    const parts = token.split(".");
-    const payload = JSON.parse(atob(parts[1]));
-    return { userId: payload.userId, storeId: payload.storeId };
-  } catch {
-    return null;
+export async function GET(request: NextRequest) {
+  const user = await verifyFirebaseToken(request);
+  if (!user) {
+    return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
   }
-}
 
-export async function GET(req: NextRequest) {
-  const user = getTokenUser(req);
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const snapshot = await collections.orders
+    .where("storeId", "==", user.storeId)
+    .get();
 
-  const orders = await prisma.order.findMany({
-    where: { storeId: user.storeId },
-    orderBy: { date: "desc" },
-    include: { shipments: true },
-  });
+  const orders = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as any));
+  orders.sort(
+    (a: any, b: any) =>
+      new Date(b.date ?? b.createdAt).getTime() -
+      new Date(a.date ?? a.createdAt).getTime()
+  );
 
   return NextResponse.json(orders);
 }
 
-export async function POST(req: NextRequest) {
-  const user = getTokenUser(req);
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+export async function POST(request: NextRequest) {
+  const user = await verifyFirebaseToken(request);
+  if (!user) {
+    return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
+  }
 
-  const body = await req.json();
+  const body = await request.json();
   const { customerName, items, total, status, payment } = body;
 
   if (!customerName || !items || !total) {
-    return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    return NextResponse.json({ error: "جميع الحقول مطلوبة" }, { status: 400 });
   }
 
-  const count = await prisma.order.count({ where: { storeId: user.storeId } });
-  const orderNumber = `ORD-${String(count + 7891).padStart(4, "0")}`;
+  const timestamp = Date.now().toString(36).toUpperCase();
+  const orderNumber = `ORD-${timestamp}`;
 
-  const order = await prisma.order.create({
-    data: {
-      orderNumber,
-      customerName,
-      items: parseInt(items),
-      total: parseFloat(total),
-      status: status || "Pending",
-      payment: payment || "Pending",
-      storeId: user.storeId,
-    },
+  const docRef = await collections.orders.add({
+    orderNumber,
+    customerName,
+    items: parseInt(items),
+    total: parseFloat(total),
+    status: status || "Pending",
+    payment: payment || "Pending",
+    storeId: user.storeId,
+    date: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
   });
 
-  return NextResponse.json(order, { status: 201 });
+  const created = await docRef.get();
+  return NextResponse.json(
+    { id: created.id, ...created.data() },
+    { status: 201 }
+  );
 }

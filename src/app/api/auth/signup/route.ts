@@ -1,71 +1,83 @@
 import { NextRequest, NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
-import { prisma } from "@/lib/db";
+import { getAdminAuth, getAdminFirestore } from "@/lib/firebase-admin";
 
-function generateToken(payload: { userId: string; storeId: string }) {
-  const header = btoa(JSON.stringify({ alg: "HS256", typ: "JWT" }));
-  const body = btoa(JSON.stringify({ ...payload, iat: Date.now() }));
-  const sig = btoa(`${header}.${body}.stockflow-secret`);
-  return `${header}.${body}.${sig}`;
-}
-
-export async function POST(req: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
-    const body = await req.json();
-    const { username, email, password, fullName, storeName } = body;
+    const { username, email, password, fullName, storeName } =
+      await request.json();
 
     if (!username || !email || !password || !fullName || !storeName) {
-      return NextResponse.json({ error: "All fields are required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "جميع الحقول مطلوبة" },
+        { status: 400 }
+      );
     }
 
-    const existingUser = await prisma.user.findFirst({
-      where: { OR: [{ username }, { email }] },
-    });
-
-    if (existingUser) {
-      return NextResponse.json({ error: "Username or email already exists" }, { status: 409 });
+    if (password.length < 6) {
+      return NextResponse.json(
+        { error: "كلمة المرور يجب أن تكون 6 أحرف على الأقل" },
+        { status: 400 }
+      );
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const adminAuth = getAdminAuth();
+    const firestore = getAdminFirestore();
 
-    const store = await prisma.store.create({
-      data: {
-        name: storeName,
-        ownerName: fullName,
-        ownerEmail: email,
-      },
+    const existingUser = await firestore
+      .collection("users")
+      .where("username", "==", username)
+      .get();
+
+    if (!existingUser.empty) {
+      return NextResponse.json(
+        { error: "اسم المستخدم موجود بالفعل" },
+        { status: 409 }
+      );
+    }
+
+    const userRecord = await adminAuth.createUser({
+      email,
+      password,
+      displayName: fullName,
     });
 
-    const user = await prisma.user.create({
-      data: {
+    const storeRef = firestore.collection("stores").doc();
+    await storeRef.set({
+      id: storeRef.id,
+      name: storeName,
+      ownerName: fullName,
+      ownerEmail: email,
+      createdAt: new Date().toISOString(),
+    });
+
+    await firestore.collection("users").doc(userRecord.uid).set({
+      id: userRecord.uid,
+      username,
+      email,
+      fullName,
+      role: "admin",
+      storeId: storeRef.id,
+      createdAt: new Date().toISOString(),
+    });
+
+    const customToken = await adminAuth.createCustomToken(userRecord.uid);
+
+    return NextResponse.json({
+      customToken,
+      user: {
+        id: userRecord.uid,
         username,
-        email,
-        password: hashedPassword,
         fullName,
         role: "admin",
-        storeId: store.id,
+        storeId: storeRef.id,
       },
+      store: { id: storeRef.id, name: storeName },
     });
-
-    const token = generateToken({ userId: user.id, storeId: store.id });
-
-    const response = NextResponse.json({
-      token,
-      user: { id: user.id, username: user.username, fullName: user.fullName, role: user.role },
-      store: { id: store.id, name: store.name },
-    });
-
-    response.cookies.set("token", token, {
-      httpOnly: true,
-      secure: false,
-      sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 7,
-      path: "/",
-    });
-
-    return response;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Signup error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { error: error.message || "حدث خطأ داخلي" },
+      { status: 500 }
+    );
   }
 }

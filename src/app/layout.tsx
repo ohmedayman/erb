@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "StockFlow - Professional Warehouse Management",
+  title: "StockFlow - نظام إدارة المخازن الاحترافي",
   description:
-    "A complete SaaS solution for inventory tracking, order management, and real-time analytics.",
+    "حل SaaS متكامل لتتبع المخزون وإدارة الطلبات والتحليلات اللحظية للشركات الحديثة.",
 };
 
 export default function RootLayout({
@@ -25,7 +25,8 @@ export default function RootLayout({
 }) {
   return (
     <html
-      lang="en"
+      lang="ar"
+      dir="rtl"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>

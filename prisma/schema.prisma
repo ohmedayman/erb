@@ -35,6 +35,13 @@ model Store {
   products        Product[]
   orders          Order[]
   teamMembers     TeamMember[]
+  purchaseOrders  PurchaseOrder[]
+  notifications   Notification[]
+  warehouses      Warehouse[]
+  suppliers       Supplier[]
+  stockMovements  StockMovement[]
+  activityLogs    ActivityLog[]
+  returns         Return[]
 }
 
 model User {
@@ -67,10 +74,13 @@ model Order {
   id            String   @id @default(cuid())
   orderNumber   String   @unique
   customerName  String
+  customerPhone String?
+  customerEmail String?
   items         Int
   total         Float
   status        String   @default("Pending")
   payment       String   @default("Pending")
+  notes         String?
   date          DateTime @default(now())
   storeId       String
   store         Store    @relation(fields: [storeId], references: [id])
@@ -81,10 +91,12 @@ model Shipment {
   id              String  @id @default(cuid())
   shipmentNumber  String  @unique
   carrier         String
+  trackingNumber  String?
   status          String  @default("Processing")
   origin          String
   destination     String
   eta             String
+  notes           String?
   orderId         String
   order           Order   @relation(fields: [orderId], references: [id])
 }
@@ -98,4 +110,104 @@ model TeamMember {
   joinedAt  DateTime @default(now())
   storeId   String
   store     Store    @relation(fields: [storeId], references: [id])
+}
+
+model PurchaseOrder {
+  id              String   @id @default(cuid())
+  poNumber        String   @unique
+  supplierName    String
+  items           Int
+  total           Float
+  status          String   @default("Pending")
+  expectedDate    String?
+  notes           String?
+  createdAt       DateTime @default(now())
+  storeId         String
+  store           Store    @relation(fields: [storeId], references: [id])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  title     String
+  message   String
+  type      String   @default("info")
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  storeId   String
+  store     Store    @relation(fields: [storeId], references: [id])
+}
+
+model Warehouse {
+  id          String   @id @default(cuid())
+  name        String
+  code        String   @unique
+  address     String?
+  city        String?
+  capacity    Int      @default(1000)
+  used        Int      @default(0)
+  manager     String?
+  phone       String?
+  status      String   @default("Active")
+  createdAt   DateTime @default(now())
+  storeId     String
+  store       Store    @relation(fields: [storeId], references: [id])
+}
+
+model Supplier {
+  id          String   @id @default(cuid())
+  name        String
+  code        String   @unique
+  contactName String?
+  email       String?
+  phone       String?
+  address     String?
+  category    String?
+  rating      Int      @default(5)
+  status      String   @default("Active")
+  createdAt   DateTime @default(now())
+  storeId     String
+  store       Store    @relation(fields: [storeId], references: [id])
+}
+
+model StockMovement {
+  id            String   @id @default(cuid())
+  productName   String
+  sku           String
+  type          String
+  quantity      Int
+  fromLocation  String?
+  toLocation    String?
+  reference     String?
+  notes         String?
+  createdBy     String
+  createdAt     DateTime @default(now())
+  storeId       String
+  store         Store    @relation(fields: [storeId], references: [id])
+}
+
+model ActivityLog {
+  id        String   @id @default(cuid())
+  action    String
+  entity    String
+  entityId  String?
+  details   String?
+  user      String
+  createdAt DateTime @default(now())
+  storeId   String
+  store     Store    @relation(fields: [storeId], references: [id])
+}
+
+model Return {
+  id            String   @id @default(cuid())
+  returnNumber  String   @unique
+  orderNumber   String
+  customerName  String
+  reason        String
+  quantity      Int
+  status        String   @default("Pending")
+  refundAmount  Float
+  notes         String?
+  createdAt     DateTime @default(now())
+  storeId       String
+  store         Store    @relation(fields: [storeId], references: [id])
 }

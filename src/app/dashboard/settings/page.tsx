@@ -5,14 +5,15 @@ import {
   Store, User, Bell, Shield, Save, Camera, MapPin, Phone,
   Mail, Globe, Building2, CheckCircle, AlertCircle,
 } from "lucide-react";
+import { auth } from "@/lib/firebase";
 
 const tabs = [
-  { id: "store", label: "Store Info", icon: Store },
-  { id: "owner", label: "Owner Details", icon: User },
-  { id: "address", label: "Address", icon: MapPin },
-  { id: "business", label: "Business", icon: Building2 },
-  { id: "notifications", label: "Notifications", icon: Bell },
-  { id: "security", label: "Security", icon: Shield },
+  { id: "store", label: "معلومات المتجر", icon: Store },
+  { id: "owner", label: "بيانات المالك", icon: User },
+  { id: "address", label: "العنوان", icon: MapPin },
+  { id: "business", label: "الأعمال", icon: Building2 },
+  { id: "notifications", label: "الإشعارات", icon: Bell },
+  { id: "security", label: "الأمان", icon: Shield },
 ];
 
 export default function SettingsPage() {
@@ -23,16 +24,30 @@ export default function SettingsPage() {
   const [passwords, setPasswords] = useState({ current: "", new: "", confirm: "" });
 
   useEffect(() => {
-    fetch("/api/stores")
-      .then((r) => r.json())
-      .then(setStoreData)
-      .finally(() => setLoading(false));
+    const fetchStore = async () => {
+      try {
+        const token = await auth.currentUser?.getIdToken();
+        const res = await fetch("/api/stores", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        setStoreData(data);
+      } catch {
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStore();
   }, []);
 
   const handleSave = async () => {
+    const token = await auth.currentUser?.getIdToken();
     const res = await fetch("/api/stores", {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
       body: JSON.stringify(storeData),
     });
     if (res.ok) {
@@ -50,7 +65,7 @@ export default function SettingsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <p className="text-muted-foreground">Loading settings...</p>
+        <p className="text-muted-foreground">جاري تحميل الإعدادات...</p>
       </div>
     );
   }
@@ -59,17 +74,17 @@ export default function SettingsPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Settings</h1>
-          <p className="text-muted-foreground text-sm mt-1">Manage your store configuration and preferences</p>
+          <h1 className="text-2xl font-bold text-foreground">الإعدادات</h1>
+          <p className="text-muted-foreground text-sm mt-1">إدارة إعدادات وتفضيلات متجرك</p>
         </div>
         <button onClick={handleSave} className="flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-primary-hover transition-colors">
-          <Save className="w-4 h-4" /> Save Changes
+          <Save className="w-4 h-4" /> حفظ التغييرات
         </button>
       </div>
 
       {saved && (
         <div className="flex items-center gap-2 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm">
-          <CheckCircle className="w-4 h-4" /> Settings saved successfully!
+          <CheckCircle className="w-4 h-4" /> تم حفظ الإعدادات بنجاح!
         </div>
       )}
 
@@ -89,30 +104,30 @@ export default function SettingsPage() {
           {activeTab === "store" && (
             <div className="bg-card rounded-xl border border-border">
               <div className="px-6 py-4 border-b border-border">
-                <h2 className="font-semibold text-foreground">Store Information</h2>
-                <p className="text-sm text-muted-foreground mt-1">Update your store details and branding</p>
+                <h2 className="font-semibold text-foreground">معلومات المتجر</h2>
+                <p className="text-sm text-muted-foreground mt-1">تحديث تفاصيل متجرك وعلامتك التجارية</p>
               </div>
               <div className="p-6 space-y-6">
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div className="sm:col-span-2">
-                    <label className="block text-sm font-medium text-foreground mb-1.5">Store Name</label>
-                    <input type="text" value={storeData?.name || ""} onChange={(e) => updateField("name", e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" />
+                    <label className="block text-sm font-medium text-foreground mb-1.5">اسم المتجر</label>
+                    <input type="text" value={storeData?.name || ""} onChange={(e) => updateField("name", e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" />
                   </div>
                   <div className="sm:col-span-2">
-                    <label className="block text-sm font-medium text-foreground mb-1.5">Description</label>
-                    <textarea value={storeData?.description || ""} onChange={(e) => updateField("description", e.target.value)} rows={3} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none" />
+                    <label className="block text-sm font-medium text-foreground mb-1.5">الوصف</label>
+                    <textarea value={storeData?.description || ""} onChange={(e) => updateField("description", e.target.value)} rows={3} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-1.5">Website</label>
+                    <label className="block text-sm font-medium text-foreground mb-1.5">الموقع الإلكتروني</label>
                     <div className="relative">
-                      <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <input type="url" value={storeData?.website || ""} onChange={(e) => updateField("website", e.target.value)} className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-border bg-white text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="https://mystore.com" />
+                      <Globe className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <input type="url" value={storeData?.website || ""} onChange={(e) => updateField("website", e.target.value)} className="w-full pr-10 pl-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="https://mystore.com" />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-1.5">Category</label>
-                    <select value={storeData?.category || "Electronics"} onChange={(e) => updateField("category", e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm focus:outline-none focus:ring-2 focus:ring-primary/50">
-                      <option>Electronics</option><option>Furniture</option><option>Clothing</option><option>Food & Beverage</option><option>Industrial</option><option>Other</option>
+                    <label className="block text-sm font-medium text-foreground mb-1.5">الفئة</label>
+                    <select value={storeData?.category || "Electronics"} onChange={(e) => updateField("category", e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50">
+                      <option>إلكترونيات</option><option>أثاث</option><option>ملابس</option><option>أغذية ومشروبات</option><option>صناعي</option><option>أخرى</option>
                     </select>
                   </div>
                 </div>
@@ -123,26 +138,26 @@ export default function SettingsPage() {
           {activeTab === "owner" && (
             <div className="bg-card rounded-xl border border-border">
               <div className="px-6 py-4 border-b border-border">
-                <h2 className="font-semibold text-foreground">Owner Details</h2>
-                <p className="text-sm text-muted-foreground mt-1">Your personal account information</p>
+                <h2 className="font-semibold text-foreground">بيانات المالك</h2>
+                <p className="text-sm text-muted-foreground mt-1">معلومات حسابك الشخصي</p>
               </div>
               <div className="p-6 space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-1.5">Full Name</label>
-                  <input type="text" value={storeData?.ownerName || ""} onChange={(e) => updateField("ownerName", e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" />
+                  <label className="block text-sm font-medium text-foreground mb-1.5">الاسم الكامل</label>
+                  <input type="text" value={storeData?.ownerName || ""} onChange={(e) => updateField("ownerName", e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-1.5">Email Address</label>
+                  <label className="block text-sm font-medium text-foreground mb-1.5">البريد الإلكتروني</label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <input type="email" value={storeData?.ownerEmail || ""} onChange={(e) => updateField("ownerEmail", e.target.value)} className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-border bg-white text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" />
+                    <Mail className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <input type="email" value={storeData?.ownerEmail || ""} onChange={(e) => updateField("ownerEmail", e.target.value)} className="w-full pr-10 pl-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-1.5">Phone Number</label>
+                  <label className="block text-sm font-medium text-foreground mb-1.5">رقم الهاتف</label>
                   <div className="relative">
-                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <input type="tel" value={storeData?.ownerPhone || ""} onChange={(e) => updateField("ownerPhone", e.target.value)} className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-border bg-white text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="+1 (555) 123-4567" />
+                    <Phone className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <input type="tel" value={storeData?.ownerPhone || ""} onChange={(e) => updateField("ownerPhone", e.target.value)} className="w-full pr-10 pl-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="+966 50 123 4567" />
                   </div>
                 </div>
               </div>
@@ -152,33 +167,33 @@ export default function SettingsPage() {
           {activeTab === "address" && (
             <div className="bg-card rounded-xl border border-border">
               <div className="px-6 py-4 border-b border-border">
-                <h2 className="font-semibold text-foreground">Address</h2>
-                <p className="text-sm text-muted-foreground mt-1">Your store&apos;s physical location</p>
+                <h2 className="font-semibold text-foreground">العنوان</h2>
+                <p className="text-sm text-muted-foreground mt-1">الموقع الفعلي لمتجرك</p>
               </div>
               <div className="p-6 space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-1.5">Street Address</label>
-                  <input type="text" value={storeData?.address || ""} onChange={(e) => updateField("address", e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="123 Main Street" />
+                  <label className="block text-sm font-medium text-foreground mb-1.5">العنوان</label>
+                  <input type="text" value={storeData?.address || ""} onChange={(e) => updateField("address", e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="شارع الملك فهد" />
                 </div>
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-1.5">City</label>
-                    <input type="text" value={storeData?.city || ""} onChange={(e) => updateField("city", e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" />
+                    <label className="block text-sm font-medium text-foreground mb-1.5">المدينة</label>
+                    <input type="text" value={storeData?.city || ""} onChange={(e) => updateField("city", e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-1.5">State</label>
-                    <input type="text" value={storeData?.state || ""} onChange={(e) => updateField("state", e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" />
+                    <label className="block text-sm font-medium text-foreground mb-1.5">المنطقة</label>
+                    <input type="text" value={storeData?.state || ""} onChange={(e) => updateField("state", e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" />
                   </div>
                 </div>
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-1.5">ZIP Code</label>
-                    <input type="text" value={storeData?.zipCode || ""} onChange={(e) => updateField("zipCode", e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" />
+                    <label className="block text-sm font-medium text-foreground mb-1.5">الرمز البريدي</label>
+                    <input type="text" value={storeData?.zipCode || ""} onChange={(e) => updateField("zipCode", e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-1.5">Country</label>
-                    <select value={storeData?.country || ""} onChange={(e) => updateField("country", e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm focus:outline-none focus:ring-2 focus:ring-primary/50">
-                      <option>United States</option><option>United Kingdom</option><option>Canada</option><option>Germany</option><option>France</option><option>Saudi Arabia</option><option>UAE</option><option>Egypt</option>
+                    <label className="block text-sm font-medium text-foreground mb-1.5">الدولة</label>
+                    <select value={storeData?.country || ""} onChange={(e) => updateField("country", e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50">
+                      <option>الولايات المتحدة</option><option>المملكة المتحدة</option><option>كندا</option><option>ألمانيا</option><option>فرنسا</option><option>المملكة العربية السعودية</option><option>الإمارات</option><option>مصر</option>
                     </select>
                   </div>
                 </div>
@@ -189,26 +204,26 @@ export default function SettingsPage() {
           {activeTab === "business" && (
             <div className="bg-card rounded-xl border border-border">
               <div className="px-6 py-4 border-b border-border">
-                <h2 className="font-semibold text-foreground">Business Settings</h2>
-                <p className="text-sm text-muted-foreground mt-1">Configure business-related settings</p>
+                <h2 className="font-semibold text-foreground">إعدادات الأعمال</h2>
+                <p className="text-sm text-muted-foreground mt-1">تكوين الإعدادات المتعلقة بالأعمال</p>
               </div>
               <div className="p-6 space-y-4">
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-1.5">Tax ID / VAT Number</label>
-                    <input type="text" value={storeData?.taxId || ""} onChange={(e) => updateField("taxId", e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="XX-XXXXXXX" />
+                    <label className="block text-sm font-medium text-foreground mb-1.5">الرقم الضريبي / الرقم الضريبي المضافة</label>
+                    <input type="text" value={storeData?.taxId || ""} onChange={(e) => updateField("taxId", e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="SA-12345678" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-1.5">Currency</label>
-                    <select value={storeData?.currency || "USD"} onChange={(e) => updateField("currency", e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm focus:outline-none focus:ring-2 focus:ring-primary/50">
-                      <option value="USD">USD - US Dollar</option><option value="EUR">EUR - Euro</option><option value="GBP">GBP - British Pound</option><option value="SAR">SAR - Saudi Riyal</option><option value="AED">AED - UAE Dirham</option><option value="EGP">EGP - Egyptian Pound</option>
+                    <label className="block text-sm font-medium text-foreground mb-1.5">العملة</label>
+                    <select value={storeData?.currency || "USD"} onChange={(e) => updateField("currency", e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50">
+                      <option value="USD">USD - دولار أمريكي</option><option value="EUR">EUR - يورو</option><option value="GBP">GBP - جنيه إسترليني</option><option value="SAR">SAR - ريال سعودي</option><option value="AED">AED - درهم إماراتي</option><option value="EGP">EGP - جنيه مصري</option>
                     </select>
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-1.5">Timezone</label>
-                  <select value={storeData?.timezone || "America/New_York"} onChange={(e) => updateField("timezone", e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm focus:outline-none focus:ring-2 focus:ring-primary/50">
-                    <option value="America/New_York">Eastern Time (ET)</option><option value="America/Chicago">Central Time (CT)</option><option value="America/Denver">Mountain Time (MT)</option><option value="America/Los_Angeles">Pacific Time (PT)</option><option value="Europe/London">London (GMT)</option><option value="Europe/Paris">Paris (CET)</option><option value="Asia/Riyadh">Riyadh (AST)</option><option value="Asia/Dubai">Dubai (GST)</option><option value="Africa/Cairo">Cairo (EET)</option>
+                  <label className="block text-sm font-medium text-foreground mb-1.5">المنطقة الزمنية</label>
+                  <select value={storeData?.timezone || "America/New_York"} onChange={(e) => updateField("timezone", e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50">
+                    <option value="America/New_York">الوقت الشرقي</option><option value="America/Chicago">الوقت المركزي</option><option value="America/Denver">وقت الجبال</option><option value="America/Los_Angeles">الوقت الهادئ</option><option value="Europe/London">لندن</option><option value="Europe/Paris">باريس</option><option value="Asia/Riyadh">الرياض</option><option value="Asia/Dubai">دبي</option><option value="Africa/Cairo">القاهرة</option>
                   </select>
                 </div>
               </div>
@@ -218,15 +233,15 @@ export default function SettingsPage() {
           {activeTab === "notifications" && (
             <div className="bg-card rounded-xl border border-border">
               <div className="px-6 py-4 border-b border-border">
-                <h2 className="font-semibold text-foreground">Notifications</h2>
-                <p className="text-sm text-muted-foreground mt-1">Choose what notifications you receive</p>
+                <h2 className="font-semibold text-foreground">الإشعارات</h2>
+                <p className="text-sm text-muted-foreground mt-1">اختر الإشعارات التي تريد استلامها</p>
               </div>
               <div className="p-6 space-y-4">
                 {[
-                  { key: "emailNotifs", label: "Email Notifications", desc: "Receive email updates about your store activity" },
-                  { key: "orderAlerts", label: "Order Alerts", desc: "Get notified when new orders are placed" },
-                  { key: "lowStockAlerts", label: "Low Stock Alerts", desc: "Alert when products fall below minimum stock level" },
-                  { key: "weeklyReports", label: "Weekly Reports", desc: "Receive a weekly summary of your store performance" },
+                  { key: "emailNotifs", label: "إشعارات البريد الإلكتروني", desc: "استلام تحديثات عبر البريد الإلكتروني حول نشاط متجرك" },
+                  { key: "orderAlerts", label: "تنبيهات الطلبات", desc: "استلام إشعار عند تقديم طلبات جديدة" },
+                  { key: "lowStockAlerts", label: "تنبيهات المخزون المنخفض", desc: "تنبيه عند انخفاض المنتجات عن الحد الأدنى" },
+                  { key: "weeklyReports", label: "التقارير الأسبوعية", desc: "استلام ملخص أسبوعي لأداء متجرك" },
                 ].map((item) => (
                   <div key={item.key} className="flex items-center justify-between py-3 border-b border-border last:border-0">
                     <div>
@@ -246,30 +261,30 @@ export default function SettingsPage() {
           {activeTab === "security" && (
             <div className="bg-card rounded-xl border border-border">
               <div className="px-6 py-4 border-b border-border">
-                <h2 className="font-semibold text-foreground">Security</h2>
-                <p className="text-sm text-muted-foreground mt-1">Manage your password and security settings</p>
+                <h2 className="font-semibold text-foreground">الأمان</h2>
+                <p className="text-sm text-muted-foreground mt-1">إدارة كلمة المرور وإعدادات الأمان</p>
               </div>
               <div className="p-6 space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-1.5">Current Password</label>
-                  <input type="password" value={passwords.current} onChange={(e) => setPasswords({ ...passwords, current: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="Enter current password" />
+                  <label className="block text-sm font-medium text-foreground mb-1.5">كلمة المرور الحالية</label>
+                  <input type="password" value={passwords.current} onChange={(e) => setPasswords({ ...passwords, current: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="أدخل كلمة المرور الحالية" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-1.5">New Password</label>
-                  <input type="password" value={passwords.new} onChange={(e) => setPasswords({ ...passwords, new: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="Min. 8 characters" />
+                  <label className="block text-sm font-medium text-foreground mb-1.5">كلمة المرور الجديدة</label>
+                  <input type="password" value={passwords.new} onChange={(e) => setPasswords({ ...passwords, new: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="8 أحرف على الأقل" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-1.5">Confirm New Password</label>
-                  <input type="password" value={passwords.confirm} onChange={(e) => setPasswords({ ...passwords, confirm: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="Confirm new password" />
+                  <label className="block text-sm font-medium text-foreground mb-1.5">تأكيد كلمة المرور الجديدة</label>
+                  <input type="password" value={passwords.confirm} onChange={(e) => setPasswords({ ...passwords, confirm: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="أكد كلمة المرور الجديدة" />
                 </div>
                 {passwords.new && passwords.confirm && passwords.new !== passwords.confirm && (
-                  <div className="flex items-center gap-2 text-red-500 text-sm"><AlertCircle className="w-4 h-4" /> Passwords do not match</div>
+                  <div className="flex items-center gap-2 text-red-500 text-sm"><AlertCircle className="w-4 h-4" /> كلمتا المرور غير متطابقتين</div>
                 )}
-                <button className="px-5 py-2.5 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary-hover transition-colors">Update Password</button>
+                <button className="px-5 py-2.5 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary-hover transition-colors">تحديث كلمة المرور</button>
                 <div className="pt-4 border-t border-border">
-                  <h3 className="text-sm font-medium text-foreground mb-2">Two-Factor Authentication</h3>
-                  <p className="text-xs text-muted-foreground mb-3">Add an extra layer of security to your account</p>
-                  <button className="px-4 py-2 bg-muted rounded-lg text-sm font-medium hover:bg-border transition-colors">Enable 2FA</button>
+                  <h3 className="text-sm font-medium text-foreground mb-2">المصادقة الثنائية</h3>
+                  <p className="text-xs text-muted-foreground mb-3">أضف طبقة أمان إضافية لحسابك</p>
+                  <button className="px-4 py-2 bg-muted rounded-lg text-sm font-medium hover:bg-border transition-colors">تفعيل المصادقة الثنائية</button>
                 </div>
               </div>
             </div>

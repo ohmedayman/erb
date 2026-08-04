@@ -33,19 +33,19 @@ export default function HomePage() {
                 href="#features"
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
-                Features
+                المميزات
               </a>
               <a
                 href="#pricing"
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
-                Pricing
+                الأسعار
               </a>
               <a
                 href="#about"
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
-                About
+                حول
               </a>
             </div>
             <div className="flex items-center gap-3">
@@ -53,13 +53,13 @@ export default function HomePage() {
                 href="/login"
                 className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-4 py-2"
               >
-                Log in
+                تسجيل الدخول
               </Link>
               <Link
                 href="/signup"
                 className="text-sm font-medium bg-primary text-white px-5 py-2 rounded-lg hover:bg-primary-hover transition-colors"
               >
-                Get Started
+                ابدأ الآن
               </Link>
             </div>
           </div>
@@ -75,30 +75,28 @@ export default function HomePage() {
           <div className="text-center max-w-3xl mx-auto">
             <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full text-sm font-medium mb-6">
               <Zap className="w-4 h-4" />
-              Professional Warehouse Management
+              إدارة مخازن احترافية
             </div>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-tight">
-              Manage Your Warehouse
-              <span className="text-primary"> Effortlessly</span>
+              أدر مخزنك بكل
+              <span className="text-primary"> سهولة</span>
             </h1>
             <p className="mt-6 text-lg text-muted-foreground max-w-2xl mx-auto">
-              A complete SaaS solution for inventory tracking, order management,
-              and real-time analytics. Built for modern businesses that demand
-              speed and accuracy.
+              حل SaaS متكامل لتتبع المخزون وإدارة الطلبات والتحليلات اللحظية. مصمم للشركات الحديثة.
             </p>
             <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
                 href="/signup"
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-primary text-white px-8 py-3.5 rounded-lg font-medium hover:bg-primary-hover transition-all shadow-lg shadow-primary/25"
               >
-                Start Free Trial
+                ابدأ تجربة مجانية
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
                 href="/login"
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white text-foreground px-8 py-3.5 rounded-lg font-medium border border-border hover:bg-muted transition-colors"
               >
-                Live Demo
+                عرض مباشر
               </Link>
             </div>
           </div>
@@ -114,15 +112,15 @@ export default function HomePage() {
                   <div className="w-3 h-3 rounded-full bg-green-400" />
                 </div>
                 <div className="flex-1 text-center text-xs text-muted-foreground">
-                  StockFlow Dashboard
+                  لوحة تحكم StockFlow
                 </div>
               </div>
               <div className="p-6 grid grid-cols-4 gap-4">
                 {[
-                  { label: "Total Products", value: "12,847", change: "+12%", icon: Package, color: "text-blue-500", bg: "bg-blue-50" },
-                  { label: "Pending Orders", value: "342", change: "-8%", icon: ClipboardList, color: "text-orange-500", bg: "bg-orange-50" },
-                  { label: "In Transit", value: "1,205", change: "+5%", icon: Truck, color: "text-green-500", bg: "bg-green-50" },
-                  { label: "Active Users", value: "89", change: "+23%", icon: Users, color: "text-purple-500", bg: "bg-purple-50" },
+                  { label: "إجمالي المنتجات", value: "12,847", change: "+12%", icon: Package, color: "text-blue-500", bg: "bg-blue-50" },
+                  { label: "الطلبات المعلقة", value: "342", change: "-8%", icon: ClipboardList, color: "text-orange-500", bg: "bg-orange-50" },
+                  { label: "قيد الشحن", value: "1,205", change: "+5%", icon: Truck, color: "text-green-500", bg: "bg-green-50" },
+                  { label: "المستخدمون النشطون", value: "89", change: "+23%", icon: Users, color: "text-purple-500", bg: "bg-purple-50" },
                 ].map((stat, i) => (
                   <div key={i} className="bg-card rounded-xl p-4 border border-border">
                     <div className="flex items-center gap-3">
@@ -152,44 +150,43 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center max-w-2xl mx-auto mb-16">
             <h2 className="text-3xl font-bold text-foreground">
-              Everything You Need
+              كل ما تحتاجه
             </h2>
             <p className="mt-4 text-muted-foreground">
-              Powerful features to streamline your warehouse operations from
-              receiving to shipping.
+              ميزات قوية لتبسيط عمليات المخازن من الاستلام إلى الشحن.
             </p>
           </div>
           <div className="grid md:grid-cols-3 gap-8">
             {[
               {
                 icon: Package,
-                title: "Inventory Management",
-                desc: "Track stock levels in real-time across multiple warehouses with barcode scanning support.",
+                title: "إدارة المخزون",
+                desc: "تتبع مستويات المخزون لحظياً عبر مخازن متعددة مع دعم مسح الباركود.",
               },
               {
                 icon: ClipboardList,
-                title: "Order Processing",
-                desc: "Automate order fulfillment workflows from picking to packing with intelligent routing.",
+                title: "معالجة الطلبات",
+                desc: "أتمتة سير عمل تنفيذ الطلبات من التجميع إلى التغليف.",
               },
               {
                 icon: BarChart3,
-                title: "Analytics & Reports",
-                desc: "Gain insights with dashboards, custom reports, and predictive analytics.",
+                title: "التحليلات والتقارير",
+                desc: "احصل على رؤى مع لوحات التحكم والتقارير المخصصة.",
               },
               {
                 icon: Truck,
-                title: "Shipping Integration",
-                desc: "Connect with major carriers for real-time tracking and automated label generation.",
+                title: "تكامل الشحن",
+                desc: "تواصل مع شركات الشحن الرئيسية لتتبع لحظي.",
               },
               {
                 icon: Shield,
-                title: "Role-Based Access",
-                desc: "Control who sees what with granular permissions for teams of any size.",
+                title: "صلاحيات حسب الدور",
+                desc: "تحكم في من يرى ماذا بصلاحيات دقيقة.",
               },
               {
                 icon: Globe,
-                title: "Multi-Store Support",
-                desc: "Manage multiple stores and warehouses from a single unified dashboard.",
+                title: "دعم متاجر متعددة",
+                desc: "أدر متاجر ومخازن متعددة من لوحة تحكم موحدة.",
               },
             ].map((feature, i) => (
               <div
@@ -214,60 +211,60 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center max-w-2xl mx-auto mb-16">
             <h2 className="text-3xl font-bold text-foreground">
-              Simple, Transparent Pricing
+              أسعار بسيطة وشفافة
             </h2>
             <p className="mt-4 text-muted-foreground">
-              Start free, scale as you grow. No hidden fees.
+              ابدأ مجاناً وتوسع مع نموك. لا رسوم خفية.
             </p>
           </div>
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {[
               {
-                name: "Starter",
+                name: "المبتدئ",
                 price: "$29",
-                period: "/month",
-                desc: "Perfect for small businesses",
+                period: "/شهر",
+                desc: "مثالي للشركات الصغيرة",
                 features: [
-                  "1 Warehouse",
-                  "Up to 1,000 Products",
-                  "Basic Reports",
-                  "Email Support",
-                  "1 User",
+                  "مخزن واحد",
+                  "حتى 1,000 منتج",
+                  "تقارير أساسية",
+                  "دعم عبر البريد",
+                  "مستخدم واحد",
                 ],
-                cta: "Start Free",
+                cta: "ابدأ مجاناً",
                 primary: false,
               },
               {
-                name: "Professional",
+                name: "المحترف",
                 price: "$79",
-                period: "/month",
-                desc: "For growing operations",
+                period: "/شهر",
+                desc: "للعمليات المتنامية",
                 features: [
-                  "5 Warehouses",
-                  "Up to 10,000 Products",
-                  "Advanced Analytics",
-                  "Priority Support",
-                  "10 Users",
-                  "API Access",
+                  "5 مخازن",
+                  "حتى 10,000 منتج",
+                  "تحليلات متقدمة",
+                  "دعم ذو أولوية",
+                  "10 مستخدمين",
+                  "وصول API",
                 ],
-                cta: "Start Free Trial",
+                cta: "ابدأ تجربة مجانية",
                 primary: true,
               },
               {
-                name: "Enterprise",
+                name: "المؤسسات",
                 price: "$199",
-                period: "/month",
-                desc: "For large-scale operations",
+                period: "/شهر",
+                desc: "للعمليات الكبيرة",
                 features: [
-                  "Unlimited Warehouses",
-                  "Unlimited Products",
-                  "Custom Reports",
-                  "24/7 Support",
-                  "Unlimited Users",
-                  "Custom Integrations",
-                  "Dedicated Manager",
+                  "مخازن غير محدودة",
+                  "منتجات غير محدودة",
+                  "تقارير مخصصة",
+                  "دعم على مدار الساعة",
+                  "مستخدمون غير محدودون",
+                  "تكاملات مخصصة",
+                  "مدير مخصص",
                 ],
-                cta: "Contact Sales",
+                cta: "تواصل مع المبيعات",
                 primary: false,
               },
             ].map((plan, i) => (
@@ -281,7 +278,7 @@ export default function HomePage() {
               >
                 {plan.primary && (
                   <div className="text-xs font-semibold text-primary bg-primary/10 px-3 py-1 rounded-full inline-block mb-4">
-                    Most Popular
+                    الأكثر شعبية
                   </div>
                 )}
                 <h3 className="text-xl font-bold text-foreground">{plan.name}</h3>
@@ -329,7 +326,7 @@ export default function HomePage() {
               </span>
             </div>
             <p className="text-sm text-slate-400">
-              © 2026 StockFlow. All rights reserved.
+              © 2026 StockFlow. جميع الحقوق محفوظة.
             </p>
           </div>
         </div>

@@ -1,56 +1,52 @@
 import { NextRequest, NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
-import { prisma } from "@/lib/db";
+import { getAdminAuth, getAdminFirestore } from "@/lib/firebase-admin";
 
-function generateToken(payload: { userId: string; storeId: string }) {
-  const header = btoa(JSON.stringify({ alg: "HS256", typ: "JWT" }));
-  const body = btoa(JSON.stringify({ ...payload, iat: Date.now() }));
-  const sig = btoa(`${header}.${body}.stockflow-secret`);
-  return `${header}.${body}.${sig}`;
-}
-
-export async function POST(req: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
-    const body = await req.json();
-    const { username, password } = body;
+    const { username, password } = await request.json();
 
     if (!username || !password) {
-      return NextResponse.json({ error: "Username and password are required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "اسم المستخدم وكلمة المرور مطلوبين" },
+        { status: 400 }
+      );
     }
 
-    const user = await prisma.user.findUnique({
-      where: { username },
-      include: { store: true },
-    });
+    const firestore = getAdminFirestore();
+    const usersSnapshot = await firestore
+      .collection("users")
+      .where("username", "==", username)
+      .get();
 
-    if (!user) {
-      return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
+    if (usersSnapshot.empty) {
+      return NextResponse.json(
+        { error: "بيانات الدخول غير صحيحة" },
+        { status: 401 }
+      );
     }
 
-    const valid = await bcrypt.compare(password, user.password);
-    if (!valid) {
-      return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
-    }
+    const userDoc = usersSnapshot.docs[0];
+    const userData = userDoc.data();
 
-    const token = generateToken({ userId: user.id, storeId: user.storeId });
+    const adminAuth = getAdminAuth();
+    const customToken = await adminAuth.createCustomToken(userDoc.id);
 
-    const response = NextResponse.json({
-      token,
-      user: { id: user.id, username: user.username, fullName: user.fullName, role: user.role },
-      store: { id: user.store.id, name: user.store.name },
+    return NextResponse.json({
+      customToken,
+      user: {
+        id: userDoc.id,
+        username: userData.username,
+        email: userData.email,
+        fullName: userData.fullName,
+        role: userData.role,
+        storeId: userData.storeId,
+      },
     });
-
-    response.cookies.set("token", token, {
-      httpOnly: true,
-      secure: false,
-      sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 7,
-      path: "/",
-    });
-
-    return response;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Login error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "حدث خطأ داخلي" },
+      { status: 500 }
+    );
   }
 }

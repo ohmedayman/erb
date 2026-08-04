@@ -1,50 +1,54 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { verifyFirebaseToken } from "@/lib/auth";
+import { collections } from "@/lib/firestore";
 
-function getTokenUser(req: NextRequest) {
-  const token = req.cookies.get("token")?.value;
-  if (!token) return null;
-  try {
-    const parts = token.split(".");
-    const payload = JSON.parse(atob(parts[1]));
-    return { userId: payload.userId, storeId: payload.storeId };
-  } catch {
-    return null;
+export async function GET(request: NextRequest) {
+  const user = await verifyFirebaseToken(request);
+  if (!user) {
+    return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
   }
-}
 
-export async function GET(req: NextRequest) {
-  const user = getTokenUser(req);
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const snapshot = await collections.teamMembers
+    .where("storeId", "==", user.storeId)
+    .get();
 
-  const members = await prisma.teamMember.findMany({
-    where: { storeId: user.storeId },
-    orderBy: { joinedAt: "desc" },
-  });
+  const members = snapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  }));
 
   return NextResponse.json(members);
 }
 
-export async function POST(req: NextRequest) {
-  const user = getTokenUser(req);
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+export async function POST(request: NextRequest) {
+  const user = await verifyFirebaseToken(request);
+  if (!user) {
+    return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
+  }
 
-  const body = await req.json();
+  const body = await request.json();
   const { name, email, role } = body;
 
   if (!name || !email) {
-    return NextResponse.json({ error: "Name and email are required" }, { status: 400 });
+    return NextResponse.json(
+      { error: "الاسم والبريد مطلوبين" },
+      { status: 400 }
+    );
   }
 
-  const member = await prisma.teamMember.create({
-    data: {
-      name,
-      email,
-      role: role || "Staff",
-      status: "Active",
-      storeId: user.storeId,
-    },
+  const docRef = await collections.teamMembers.add({
+    name,
+    email,
+    role: role || "Staff",
+    status: "Active",
+    storeId: user.storeId,
+    joinedAt: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
   });
 
-  return NextResponse.json(member, { status: 201 });
+  const created = await docRef.get();
+  return NextResponse.json(
+    { id: created.id, ...created.data() },
+    { status: 201 }
+  );
 }

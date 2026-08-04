@@ -4,6 +4,9 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Warehouse, Eye, EyeOff, Globe, CheckCircle } from "lucide-react";
+import { auth, db } from "@/lib/firebase";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { doc, setDoc, collection, query, where, getDocs } from "firebase/firestore";
 
 export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -24,30 +27,58 @@ export default function SignupPage() {
     setError("");
 
     try {
-      const res = await fetch("/api/auth/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fullName: formData.name,
-          email: formData.email,
-          username: formData.username,
-          password: formData.password,
-          storeName: formData.storeName,
-        }),
-      });
+      const usersRef = collection(db, "users");
+      const usernameQuery = query(usersRef, where("username", "==", formData.username));
+      const usernameSnapshot = await getDocs(usernameQuery);
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.error || "Signup failed");
+      if (!usernameSnapshot.empty) {
+        setError("اسم المستخدم مستخدم بالفعل");
         setLoading(false);
         return;
       }
 
-      localStorage.setItem("auth", JSON.stringify(data));
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        formData.email,
+        formData.password
+      );
+
+      await updateProfile(userCredential.user, {
+        displayName: formData.name,
+      });
+
+      const storeRef = doc(collection(db, "stores"));
+      const newStore = {
+        id: storeRef.id,
+        name: formData.storeName,
+        ownerId: userCredential.user.uid,
+        createdAt: new Date().toISOString(),
+      };
+      await setDoc(storeRef, newStore);
+
+      await setDoc(doc(db, "users", userCredential.user.uid), {
+        fullName: formData.name,
+        email: formData.email,
+        username: formData.username,
+        role: "owner",
+        storeId: storeRef.id,
+        createdAt: new Date().toISOString(),
+      });
+
+      const token = await userCredential.user.getIdToken();
+      localStorage.setItem("firebaseToken", token);
+
       router.push("/dashboard");
-    } catch {
-      setError("Something went wrong");
+    } catch (err: any) {
+      if (err.code === "auth/email-already-in-use") {
+        setError("البريد الإلكتروني مستخدم بالفعل");
+      } else if (err.code === "auth/weak-password") {
+        setError("كلمة المرور ضعيفة جداً");
+      } else if (err.code === "auth/invalid-email") {
+        setError("البريد الإلكتروني غير صالح");
+      } else {
+        setError("حدث خطأ ما");
+      }
       setLoading(false);
     }
   };
@@ -77,7 +108,7 @@ export default function SignupPage() {
               <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
                 <Warehouse className="w-10 h-10 text-primary" />
               </div>
-              <p className="text-sm font-medium text-foreground/60">Start Your Journey</p>
+              <p className="text-sm font-medium text-foreground/60">ابدأ رحلتك</p>
             </div>
           </div>
         </div>
@@ -92,15 +123,15 @@ export default function SignupPage() {
             <span className="text-xl font-bold text-foreground">Stock<span className="text-primary">Flow</span></span>
           </Link>
           <button className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground border border-border rounded-lg px-3 py-1.5 transition-colors">
-            <Globe className="w-4 h-4" /> English
+            <Globe className="w-4 h-4" /> العربية
           </button>
         </div>
 
         <div className="flex-1 flex items-center justify-center px-8 py-6">
           <div className="w-full max-w-md">
             <div className="bg-card rounded-2xl shadow-xl border border-border p-8">
-              <h1 className="text-2xl font-bold text-foreground">Create Account</h1>
-              <p className="mt-2 text-sm text-muted-foreground">Set up your warehouse management system</p>
+              <h1 className="text-2xl font-bold text-foreground">إنشاء حساب</h1>
+              <p className="mt-2 text-sm text-muted-foreground">قم بإعداد نظام إدارة المخازن الخاص بك</p>
 
               {error && (
                 <div className="mt-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
@@ -110,30 +141,30 @@ export default function SignupPage() {
 
               <form onSubmit={handleSignup} className="mt-8 space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-1.5">Full Name</label>
-                  <input type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm" placeholder="John Doe" required />
+                  <label className="block text-sm font-medium text-foreground mb-1.5">الاسم الكامل</label>
+                  <input type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-foreground text-right focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm" placeholder="أدخل اسمك الكامل" required />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-1.5">Email Address</label>
-                  <input type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm" placeholder="john@company.com" required />
+                  <label className="block text-sm font-medium text-foreground mb-1.5">البريد الإلكتروني</label>
+                  <input type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-foreground text-right focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm" placeholder="example@company.com" required />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-1.5">Store Name</label>
-                  <input type="text" value={formData.storeName} onChange={(e) => setFormData({ ...formData, storeName: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm" placeholder="My Warehouse" required />
+                  <label className="block text-sm font-medium text-foreground mb-1.5">اسم المتجر</label>
+                  <input type="text" value={formData.storeName} onChange={(e) => setFormData({ ...formData, storeName: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-foreground text-right focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm" placeholder="متجري" required />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-1.5">Username</label>
-                  <input type="text" value={formData.username} onChange={(e) => setFormData({ ...formData, username: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm" placeholder="johndoe" required />
+                  <label className="block text-sm font-medium text-foreground mb-1.5">اسم المستخدم</label>
+                  <input type="text" value={formData.username} onChange={(e) => setFormData({ ...formData, username: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-foreground text-right focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm" placeholder="اسم المستخدم" required />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-1.5">Password</label>
+                  <label className="block text-sm font-medium text-foreground mb-1.5">كلمة المرور</label>
                   <div className="relative">
-                    <input type={showPassword ? "text" : "password"} value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm pr-12" placeholder="Min. 8 characters" required minLength={8} />
-                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
+                    <input type={showPassword ? "text" : "password"} value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-foreground text-right focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm pl-12" placeholder="8 أحرف على الأقل" required minLength={8} />
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
@@ -141,7 +172,7 @@ export default function SignupPage() {
 
                 <div className="flex items-start gap-2 pt-1">
                   <CheckCircle className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                  <p className="text-xs text-muted-foreground">By creating an account, you agree to our Terms of Service and Privacy Policy</p>
+                  <p className="text-xs text-muted-foreground">بإنشاء حساب، أنت توافق على شروط الخدمة وسياسة الخصوصية</p>
                 </div>
 
                 <button type="submit" disabled={loading} className="w-full bg-primary text-white py-3 rounded-lg font-medium hover:bg-primary-hover transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary/25 mt-2">
@@ -151,16 +182,16 @@ export default function SignupPage() {
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                       </svg>
-                      Creating account...
+                      جاري إنشاء الحساب...
                     </span>
-                  ) : "Create Account"}
+                  ) : "إنشاء حساب"}
                 </button>
               </form>
 
               <div className="mt-6 text-center">
                 <p className="text-sm text-muted-foreground">
-                  Already have an account?{" "}
-                  <Link href="/login" className="text-primary hover:text-primary-hover font-medium transition-colors">Log in</Link>
+                  لديك حساب بالفعل؟{" "}
+                  <Link href="/login" className="text-primary hover:text-primary-hover font-medium transition-colors">تسجيل الدخول</Link>
                 </p>
               </div>
             </div>

@@ -13,15 +13,25 @@ function getAdminApp(): App {
 
   const projectId = process.env.FIREBASE_ADMIN_PROJECT_ID;
   const clientEmail = process.env.FIREBASE_ADMIN_CLIENT_EMAIL;
-  const privateKey = process.env.FIREBASE_ADMIN_PRIVATE_KEY?.replace(/\\n/g, "\n");
+  let privateKey = process.env.FIREBASE_ADMIN_PRIVATE_KEY;
+
+  if (privateKey) {
+    privateKey = privateKey
+      .replace(/\\n/g, "\n")
+      .replace(/\\r/g, "\r")
+      .trim();
+    if (!privateKey.includes("-----BEGIN")) {
+      privateKey = "-----BEGIN PRIVATE KEY-----\n" + privateKey + "\n-----END PRIVATE KEY-----";
+    }
+  }
 
   if (projectId && clientEmail && privateKey) {
     try {
       adminApp = initializeApp({
         credential: cert({ projectId, clientEmail, privateKey }),
       });
-    } catch (e) {
-      console.warn("Firebase Admin cert failed, using project-only mode:", e);
+    } catch (e: any) {
+      console.error("Firebase Admin cert failed:", e.message);
       adminApp = initializeApp({
         projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
       });

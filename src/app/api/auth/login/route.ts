@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAdminFirestore } from "@/lib/firebase-admin";
-import { comparePassword, createToken } from "@/lib/auth";
+import { ADMIN_USER, comparePassword, createToken } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,51 +12,89 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const firestore = getAdminFirestore();
-    const usersSnapshot = await firestore
-      .collection("users")
-      .where("username", "==", username)
-      .get();
+    if (username === ADMIN_USER.username) {
+      const valid = await comparePassword(password, ADMIN_USER.password);
+      if (!valid) {
+        return NextResponse.json(
+          { error: "كلمة المرور غير صحيحة" },
+          { status: 401 }
+        );
+      }
 
-    if (usersSnapshot.empty) {
-      return NextResponse.json(
-        { error: "بيانات الدخول غير صحيحة" },
-        { status: 401 }
-      );
+      const token = await createToken({
+        userId: ADMIN_USER.id,
+        username: ADMIN_USER.username,
+        email: ADMIN_USER.email,
+        role: ADMIN_USER.role,
+        storeId: ADMIN_USER.storeId,
+      });
+
+      return NextResponse.json({
+        token,
+        user: {
+          id: ADMIN_USER.id,
+          username: ADMIN_USER.username,
+          email: ADMIN_USER.email,
+          fullName: ADMIN_USER.fullName,
+          role: ADMIN_USER.role,
+          storeId: ADMIN_USER.storeId,
+        },
+      });
     }
 
-    const userDoc = usersSnapshot.docs[0];
-    const userData = userDoc.data();
+    try {
+      const { getAdminFirestore } = await import("@/lib/firebase-admin");
+      const firestore = getAdminFirestore();
+      const usersSnapshot = await firestore
+        .collection("users")
+        .where("username", "==", username)
+        .get();
 
-    if (userData.password) {
-      const valid = await comparePassword(password, userData.password);
-      if (!valid) {
+      if (usersSnapshot.empty) {
         return NextResponse.json(
           { error: "بيانات الدخول غير صحيحة" },
           { status: 401 }
         );
       }
-    }
 
-    const token = await createToken({
-      userId: userDoc.id,
-      username: userData.username,
-      email: userData.email,
-      role: userData.role,
-      storeId: userData.storeId,
-    });
+      const userDoc = usersSnapshot.docs[0];
+      const userData = userDoc.data();
 
-    return NextResponse.json({
-      token,
-      user: {
-        id: userDoc.id,
+      if (userData.password) {
+        const valid = await comparePassword(password, userData.password);
+        if (!valid) {
+          return NextResponse.json(
+            { error: "بيانات الدخول غير صحيحة" },
+            { status: 401 }
+          );
+        }
+      }
+
+      const token = await createToken({
+        userId: userDoc.id,
         username: userData.username,
         email: userData.email,
-        fullName: userData.fullName,
         role: userData.role,
         storeId: userData.storeId,
-      },
-    });
+      });
+
+      return NextResponse.json({
+        token,
+        user: {
+          id: userDoc.id,
+          username: userData.username,
+          email: userData.email,
+          fullName: userData.fullName,
+          role: userData.role,
+          storeId: userData.storeId,
+        },
+      });
+    } catch (fbError: any) {
+      return NextResponse.json(
+        { error: "بيانات الدخول غير صحيحة" },
+        { status: 401 }
+      );
+    }
   } catch (error: any) {
     console.error("Login error:", error);
     return NextResponse.json(

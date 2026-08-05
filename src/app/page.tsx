@@ -238,6 +238,7 @@ export default function HomePage() {
 
             <motion.div initial={{ opacity: 0, x: 50, scale: 0.95 }} animate={{ opacity: 1, x: 0, scale: 1 }} transition={{ delay: 0.6, duration: 0.8 }} className="relative hidden lg:block">
               <div className="relative">
+                {/* Floating Stats */}
                 <motion.div animate={{ y: [0, -10, 0] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} className="absolute -top-4 -left-4 bg-white rounded-2xl shadow-xl shadow-orange-500/10 p-3 flex items-center gap-3 z-10 border border-orange-100">
                   <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center"><TrendingUp className="w-5 h-5 text-green-600" /></div>
                   <div><p className="text-xs text-gray-500">المبيعات</p><p className="text-sm font-bold text-gray-900">+23.5%</p></div>
@@ -246,6 +247,8 @@ export default function HomePage() {
                   <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center"><Package className="w-5 h-5 text-blue-600" /></div>
                   <div><p className="text-xs text-gray-500">المنتجات</p><p className="text-sm font-bold text-gray-900">12,847</p></div>
                 </motion.div>
+
+                {/* Dashboard Mockup */}
                 <div className="bg-white rounded-3xl shadow-2xl shadow-gray-200/50 border border-gray-100 overflow-hidden">
                   <div className="bg-gray-50 px-4 py-3 border-b border-gray-100 flex items-center gap-2">
                     <div className="flex gap-1.5">
@@ -256,6 +259,7 @@ export default function HomePage() {
                     <div className="flex-1 text-center text-xs text-gray-400 font-medium">لوحة تحكم StockFlow</div>
                   </div>
                   <div className="p-5 space-y-4">
+                    {/* Stats Row */}
                     <div className="grid grid-cols-3 gap-3">
                       {[
                         { label: "المنتجات", value: "12,847", color: "from-blue-500 to-blue-600", icon: Package },
@@ -271,8 +275,53 @@ export default function HomePage() {
                         </motion.div>
                       ))}
                     </div>
-                    <div className="bg-gray-50 rounded-xl h-32 flex items-center justify-center border border-gray-100">
-                      <BarChart3 className="w-8 h-8 text-gray-300" />
+
+                    {/* Chart Area */}
+                    <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                      <div className="flex items-center justify-between mb-3">
+                        <p className="text-xs font-medium text-gray-600">المبيعات الشهرية</p>
+                        <span className="text-xs text-green-500 font-medium">+18%</span>
+                      </div>
+                      <div className="flex items-end gap-2 h-24">
+                        {[40, 65, 45, 80, 55, 90, 70, 95, 60, 85, 75, 100].map((h, i) => (
+                          <motion.div
+                            key={i}
+                            initial={{ height: 0 }}
+                            animate={{ height: `${h}%` }}
+                            transition={{ delay: 1 + i * 0.05, duration: 0.5 }}
+                            className="flex-1 bg-gradient-to-t from-orange-500 to-orange-400 rounded-t-sm"
+                          />
+                        ))}
+                      </div>
+                      <div className="flex justify-between mt-2 text-[9px] text-gray-400">
+                        <span>يناير</span>
+                        <span>مارس</span>
+                        <span>مايو</span>
+                        <span>يوليو</span>
+                        <span>سبتمبر</span>
+                        <span>نوفمبر</span>
+                      </div>
+                    </div>
+
+                    {/* Recent Orders */}
+                    <div className="space-y-2">
+                      <p className="text-xs font-medium text-gray-600">آخر الأوردرات</p>
+                      {[
+                        { name: "أحمد محمد", amount: "2,450 ج.م", status: "تم التوصيل", color: "bg-green-100 text-green-600" },
+                        { name: "سارة علي", amount: "1,200 ج.م", status: "قيد الشحن", color: "bg-blue-100 text-blue-600" },
+                        { name: "محمد حسن", amount: "3,800 ج.م", status: "معلّق", color: "bg-yellow-100 text-yellow-600" },
+                      ].map((order, i) => (
+                        <motion.div key={i} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 1.2 + i * 0.1 }} className="flex items-center justify-between bg-white rounded-xl p-3 border border-gray-100">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-xs font-bold text-gray-600">{order.name.charAt(0)}</div>
+                            <div>
+                              <p className="text-xs font-medium text-gray-900">{order.name}</p>
+                              <p className="text-[10px] text-gray-500">{order.amount}</p>
+                            </div>
+                          </div>
+                          <span className={`text-[10px] font-medium px-2 py-1 rounded-full ${order.color}`}>{order.status}</span>
+                        </motion.div>
+                      ))}
                     </div>
                   </div>
                 </div>
@@ -280,6 +329,7 @@ export default function HomePage() {
             </motion.div>
           </div>
 
+          {/* Stats Bar */}
           <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8, duration: 0.6 }} className="mt-16 bg-white/70 backdrop-blur-xl rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 p-6 lg:p-8">
             <div className="grid grid-cols-3 gap-6">
               <div className="text-center">

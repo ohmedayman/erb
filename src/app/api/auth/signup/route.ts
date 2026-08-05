@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAdminFirestore } from "@/lib/firebase-admin";
 import { hashPassword, createToken } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
@@ -21,7 +20,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const firestore = getAdminFirestore();
+    let firestore: any;
+    try {
+      const mod = await import("@/lib/firebase-admin");
+      firestore = mod.getAdminFirestore();
+    } catch (e: any) {
+      return NextResponse.json(
+        { error: "Firebase Admin SDK failed: " + e.message },
+        { status: 500 }
+      );
+    }
 
     const existingUser = await firestore
       .collection("users")
@@ -80,7 +88,7 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     console.error("Signup error:", error);
     return NextResponse.json(
-      { error: error.message || "حدث خطأ داخلي" },
+      { error: error.message || "حدث خطأ داخلي", stack: error.stack },
       { status: 500 }
     );
   }

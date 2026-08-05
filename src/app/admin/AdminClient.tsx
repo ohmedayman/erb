@@ -231,16 +231,13 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen bg-[#0f172a] flex" dir="rtl">
-      <AnimatePresence>
-        {sidebarOpen && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
-        )}
-      </AnimatePresence>
+      {/* Mobile overlay */}
+      {sidebarOpen && (
+        <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
+      )}
 
-      {/* Sidebar */}
-      <motion.aside initial={false} animate={{ x: sidebarOpen ? 0 : 280 }}
-        className="fixed lg:sticky top-0 right-0 h-screen w-[280px] bg-[#1e293b] border-l border-slate-700 z-50 flex flex-col">
+      {/* Sidebar - always visible on desktop, overlay on mobile */}
+      <aside className={`fixed lg:sticky top-0 right-0 h-screen w-[280px] bg-[#1e293b] border-l border-slate-700 z-50 flex flex-col transition-transform duration-200 lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "translate-x-full"}`}>
         <div className="p-6 border-b border-slate-700">
           <div className="flex items-center gap-3">
             <Image src="/favicon.svg" alt="StockFlow" width={40} height={40} />
@@ -283,7 +280,7 @@ export default function AdminPage() {
             </button>
           </div>
         </div>
-      </motion.aside>
+      </aside>
 
       {/* Main Content */}
       <main className="flex-1 min-h-screen">

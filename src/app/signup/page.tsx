@@ -63,10 +63,15 @@ export default function SignupPage() {
       });
 
       if (error) {
-        if (error.message.includes("already")) {
+        const msg = error.message.toLowerCase();
+        if (msg.includes("already")) {
           setServerError("البريد الإلكتروني متسجل قبل كده");
-        } else if (error.message.includes("rate") || error.message.includes("limit") || error.message.includes("email")) {
+        } else if (msg.includes("rate") || msg.includes("too many") || msg.includes("limit")) {
           setServerError("تم تجاوز حد الإرسال. حاول تاني بعد شوية أو تواصل مع الدعم على 01028707543");
+        } else if (msg.includes("email") && msg.includes("valid")) {
+          setServerError("البريد الإلكتروني غير صحيح");
+        } else if (msg.includes("password")) {
+          setServerError("الباسوورد ضعيف — لازم 6 أحرف على الأقل");
         } else {
           setServerError("حصل مشكلة: " + error.message);
         }

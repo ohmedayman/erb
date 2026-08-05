@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Warehouse, Eye, EyeOff, Globe, Mail, Lock, Loader2, CheckCircle } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import Image from "next/image";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -135,7 +136,7 @@ export default function LoginPage() {
           <div className="w-64 h-40 bg-white/60 rounded-2xl border border-white/80 shadow-xl backdrop-blur-sm flex items-center justify-center">
             <div className="text-center">
               <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                <Warehouse className="w-10 h-10 text-primary" />
+                <Image src="/favicon.svg" alt="StockFlow" width={48} height={48} />
               </div>
               <p className="text-sm font-medium text-foreground/60">إدارة المخازن</p>
             </div>
@@ -152,9 +153,7 @@ export default function LoginPage() {
       <div className="flex-1 flex flex-col">
         <div className="flex items-center justify-between px-8 py-5">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-9 h-9 bg-primary rounded-lg flex items-center justify-center">
-              <Warehouse className="w-5 h-5 text-white" />
-            </div>
+            <Image src="/favicon.svg" alt="StockFlow" width={36} height={36} />
             <span className="text-xl font-bold text-foreground">Stock<span className="text-primary">Flow</span></span>
           </Link>
           <button className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground border border-border rounded-lg px-3 py-1.5 transition-colors">

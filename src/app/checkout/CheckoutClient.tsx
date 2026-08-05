@@ -11,6 +11,7 @@ import {
   Receipt, Truck, Bell, AlertCircle
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import Image from "next/image";
 
 const PAYMENT_METHODS = [
   {
@@ -22,13 +23,13 @@ const PAYMENT_METHODS = [
     borderColor: "border-blue-200",
     textColor: "text-blue-600",
     description: "ادفع عن طريق فوري من أي فرع قريب منك",
-    instructions: [
-      "روح لأي فرع فوري قريب منك",
-      "قولهم عايز تدفع لـ StockFlow",
-      "ادفع المبلغ: 3,000 ج.م",
-      "احتفظ بالرقم المرجعي",
-      "ادخل الرقم المرجعي هنا"
-    ],
+      instructions: [
+        "روح لأي فرع فوري قريب منك",
+        "قولهم عايز تدفع لـ StockFlow",
+        "ادفع المبلغ المطلوب",
+        "احتفظ بالرقم المرجعي",
+        "ادخل الرقم المرجعي هنا"
+      ],
     accountName: "StockFlow SaaS",
     accountNumber: "0123456789",
     notes: "الدفع الفوري — التأكيد خلال 5 دقائق"
@@ -46,7 +47,7 @@ const PAYMENT_METHODS = [
       "افتح تطبيق فودافون كاش",
       "اختر 'تحويل للمحفضة'",
       "ابعت على الرقم: 01012345678",
-      "المبلغ: 3,000 ج.م",
+      "ادفع المبلغ المطلوب",
       "احتفظ برقم العملية"
     ],
     accountName: "StockFlow SaaS",
@@ -66,7 +67,7 @@ const PAYMENT_METHODS = [
       "افتح تطبيق البنك بتاعك",
       "اختر InstaPay",
       "ابعت على البريد: payment@stockflow.vexonet.online",
-      "المبلغ: 3,000 ج.م",
+      "ادفع المبلغ المطلوب",
       "احتفظ برقم العملية"
     ],
     accountName: "StockFlow SaaS",
@@ -85,7 +86,7 @@ const PAYMENT_METHODS = [
     instructions: [
       "روح لأي فرع بنكي",
       "اعمل حوالة بنكية على الحساب",
-      "المبلغ: 3,000 ج.م",
+      "ادفع المبلغ المطلوب",
       "اسم الحساب: StockFlow SaaS",
       "احتفظ بسند الحوالة"
     ],
@@ -99,6 +100,7 @@ const PAYMENT_METHODS = [
 export default function CheckoutPage() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
+  const [selectedPlan, setSelectedPlan] = useState<string>("plan-pro");
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
   const [transactionId, setTransactionId] = useState("");
   const [userName, setUserName] = useState("");
@@ -108,6 +110,27 @@ export default function CheckoutPage() {
   const [copied, setCopied] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [orderId, setOrderId] = useState("");
+  const [plans, setPlans] = useState<any[]>([]);
+
+  useEffect(() => {
+    const stored = JSON.parse(localStorage.getItem("user") || "null");
+    if (!stored) {
+      router.push("/login");
+      return;
+    }
+    setUser(stored);
+    setUserName(stored.name || stored.fullName || "");
+    loadPlans();
+  }, [router]);
+
+  const loadPlans = async () => {
+    try {
+      const { data } = await supabase.from("subscription_plans").select("*").eq("is_active", true).order("price");
+      if (data && data.length > 0) setPlans(data);
+    } catch {}
+  };
+
+  const currentPlan = plans.find(p => p.id === selectedPlan) || { name: "StockFlow Pro", price: 3000, duration: "yearly", features: [] };
 
   useEffect(() => {
     const stored = JSON.parse(localStorage.getItem("user") || "null");
@@ -135,9 +158,9 @@ export default function CheckoutPage() {
         user_name: userName,
         user_email: user.email,
         user_phone: userPhone,
-        plan_name: "StockFlow Pro",
-        plan_price: 3000,
-        plan_duration: "سنوياً",
+        plan_name: currentPlan.name,
+        plan_price: currentPlan.price,
+        plan_duration: currentPlan.duration || "yearly",
         payment_method: selectedMethod,
         payment_details: PAYMENT_METHODS.find(m => m.id === selectedMethod)?.notes || "",
         transaction_id: transactionId,
@@ -151,6 +174,11 @@ export default function CheckoutPage() {
         .single();
 
       if (error) throw error;
+
+      await supabase
+        .from("registered_users")
+        .update({ subscription_status: "pending" })
+        .eq("id", user.id);
 
       setOrderId(data.id);
       setOrderSuccess(true);
@@ -208,9 +236,7 @@ export default function CheckoutPage() {
       <div className="bg-white/80 backdrop-blur-sm border-b border-border sticky top-0 z-40">
         <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5">
-            <div className="w-9 h-9 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/25">
-              <Warehouse className="w-5 h-5 text-white" />
-            </div>
+            <Image src="/favicon.svg" alt="StockFlow" width={36} height={36} />
             <span className="text-lg font-bold text-foreground">Stock<span className="text-primary">Flow</span></span>
           </Link>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -246,50 +272,68 @@ export default function CheckoutPage() {
             {step === 1 && (
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
                 <div className="bg-white rounded-2xl shadow-lg border border-border p-6">
-                  <h2 className="text-xl font-bold text-foreground mb-6">ملخص الطلب</h2>
+                  <h2 className="text-xl font-bold text-foreground mb-2">اختار خطة الاشتراك</h2>
+                  <p className="text-sm text-muted-foreground mb-6">اختار الخطة اللي تناسبك</p>
 
-                  <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl p-6 text-white mb-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <div>
-                        <h3 className="text-lg font-bold">StockFlow Pro</h3>
-                        <p className="text-orange-100 text-sm">نظام إدارة المخازن الكامل</p>
-                      </div>
-                      <Star className="w-8 h-8 text-orange-200" />
-                    </div>
-                    <div className="border-t border-orange-400/30 pt-4">
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-3xl font-bold">3,000</span>
-                        <span className="text-orange-200">ج.م / سنوياً</span>
-                      </div>
-                      <p className="text-orange-200 text-sm mt-1">250 ج.م فقط شهرياً</p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-3">
-                    <h4 className="font-medium text-foreground">متجيناش في الاشتراك:</h4>
-                    {[
-                      { icon: Package, text: "منتجات غير محدودة" },
-                      { icon: Users, text: "زبائن وموردين" },
-                      { icon: BarChart3, text: "تقارير وتحليلات" },
-                      { icon: Receipt, text: "فواتير وأوردرات" },
-                      { icon: Truck, text: "شحن وتوصيل" },
-                      { icon: Settings, text: "إعدادات كاملة" },
-                      { icon: Bell, text: "إشعارات فورية" },
-                      { icon: FileText, text: "باركود وطباعة" },
-                    ].map(({ icon: Icon, text }, i) => (
-                      <div key={i} className="flex items-center gap-3 text-sm text-muted-foreground">
-                        <CheckCircle className="w-4 h-4 text-green-500 shrink-0" />
-                        <Icon className="w-4 h-4 text-primary shrink-0" />
-                        <span>{text}</span>
-                      </div>
+                  <div className="space-y-3 mb-6">
+                    {plans.map((plan) => (
+                      <button
+                        key={plan.id}
+                        onClick={() => setSelectedPlan(plan.id)}
+                        className={`w-full p-5 rounded-2xl border-2 text-right transition-all ${
+                          selectedPlan === plan.id
+                            ? "border-primary bg-primary/5 ring-2 ring-offset-2 ring-primary/20"
+                            : "border-border hover:border-border/80 hover:bg-muted/50"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-3">
+                          <div>
+                            <h3 className="text-lg font-bold text-foreground">{plan.name}</h3>
+                            <p className="text-sm text-muted-foreground">{plan.id === 'plan-enterprise' ? 'للشركات الكبيرة' : plan.id === 'plan-pro' ? 'للشركات الناشئة' : 'للبداية'}</p>
+                          </div>
+                          <div className="text-left">
+                            <p className="text-2xl font-bold text-primary">{plan.price?.toLocaleString()} ج.م</p>
+                            <p className="text-xs text-muted-foreground">سنوياً</p>
+                          </div>
+                        </div>
+                        <div className="border-t border-border pt-3">
+                          <div className="grid grid-cols-2 gap-2">
+                            {(plan.features || []).map((feature: string, i: number) => (
+                              <div key={i} className="flex items-center gap-2 text-xs text-muted-foreground">
+                                <CheckCircle className="w-3.5 h-3.5 text-green-500 shrink-0" />
+                                <span>{feature}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </button>
                     ))}
+                    {plans.length === 0 && (
+                      <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl p-6 text-white">
+                        <div className="flex items-center justify-between mb-4">
+                          <div>
+                            <h3 className="text-lg font-bold">StockFlow Pro</h3>
+                            <p className="text-orange-100 text-sm">نظام إدارة المخازن الكامل</p>
+                          </div>
+                          <Star className="w-8 h-8 text-orange-200" />
+                        </div>
+                        <div className="border-t border-orange-400/30 pt-4">
+                          <div className="flex items-baseline gap-1">
+                            <span className="text-3xl font-bold">3,000</span>
+                            <span className="text-orange-200">ج.م / سنوياً</span>
+                          </div>
+                          <p className="text-orange-200 text-sm mt-1">250 ج.م فقط شهرياً</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <button
                     onClick={() => setStep(2)}
-                    className="w-full mt-6 bg-primary text-white py-3 rounded-xl font-medium hover:bg-primary-hover transition-all shadow-lg shadow-primary/25 flex items-center justify-center gap-2"
+                    disabled={!selectedPlan}
+                    className="w-full bg-primary text-white py-3 rounded-xl font-medium hover:bg-primary-hover transition-all shadow-lg shadow-primary/25 flex items-center justify-center gap-2 disabled:opacity-50"
                   >
-                   اختار طريقة الدفع
+                    اختار طريقة الدفع
                     <ArrowLeft className="w-5 h-5" />
                   </button>
                 </div>
@@ -365,7 +409,7 @@ export default function CheckoutPage() {
                   {/* Amount */}
                   <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl p-4 text-white text-center mb-6">
                     <p className="text-orange-200 text-sm">المبلغ المطلوب</p>
-                    <p className="text-3xl font-bold">3,000 ج.م</p>
+                    <p className="text-3xl font-bold">{currentPlan.price?.toLocaleString()} ج.م</p>
                   </div>
 
                   {/* Account Details */}
@@ -488,7 +532,7 @@ export default function CheckoutPage() {
               <div className="space-y-3">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">الخطة</span>
-                  <span className="font-medium text-foreground">StockFlow Pro</span>
+                  <span className="font-medium text-foreground">{currentPlan.name}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">المدة</span>
@@ -496,12 +540,12 @@ export default function CheckoutPage() {
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">المبلغ</span>
-                  <span className="font-medium text-foreground">3,000 ج.م</span>
+                  <span className="font-medium text-foreground">{currentPlan.price?.toLocaleString()} ج.م</span>
                 </div>
                 <div className="border-t border-border pt-3">
                   <div className="flex justify-between">
                     <span className="font-medium text-foreground">الإجمالي</span>
-                    <span className="text-lg font-bold text-primary">3,000 ج.م</span>
+                    <span className="text-lg font-bold text-primary">{currentPlan.price?.toLocaleString()} ج.م</span>
                   </div>
                 </div>
               </div>

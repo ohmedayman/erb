@@ -11,6 +11,7 @@ import {
   CalendarCheck, TrendingUp,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import Image from "next/image";
 
 const allSidebarLinks: Record<string, { href: string; label: string; icon: any }> = {
   dashboard: { href: "/dashboard", label: "البورد", icon: LayoutDashboard },
@@ -143,9 +144,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="flex flex-col h-full">
           <div className="flex items-center gap-2 px-5 h-16 border-b border-white/10">
             <Link href="/dashboard" className="flex items-center gap-2.5">
-              <div className="w-9 h-9 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/25">
-                <Warehouse className="w-5 h-5 text-white" />
-              </div>
+              <Image src="/favicon.svg" alt="StockFlow" width={36} height={36} />
               <span className="text-lg font-bold text-white">Stock<span className="text-orange-400">Flow</span></span>
             </Link>
             <button onClick={() => setSidebarOpen(false)} className="mr-auto lg:hidden text-sidebar-text hover:text-white">
@@ -189,9 +188,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </button>
 
           <Link href="/dashboard" className="flex items-center gap-2 shrink-0">
-            <div className="w-9 h-9 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/25">
-              <Warehouse className="w-5 h-5 text-white" />
-            </div>
+            <Image src="/favicon.svg" alt="StockFlow" width={36} height={36} />
           </Link>
 
           <div className="flex-1 max-w-md">

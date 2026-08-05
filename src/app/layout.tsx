@@ -17,6 +17,9 @@ export const metadata: Metadata = {
   title: "StockFlow - نظام إدارة المخازن الاحترافي",
   description:
     "حل SaaS متكامل لتتبع المخزون وإدارة الطلبات والتحليلات اللحظية للشركات الحديثة.",
+  icons: {
+    icon: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({

@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { getDocsFromCollection } from "@/lib/localdb";
+import Image from "next/image";
 
 const ADMIN_EMAILS = ["admin@stockflow.com", "m44408335@gmail.com", "admin@stockflow.vexonet.online"];
 
@@ -47,6 +48,7 @@ export default function AdminPage() {
   });
 
   const [subscriptionOrders, setSubscriptionOrders] = useState<any[]>([]);
+  const [registeredUsers, setRegisteredUsers] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
   const [customers, setCustomers] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
@@ -81,8 +83,9 @@ export default function AdminPage() {
   const loadAllData = async () => {
     setLoading(true);
     try {
-      const [subOrders, prods, custs, ords, invs, exps] = await Promise.all([
+      const [subOrders, regUsers, prods, custs, ords, invs, exps] = await Promise.all([
         getDocsFromCollection("subscription_orders"),
+        getDocsFromCollection("registered_users"),
         getDocsFromCollection("products"),
         getDocsFromCollection("customers"),
         getDocsFromCollection("orders"),
@@ -91,6 +94,7 @@ export default function AdminPage() {
       ]);
 
       setSubscriptionOrders(subOrders);
+      setRegisteredUsers(regUsers);
       setProducts(prods);
       setCustomers(custs);
       setOrders(ords);
@@ -98,7 +102,7 @@ export default function AdminPage() {
       setExpenses(exps);
 
       setStats({
-        totalUsers: subOrders.length,
+        totalUsers: regUsers.length,
         totalProducts: prods.length,
         totalCustomers: custs.length,
         totalOrders: ords.length,
@@ -261,9 +265,7 @@ export default function AdminPage() {
         {/* Logo */}
         <div className="p-6 border-b border-slate-700">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center">
-              <Shield className="w-5 h-5 text-white" />
-            </div>
+            <Image src="/favicon.svg" alt="StockFlow" width={40} height={40} />
             <div>
               <h1 className="text-white font-bold text-lg">لوحة التحكم</h1>
               <p className="text-slate-400 text-xs">StockFlow Admin</p>
@@ -569,9 +571,9 @@ export default function AdminPage() {
                 >
                   <div className="bg-[#1e293b] rounded-2xl border border-slate-700 overflow-hidden">
                     <div className="px-6 py-4 border-b border-slate-700">
-                      <h3 className="text-white font-bold">المستخدمين المسجلين ({subscriptionOrders.length})</h3>
+                      <h3 className="text-white font-bold">المستخدمين المسجلين ({registeredUsers.length})</h3>
                     </div>
-                    {subscriptionOrders.length === 0 ? (
+                    {registeredUsers.length === 0 ? (
                       <div className="py-12 text-center">
                         <Users className="w-12 h-12 text-slate-600 mx-auto mb-3" />
                         <p className="text-slate-400">مفيش مستخدمين مسجلين</p>
@@ -583,25 +585,30 @@ export default function AdminPage() {
                             <tr className="border-b border-slate-700">
                               <th className="text-right py-3 px-6 font-medium text-slate-400">الاسم</th>
                               <th className="text-right py-3 px-6 font-medium text-slate-400">البريد</th>
-                              <th className="text-right py-3 px-6 font-medium text-slate-400">الموبايل</th>
-                              <th className="text-right py-3 px-6 font-medium text-slate-400">الخطة</th>
-                              <th className="text-right py-3 px-6 font-medium text-slate-400">الحالة</th>
+                              <th className="text-right py-3 px-6 font-medium text-slate-400">الدور</th>
+                              <th className="text-right py-3 px-6 font-medium text-slate-400">الاشتراك</th>
                               <th className="text-right py-3 px-6 font-medium text-slate-400">التاريخ</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-slate-700/50">
-                            {subscriptionOrders.map((user) => (
-                              <tr key={user.id} className="hover:bg-slate-700/30 transition-colors">
-                                <td className="py-3 px-6 font-medium text-white">{user.user_name}</td>
-                                <td className="py-3 px-6 text-slate-400">{user.user_email}</td>
-                                <td className="py-3 px-6 text-slate-400">{user.user_phone || "—"}</td>
-                                <td className="py-3 px-6 text-slate-400">{user.plan_name}</td>
-                                <td className="py-3 px-6"><StatusBadge status={user.status} /></td>
-                                <td className="py-3 px-6 text-slate-500 text-xs">
-                                  {new Date(user.created_at).toLocaleDateString("ar-EG")}
-                                </td>
-                              </tr>
-                            ))}
+                            {registeredUsers.map((user) => {
+                              const subOrder = subscriptionOrders.find((o: any) => o.user_id === user.id);
+                              return (
+                                <tr key={user.id} className="hover:bg-slate-700/30 transition-colors">
+                                  <td className="py-3 px-6 font-medium text-white">{user.full_name}</td>
+                                  <td className="py-3 px-6 text-slate-400">{user.email}</td>
+                                  <td className="py-3 px-6">
+                                    <StatusBadge status={user.role === "admin" ? "approved" : "draft"} />
+                                  </td>
+                                  <td className="py-3 px-6">
+                                    <StatusBadge status={subOrder?.status || user.subscription_status || "pending"} />
+                                  </td>
+                                  <td className="py-3 px-6 text-slate-500 text-xs">
+                                    {new Date(user.created_at).toLocaleDateString("ar-EG")}
+                                  </td>
+                                </tr>
+                              );
+                            })}
                           </tbody>
                         </table>
                       </div>

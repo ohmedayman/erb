@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Warehouse, Eye, EyeOff, Globe, Mail, Lock, Loader2 } from "lucide-react";
+import { Warehouse, Eye, EyeOff, Globe, Mail, Lock, Loader2, CheckCircle } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
 export default function LoginPage() {
@@ -15,6 +15,31 @@ export default function LoginPage() {
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({});
   const [serverError, setServerError] = useState("");
   const router = useRouter();
+
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetLoading, setResetLoading] = useState(false);
+  const [resetMessage, setResetMessage] = useState("");
+  const [resetError, setResetError] = useState("");
+
+  const handleResetPassword = async () => {
+    setResetLoading(true);
+    setResetMessage("");
+    setResetError("");
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+        redirectTo: `${window.location.origin}/login`,
+      });
+      if (error) {
+        setResetError("فيه مشكلة حصلت — تأكد من البريد الإلكتروني");
+      } else {
+        setResetMessage("تم إرسال رابط إعادة تعيين الباسوورد على البريد الإلكتروني بتاعك! 📧");
+      }
+    } catch {
+      setResetError("فيه مشكلة حصلت — حاول تاني");
+    }
+    setResetLoading(false);
+  };
 
   const validate = () => {
     const errs: { email?: string; password?: string } = {};
@@ -207,7 +232,7 @@ export default function LoginPage() {
                     )}
                   </AnimatePresence>
                   <div className="mt-2 text-right">
-                    <button type="button" className="text-sm text-primary hover:text-primary-hover transition-colors">
+                    <button type="button" onClick={() => setShowForgotPassword(true)} className="text-sm text-primary hover:text-primary-hover transition-colors">
                       نسيت الباسوورد؟
                     </button>
                   </div>
@@ -252,6 +277,68 @@ export default function LoginPage() {
           </div>
         </div>
       </div>
+
+      {showForgotPassword && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-card rounded-2xl shadow-xl w-full max-w-md border border-border"
+          >
+            <div className="px-6 py-4 border-b border-border flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-foreground">إعادة تعيين الباسوورد</h2>
+              <button onClick={() => { setShowForgotPassword(false); setResetMessage(""); setResetError(""); }} className="text-muted-foreground hover:text-foreground">✕</button>
+            </div>
+            <div className="p-6 space-y-4">
+              {!resetMessage ? (
+                <>
+                  <p className="text-sm text-muted-foreground">اكتب البريد الإلكتروني وهنبعتلك رابط عشان تغيّر الباسوورد</p>
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-1.5">البريد الإلكتروني</label>
+                    <input
+                      type="email"
+                      value={resetEmail}
+                      onChange={(e) => setResetEmail(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      placeholder="example@company.com"
+                    />
+                  </div>
+                  {resetError && (
+                    <p className="text-red-500 text-sm">{resetError}</p>
+                  )}
+                  <button
+                    onClick={handleResetPassword}
+                    disabled={resetLoading || !resetEmail}
+                    className="w-full bg-primary text-white py-2.5 rounded-lg text-sm font-medium hover:bg-primary-hover transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    {resetLoading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        بيتم الإرسال...
+                      </>
+                    ) : (
+                      "إرسال رابط إعادة التعيين"
+                    )}
+                  </button>
+                </>
+              ) : (
+                <div className="text-center py-4">
+                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <CheckCircle className="w-8 h-8 text-green-600" />
+                  </div>
+                  <p className="text-sm text-foreground font-medium">{resetMessage}</p>
+                  <button
+                    onClick={() => { setShowForgotPassword(false); setResetMessage(""); }}
+                    className="mt-4 text-sm text-primary hover:text-primary-hover transition-colors"
+                  >
+                    رجوع لتسجيل الدخول
+                  </button>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        </div>
+      )}
     </motion.div>
   );
 }

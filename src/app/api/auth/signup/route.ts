@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     console.error("Signup error:", error);
     return NextResponse.json(
-      { error: error.message || "حدث خطأ داخلي" },
+      { error: error.message || error.toString() || "حدث خطأ داخلي", stack: error.stack },
       { status: 500 }
     );
   }

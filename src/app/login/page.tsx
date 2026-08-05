@@ -33,10 +33,8 @@ export default function LoginPage() {
         return;
       }
 
-      if (data.customToken) {
-        localStorage.setItem("customToken", data.customToken);
-      }
-      if (data.user) {
+      if (data.token) {
+        localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
       }
 

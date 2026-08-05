@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAdminAuth, getAdminFirestore } from "@/lib/firebase-admin";
+import { getAdminFirestore } from "@/lib/firebase-admin";
+import { hashPassword, createToken } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,7 +21,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const adminAuth = getAdminAuth();
     const firestore = getAdminFirestore();
 
     const existingUser = await firestore
@@ -35,11 +35,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const userRecord = await adminAuth.createUser({
-      email,
-      password,
-      displayName: fullName,
-    });
+    const hashedPassword = await hashPassword(password);
 
     const storeRef = firestore.collection("stores").doc();
     await storeRef.set({
@@ -50,22 +46,30 @@ export async function POST(request: NextRequest) {
       createdAt: new Date().toISOString(),
     });
 
-    await firestore.collection("users").doc(userRecord.uid).set({
-      id: userRecord.uid,
+    const userRef = firestore.collection("users").doc();
+    await userRef.set({
+      id: userRef.id,
       username,
       email,
+      password: hashedPassword,
       fullName,
       role: "admin",
       storeId: storeRef.id,
       createdAt: new Date().toISOString(),
     });
 
-    const customToken = await adminAuth.createCustomToken(userRecord.uid);
+    const token = await createToken({
+      userId: userRef.id,
+      username,
+      email,
+      role: "admin",
+      storeId: storeRef.id,
+    });
 
     return NextResponse.json({
-      customToken,
+      token,
       user: {
-        id: userRecord.uid,
+        id: userRef.id,
         username,
         fullName,
         role: "admin",
@@ -76,7 +80,7 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     console.error("Signup error:", error);
     return NextResponse.json(
-      { error: error.message || error.toString() || "حدث خطأ داخلي", stack: error.stack },
+      { error: error.message || "حدث خطأ داخلي" },
       { status: 500 }
     );
   }

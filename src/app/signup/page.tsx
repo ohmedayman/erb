@@ -44,11 +44,12 @@ export default function SignupPage() {
         return;
       }
 
-      if (data.customToken) {
-        localStorage.setItem("customToken", data.customToken);
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("user", JSON.stringify(data.user));
       }
 
-      router.push("/login");
+      router.push("/dashboard");
     } catch (err: any) {
       setError("حدث خطأ في الاتصال بالخادم");
       setLoading(false);

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAdminAuth, getAdminFirestore } from "@/lib/firebase-admin";
+import { getAdminFirestore } from "@/lib/firebase-admin";
+import { comparePassword, createToken } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
   try {
@@ -28,11 +29,26 @@ export async function POST(request: NextRequest) {
     const userDoc = usersSnapshot.docs[0];
     const userData = userDoc.data();
 
-    const adminAuth = getAdminAuth();
-    const customToken = await adminAuth.createCustomToken(userDoc.id);
+    if (userData.password) {
+      const valid = await comparePassword(password, userData.password);
+      if (!valid) {
+        return NextResponse.json(
+          { error: "بيانات الدخول غير صحيحة" },
+          { status: 401 }
+        );
+      }
+    }
+
+    const token = await createToken({
+      userId: userDoc.id,
+      username: userData.username,
+      email: userData.email,
+      role: userData.role,
+      storeId: userData.storeId,
+    });
 
     return NextResponse.json({
-      customToken,
+      token,
       user: {
         id: userDoc.id,
         username: userData.username,
@@ -45,7 +61,7 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     console.error("Login error:", error);
     return NextResponse.json(
-      { error: "حدث خطأ داخلي" },
+      { error: error.message || "حدث خطأ داخلي" },
       { status: 500 }
     );
   }

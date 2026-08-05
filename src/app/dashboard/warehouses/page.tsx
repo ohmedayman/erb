@@ -31,7 +31,7 @@ export default function WarehousesPage() {
   const fetchWarehouses = async () => {
     try {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
-      const data = getDocsFromCollection("warehouses", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
+      const data = await getDocsFromCollection("warehouses", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
       setWarehouses(data);
     } catch {
     } finally {
@@ -52,7 +52,7 @@ export default function WarehousesPage() {
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     const user = JSON.parse(localStorage.getItem("user") || "{}");
-    addDocToCollection("warehouses", { ...newWarehouse, capacity: parseInt(newWarehouse.capacity) || 0, storeId: user.storeId });
+    await addDocToCollection("warehouses", { ...newWarehouse, capacity: parseInt(newWarehouse.capacity) || 0, storeId: user.storeId });
     setShowModal(false);
     setNewWarehouse({
       name: "",
@@ -68,14 +68,14 @@ export default function WarehousesPage() {
 
   const handleEdit = async (e: React.FormEvent) => {
     e.preventDefault();
-    updateDocInCollection("warehouses", editingWarehouse.id, { ...editingWarehouse, capacity: parseInt(editingWarehouse.capacity) || 0 });
+    await updateDocInCollection("warehouses", editingWarehouse.id, { ...editingWarehouse, capacity: parseInt(editingWarehouse.capacity) || 0 });
     setEditingWarehouse(null);
     fetchWarehouses();
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm("متأكد من حذف المستودع ده؟")) return;
-    deleteDocFromCollection("warehouses", id);
+    await deleteDocFromCollection("warehouses", id);
     fetchWarehouses();
   };
 

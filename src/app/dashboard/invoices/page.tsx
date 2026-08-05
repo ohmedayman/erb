@@ -76,10 +76,10 @@ export default function InvoicesPage() {
     { name: "", sku: "", quantity: 1, price: 0, total: 0 },
   ]);
 
-  const fetchInvoices = () => {
+  const fetchInvoices = async () => {
     try {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
-      const data = getDocsFromCollection(
+      const data = await getDocsFromCollection(
         "invoices",
         user.storeId
           ? [{ field: "storeId", op: "==", value: user.storeId }]
@@ -132,7 +132,7 @@ export default function InvoicesPage() {
   const tax = subtotal * 0.15;
   const total = subtotal + tax;
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!form.customerName || items.every((i) => !i.name)) return;
     try {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
@@ -142,7 +142,7 @@ export default function InvoicesPage() {
       const sub = validItems.reduce((s, i) => s + i.quantity * i.price, 0);
       const tx = sub * 0.15;
 
-      addDocToCollection("invoices", {
+      await addDocToCollection("invoices", {
         invoiceNumber: invoiceNum,
         customerName: form.customerName,
         customerPhone: form.customerPhone,

@@ -53,8 +53,8 @@ export default function ProfitLossPage() {
       try {
         const user = JSON.parse(localStorage.getItem("user") || "{}");
         const filters = user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : [];
-        const invoicesData = getDocsFromCollection("invoices", filters);
-        const expensesData = getDocsFromCollection("expenses", filters);
+        const invoicesData = await getDocsFromCollection("invoices", filters);
+        const expensesData = await getDocsFromCollection("expenses", filters);
 
         const totalRevenue = invoicesData.reduce((sum: number, i: any) => sum + (i.total || 0), 0);
         const totalExpenses = expensesData.reduce((sum: number, e: any) => sum + (e.amount || 0), 0);

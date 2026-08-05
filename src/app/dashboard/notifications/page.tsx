@@ -18,7 +18,7 @@ export default function NotificationsPage() {
   const fetchNotifications = async () => {
     try {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
-      const data = getDocsFromCollection("notifications", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
+      const data = await getDocsFromCollection("notifications", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
       setNotifications(data || []);
     } catch {
     } finally {

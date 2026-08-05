@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Warehouse, Eye, EyeOff, Globe, CheckCircle, Mail, Lock, User, Loader2 } from "lucide-react";
-import { getDB, saveDB, findUserByUsername, addDocToCollection } from "@/lib/localdb";
+import { supabase } from "@/lib/supabase";
 
 interface FormErrors {
   name?: string;
@@ -41,46 +41,49 @@ export default function SignupPage() {
     return Object.keys(errs).length === 0;
   };
 
-  const handleSignup = (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setServerError("");
     if (!validate()) return;
 
     setLoading(true);
 
-    setTimeout(() => {
-      try {
-        const users = JSON.parse(localStorage.getItem("users") || "[]");
-        if (users.find((u: any) => u.email === formData.email)) {
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: formData.email.trim(),
+        password: formData.password,
+        options: {
+          data: {
+            full_name: formData.name.trim(),
+          },
+        },
+      });
+
+      if (error) {
+        if (error.message.includes("already")) {
           setServerError("البريد الإلكتروني متسجل قبل كده");
-          setLoading(false);
-          return;
+        } else {
+          setServerError("حصل مشكلة: " + error.message);
         }
+        setLoading(false);
+        return;
+      }
 
-        const newUser = {
-          id: "user-" + Date.now().toString(36),
-          name: formData.name.trim(),
-          email: formData.email.trim(),
-          password: formData.password,
-          createdAt: new Date().toISOString(),
-        };
-
-        users.push(newUser);
-        localStorage.setItem("users", JSON.stringify(users));
+      if (data.user) {
         localStorage.setItem("isLoggedIn", "true");
         localStorage.setItem("user", JSON.stringify({
-          id: newUser.id,
-          name: newUser.name,
-          email: newUser.email,
+          id: data.user.id,
+          name: formData.name.trim(),
+          email: data.user.email,
           role: "admin",
         }));
 
         router.push("/onboarding");
-      } catch (err: any) {
-        setServerError("حصل مشكلة: " + err.message);
-        setLoading(false);
       }
-    }, 500);
+    } catch (err: any) {
+      setServerError("حصل مشكلة: " + err.message);
+      setLoading(false);
+    }
   };
 
   const fieldVariants = [

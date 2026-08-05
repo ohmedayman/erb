@@ -53,7 +53,7 @@ export default function ProductsPage() {
   const fetchProducts = async () => {
     try {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
-      const products = getDocsFromCollection("products", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
+      const products = await getDocsFromCollection("products", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
       setProducts(products);
     } catch {
     } finally {
@@ -69,7 +69,7 @@ export default function ProductsPage() {
     e.preventDefault();
     try {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
-      addDocToCollection("products", { ...newProduct, price: parseFloat(newProduct.price), stock: parseInt(newProduct.stock), minStock: parseInt(newProduct.minStock || "10"), storeId: user.storeId });
+      await addDocToCollection("products", { ...newProduct, price: parseFloat(newProduct.price), stock: parseInt(newProduct.stock), minStock: parseInt(newProduct.minStock || "10"), storeId: user.storeId });
       setShowModal(false);
       setNewProduct({ name: "", sku: "", category: "", price: "", stock: "", minStock: "" });
       fetchProducts();
@@ -81,7 +81,7 @@ export default function ProductsPage() {
 
   const handleEdit = async (e: React.FormEvent) => {
     e.preventDefault();
-    updateDocInCollection("products", editingProduct.id, { ...editingProduct, price: parseFloat(editingProduct.price), stock: parseInt(editingProduct.stock), minStock: parseInt(editingProduct.minStock) });
+    await updateDocInCollection("products", editingProduct.id, { ...editingProduct, price: parseFloat(editingProduct.price), stock: parseInt(editingProduct.stock), minStock: parseInt(editingProduct.minStock) });
     setEditingProduct(null);
     fetchProducts();
     toast.success("تم حفظ التغييرات");
@@ -90,7 +90,7 @@ export default function ProductsPage() {
   const handleDelete = async (id: string) => {
     if (!confirm("انت متأكد من حذف هذا المنتج؟")) return;
     try {
-      deleteDocFromCollection("products", id);
+      await deleteDocFromCollection("products", id);
       fetchProducts();
       toast.success("تم حذف المنتج");
     } catch {

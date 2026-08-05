@@ -29,7 +29,7 @@ export default function TeamPage() {
   const fetchMembers = async () => {
     try {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
-      const data = getDocsFromCollection("teamMembers", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
+      const data = await getDocsFromCollection("teamMembers", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
       setMembers(data);
     } catch {
     } finally {

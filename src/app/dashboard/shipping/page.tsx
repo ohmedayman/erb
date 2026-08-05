@@ -26,7 +26,7 @@ export default function ShippingPage() {
     const fetchShipments = async () => {
       try {
         const user = JSON.parse(localStorage.getItem("user") || "{}");
-        const data = getDocsFromCollection("shipments", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
+        const data = await getDocsFromCollection("shipments", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
         setShipments(data);
       } catch {
       } finally {

@@ -39,11 +39,11 @@ export default function DashboardPage() {
         const sid = user.storeId;
         const f = (field: string) => sid ? [{ field: "storeId", op: "==", value: sid }] : [];
 
-        const products = features.includes("products") ? getDocsFromCollection("products", f("storeId")) : [];
-        const orders = features.includes("orders") ? getDocsFromCollection("orders", f("storeId")) : [];
-        const customers = features.includes("customers") ? getDocsFromCollection("customers", f("storeId")) : [];
-        const invoices = features.includes("invoices") ? getDocsFromCollection("invoices", f("storeId")) : [];
-        const expenses = features.includes("expenses") ? getDocsFromCollection("expenses", f("storeId")) : [];
+        const products = features.includes("products") ? await getDocsFromCollection("products", f("storeId")) : [];
+        const orders = features.includes("orders") ? await getDocsFromCollection("orders", f("storeId")) : [];
+        const customers = features.includes("customers") ? await getDocsFromCollection("customers", f("storeId")) : [];
+        const invoices = features.includes("invoices") ? await getDocsFromCollection("invoices", f("storeId")) : [];
+        const expenses = features.includes("expenses") ? await getDocsFromCollection("expenses", f("storeId")) : [];
         
         const totalProducts = products.length;
         const pendingOrders = orders.filter((o: any) => o.status === "Pending").length;

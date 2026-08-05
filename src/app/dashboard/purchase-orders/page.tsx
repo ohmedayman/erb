@@ -19,7 +19,7 @@ export default function PurchaseOrdersPage() {
   const fetchPurchaseOrders = async () => {
     try {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
-      const data = getDocsFromCollection("purchaseOrders", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
+      const data = await getDocsFromCollection("purchaseOrders", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
       setPurchaseOrders(data || []);
     } catch {
     } finally {
@@ -40,7 +40,7 @@ export default function PurchaseOrdersPage() {
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     const user = JSON.parse(localStorage.getItem("user") || "{}");
-    addDocToCollection("purchaseOrders", {
+    await addDocToCollection("purchaseOrders", {
       supplierName: newOrder.supplierName,
       items: parseInt(newOrder.items),
       total: parseFloat(newOrder.total),

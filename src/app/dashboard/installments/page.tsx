@@ -54,7 +54,7 @@ export default function InstallmentsPage() {
   const fetchInstallments = async () => {
     try {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
-      const data = getDocsFromCollection("installments", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
+      const data = await getDocsFromCollection("installments", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
       setInstallments(data);
     } catch {
     } finally {

@@ -1,176 +1,145 @@
-const DB_KEY = "stockflow_db";
-
-interface DB {
-  users: any[];
-  stores: any[];
-  products: any[];
-  orders: any[];
-  customers: any[];
-  invoices: any[];
-  expenses: any[];
-  employees: any[];
-  suppliers: any[];
-  accounts: any[];
-  journalEntries: any[];
-  purchaseOrders: any[];
-  stockMovements: any[];
-  shipments: any[];
-  returns: any[];
-  installments: any[];
-  notifications: any[];
-  activityLogs: any[];
-  warehouses: any[];
-  teamMembers: any[];
-}
-
-function getDefaultDB(): DB {
-  return {
-    users: [
-      {
-        id: "admin-001",
-        username: "admin",
-        password: "admin123",
-        fullName: "مدير النظام",
-        email: "admin@stockflow.com",
-        role: "admin",
-        storeId: "store-001",
-        createdAt: new Date().toISOString(),
-      },
-    ],
-    stores: [
-      {
-        id: "store-001",
-        name: "المتجر الرئيسي",
-        ownerName: "مدير النظام",
-        ownerEmail: "admin@stockflow.com",
-        createdAt: new Date().toISOString(),
-      },
-    ],
-    products: [],
-    orders: [],
-    customers: [],
-    invoices: [],
-    expenses: [],
-    employees: [],
-    suppliers: [],
-    accounts: [],
-    journalEntries: [],
-    purchaseOrders: [],
-    stockMovements: [],
-    shipments: [],
-    returns: [],
-    installments: [],
-    notifications: [],
-    activityLogs: [],
-    warehouses: [],
-    teamMembers: [],
-  };
-}
-
-export function getDB(): DB {
-  if (typeof window === "undefined") return getDefaultDB();
-  try {
-    const raw = localStorage.getItem(DB_KEY);
-    if (!raw) {
-      const db = getDefaultDB();
-      localStorage.setItem(DB_KEY, JSON.stringify(db));
-      return db;
-    }
-    return JSON.parse(raw);
-  } catch {
-    const db = getDefaultDB();
-    localStorage.setItem(DB_KEY, JSON.stringify(db));
-    return db;
-  }
-}
-
-export function saveDB(db: DB) {
-  if (typeof window === "undefined") return;
-  localStorage.setItem(DB_KEY, JSON.stringify(db));
-}
-
-export function getCollection(name: string): any[] {
-  const db = getDB();
-  return (db as any)[name] || [];
-}
-
-export function setCollection(name: string, data: any[]) {
-  const db = getDB();
-  (db as any)[name] = data;
-  saveDB(db);
-}
+import { supabase } from "./supabase";
 
 export function generateId(): string {
   return Date.now().toString(36) + Math.random().toString(36).substring(2, 8);
 }
 
-export function addUser(user: any) {
-  const db = getDB();
-  db.users.push(user);
-  saveDB(db);
-}
-
-export function findUserByUsername(username: string): any | null {
-  const db = getDB();
-  return db.users.find((u) => u.username === username) || null;
-}
-
-export function addDocToCollection(collectionName: string, data: any): any {
-  const id = generateId();
-  const doc = { id, ...data, createdAt: new Date().toISOString() };
-  const db = getDB();
-  const col = (db as any)[collectionName] || [];
-  col.push(doc);
-  (db as any)[collectionName] = col;
-  saveDB(db);
-  return doc;
-}
-
-export function getDocsFromCollection(
+export async function getDocsFromCollection(
   collectionName: string,
   filters?: { field: string; op: string; value: any }[]
-): any[] {
-  let docs = getCollection(collectionName);
-  if (filters) {
-    for (const f of filters) {
-      docs = docs.filter((d: any) => {
-        if (f.op === "==") return d[f.field] === f.value;
-        if (f.op === "!=") return d[f.field] !== f.value;
-        if (f.op === ">") return d[f.field] > f.value;
-        if (f.op === "<") return d[f.field] < f.value;
-        return true;
-      });
+): Promise<any[]> {
+  try {
+    let query = supabase.from(collectionName).select("*");
+
+    if (filters) {
+      for (const f of filters) {
+        if (f.op === "==") query = query.eq(f.field, f.value);
+        else if (f.op === "!=") query = query.neq(f.field, f.value);
+        else if (f.op === ">") query = query.gt(f.field, f.value);
+        else if (f.op === "<") query = query.lt(f.field, f.value);
+        else if (f.op === ">=") query = query.gte(f.field, f.value);
+        else if (f.op === "<=") query = query.lte(f.field, f.value);
+      }
     }
+
+    const { data, error } = await query.order("created_at", { ascending: false });
+    if (error) {
+      console.error(`Error fetching ${collectionName}:`, error);
+      return [];
+    }
+    return data || [];
+  } catch (err) {
+    console.error(`Error fetching ${collectionName}:`, err);
+    return [];
   }
-  return docs;
 }
 
-export function getDocFromCollection(
+export async function getDocFromCollection(
   collectionName: string,
   id: string
-): any | null {
-  const docs = getCollection(collectionName);
-  return docs.find((d: any) => d.id === id) || null;
+): Promise<any | null> {
+  try {
+    const { data, error } = await supabase
+      .from(collectionName)
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (error) {
+      console.error(`Error fetching doc from ${collectionName}:`, error);
+      return null;
+    }
+    return data;
+  } catch (err) {
+    console.error(`Error fetching doc from ${collectionName}:`, err);
+    return null;
+  }
 }
 
-export function updateDocInCollection(
+export async function addDocToCollection(
+  collectionName: string,
+  data: any
+): Promise<any> {
+  try {
+    const doc = {
+      id: data.id || generateId(),
+      ...data,
+      created_at: new Date().toISOString(),
+    };
+
+    const { data: inserted, error } = await supabase
+      .from(collectionName)
+      .insert(doc)
+      .select()
+      .single();
+
+    if (error) {
+      console.error(`Error adding to ${collectionName}:`, error);
+      throw error;
+    }
+    return inserted;
+  } catch (err) {
+    console.error(`Error adding to ${collectionName}:`, err);
+    throw err;
+  }
+}
+
+export async function updateDocInCollection(
   collectionName: string,
   id: string,
   data: any
-) {
-  const db = getDB();
-  const col = (db as any)[collectionName] || [];
-  const idx = col.findIndex((d: any) => d.id === id);
-  if (idx !== -1) {
-    col[idx] = { ...col[idx], ...data, updatedAt: new Date().toISOString() };
-    (db as any)[collectionName] = col;
-    saveDB(db);
+): Promise<void> {
+  try {
+    const { error } = await supabase
+      .from(collectionName)
+      .update({ ...data, updated_at: new Date().toISOString() })
+      .eq("id", id);
+
+    if (error) {
+      console.error(`Error updating ${collectionName}:`, error);
+      throw error;
+    }
+  } catch (err) {
+    console.error(`Error updating ${collectionName}:`, err);
+    throw err;
   }
 }
 
-export function deleteDocFromCollection(collectionName: string, id: string) {
-  const db = getDB();
-  const col = (db as any)[collectionName] || [];
-  (db as any)[collectionName] = col.filter((d: any) => d.id !== id);
-  saveDB(db);
+export async function deleteDocFromCollection(
+  collectionName: string,
+  id: string
+): Promise<void> {
+  try {
+    const { error } = await supabase
+      .from(collectionName)
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      console.error(`Error deleting from ${collectionName}:`, error);
+      throw error;
+    }
+  } catch (err) {
+    console.error(`Error deleting from ${collectionName}:`, err);
+    throw err;
+  }
+}
+
+// Legacy functions for backward compatibility
+export function getDB(): any {
+  return null;
+}
+
+export function saveDB(db: any): void {}
+
+export function getCollection(name: string): any[] {
+  return [];
+}
+
+export function setCollection(name: string, data: any[]): void {}
+
+export function addUser(user: any): void {}
+
+export function findUserByUsername(username: string): any | null {
+  return null;
 }

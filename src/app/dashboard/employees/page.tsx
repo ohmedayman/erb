@@ -51,7 +51,7 @@ export default function EmployeesPage() {
   const fetchEmployees = async () => {
     try {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
-      const employees = getDocsFromCollection("employees", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
+      const employees = await getDocsFromCollection("employees", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
       setEmployees(employees);
     } catch {
     } finally {
@@ -79,7 +79,7 @@ export default function EmployeesPage() {
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     const user = JSON.parse(localStorage.getItem("user") || "{}");
-    addDocToCollection("employees", { ...newEmployee, storeId: user.storeId });
+    await addDocToCollection("employees", { ...newEmployee, storeId: user.storeId });
     setShowModal(false);
     setNewEmployee({
       name: "",

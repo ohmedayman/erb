@@ -28,7 +28,7 @@ export default function ReturnsPage() {
   const fetchReturns = async () => {
     try {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
-      const data = getDocsFromCollection("returns", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
+      const data = await getDocsFromCollection("returns", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
       setReturns(data);
     } catch {
     } finally {

@@ -12,7 +12,7 @@ export default function InventoryPage() {
     const fetchInventory = async () => {
       try {
         const user = JSON.parse(localStorage.getItem("user") || "{}");
-        const products = getDocsFromCollection("products", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
+        const products = await getDocsFromCollection("products", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
         const inventory = products.map((p: any) => ({
           name: p.name,
           sku: p.sku,

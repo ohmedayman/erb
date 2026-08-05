@@ -28,7 +28,7 @@ export default function SettingsPage() {
       try {
         const user = JSON.parse(localStorage.getItem("user") || "{}");
         const filters = user.storeId ? [{ field: "id", op: "==", value: user.storeId }] : [];
-        const data = getDocsFromCollection("stores", filters);
+        const data = await getDocsFromCollection("stores", filters);
         setStoreData(data[0] || { name: "", phone: "", email: "" });
       } catch {
       } finally {
@@ -40,7 +40,7 @@ export default function SettingsPage() {
 
   const handleSave = async () => {
     if (storeData?.id) {
-      updateDocInCollection("stores", storeData.id, storeData);
+      await updateDocInCollection("stores", storeData.id, storeData);
     }
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);

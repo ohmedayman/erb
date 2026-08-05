@@ -48,10 +48,10 @@ export default function OrdersPage() {
   });
 
   useEffect(() => {
-    const fetchOrders = () => {
+    const fetchOrders = async () => {
       try {
         const user = JSON.parse(localStorage.getItem("user") || "{}");
-        const fetchedOrders = getDocsFromCollection(
+        const fetchedOrders = await getDocsFromCollection(
           "orders",
           user.storeId
             ? [{ field: "storeId", op: "==", value: user.storeId }]
@@ -73,12 +73,12 @@ export default function OrdersPage() {
       (statusFilter === "All" || o.status === statusFilter)
   );
 
-  const handleAddOrder = () => {
+  const handleAddOrder = async () => {
     if (!newOrder.customerName || !newOrder.total) return;
     try {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
       const orderNumber = `ORD-${Date.now().toString(36).toUpperCase()}`;
-      addDocToCollection("orders", {
+      await addDocToCollection("orders", {
         orderNumber,
         customerName: newOrder.customerName,
         items: Number(newOrder.items) || 1,
@@ -88,7 +88,7 @@ export default function OrdersPage() {
         date: new Date().toISOString(),
         storeId: user.storeId || "",
       });
-      const updatedOrders = getDocsFromCollection(
+      const updatedOrders = await getDocsFromCollection(
         "orders",
         user.storeId
           ? [{ field: "storeId", op: "==", value: user.storeId }]

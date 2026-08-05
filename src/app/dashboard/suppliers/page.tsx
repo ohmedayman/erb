@@ -33,7 +33,7 @@ export default function SuppliersPage() {
   const fetchSuppliers = async () => {
     try {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
-      const suppliers = getDocsFromCollection("suppliers", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
+      const suppliers = await getDocsFromCollection("suppliers", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
       setSuppliers(suppliers);
     } catch {
     } finally {
@@ -54,7 +54,7 @@ export default function SuppliersPage() {
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     const user = JSON.parse(localStorage.getItem("user") || "{}");
-    addDocToCollection("suppliers", { ...newSupplier, rating: newSupplier.rating || 5, storeId: user.storeId });
+    await addDocToCollection("suppliers", { ...newSupplier, rating: newSupplier.rating || 5, storeId: user.storeId });
     setShowModal(false);
     setNewSupplier({
       name: "",
@@ -71,14 +71,14 @@ export default function SuppliersPage() {
 
   const handleEdit = async (e: React.FormEvent) => {
     e.preventDefault();
-    updateDocInCollection("suppliers", editingSupplier.id, { ...editingSupplier, rating: parseInt(editingSupplier.rating) || 0 });
+    await updateDocInCollection("suppliers", editingSupplier.id, { ...editingSupplier, rating: parseInt(editingSupplier.rating) || 0 });
     setEditingSupplier(null);
     fetchSuppliers();
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm("هل أنت متأكد من حذف هذا المورد؟")) return;
-    deleteDocFromCollection("suppliers", id);
+    await deleteDocFromCollection("suppliers", id);
     fetchSuppliers();
   };
 

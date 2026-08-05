@@ -68,7 +68,7 @@ export default function ExpensesPage() {
   const fetchExpenses = async () => {
     try {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
-      const expenses = getDocsFromCollection("expenses", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
+      const expenses = await getDocsFromCollection("expenses", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
       setExpenses(expenses);
     } catch {
     } finally {
@@ -127,7 +127,7 @@ export default function ExpensesPage() {
     e.preventDefault();
     try {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
-      addDocToCollection("expenses", { ...newExpense, storeId: user.storeId });
+      await addDocToCollection("expenses", { ...newExpense, storeId: user.storeId });
       setShowModal(false);
       setNewExpense({
         description: "",

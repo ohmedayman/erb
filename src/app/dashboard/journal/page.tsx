@@ -38,8 +38,8 @@ export default function JournalPage() {
     try {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
       const filters = user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : [];
-      const entriesData = getDocsFromCollection("journalEntries", filters);
-      const accountsData = getDocsFromCollection("accounts", filters);
+      const entriesData = await getDocsFromCollection("journalEntries", filters);
+      const accountsData = await getDocsFromCollection("accounts", filters);
       setEntries(entriesData);
       setAccounts(accountsData);
     } catch {
@@ -117,7 +117,7 @@ export default function JournalPage() {
       credit: parseFloat(l.credit) || 0,
     }));
 
-    addDocToCollection("journalEntries", {
+    await addDocToCollection("journalEntries", {
       date: newEntry.date,
       description: newEntry.description,
       entries: formattedLines,

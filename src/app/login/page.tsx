@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Warehouse, Eye, EyeOff, Globe, Mail, Lock, Loader2 } from "lucide-react";
-import { findUserByUsername, getDB } from "@/lib/localdb";
+import { supabase } from "@/lib/supabase";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -26,31 +26,39 @@ export default function LoginPage() {
     return Object.keys(errs).length === 0;
   };
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setServerError("");
     if (!validate()) return;
 
     setLoading(true);
-    setTimeout(() => {
-      const db = getDB();
-      const user = db.users.find((u: any) => u.email === email || u.username === email);
-      if (user && user.password === password) {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        setServerError("البريد أو الباسوورد غلط");
+        setLoading(false);
+        return;
+      }
+
+      if (data.user) {
         localStorage.setItem("user", JSON.stringify({
-          id: user.id,
-          username: user.username,
-          email: user.email,
-          fullName: user.fullName,
-          role: user.role,
-          storeId: user.storeId,
+          id: data.user.id,
+          email: data.user.email,
+          fullName: data.user.user_metadata?.full_name || data.user.email,
+          role: "admin",
+          storeId: data.user.user_metadata?.store_id || "store-001",
         }));
         localStorage.setItem("isLoggedIn", "true");
         router.push("/dashboard");
-      } else {
-        setServerError("البريد أو الباسوورد غلط");
-        setLoading(false);
       }
-    }, 500);
+    } catch {
+      setServerError("فيه مشكلة حصلت — حاول تاني");
+      setLoading(false);
+    }
   };
 
   return (

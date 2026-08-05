@@ -62,7 +62,7 @@ export default function POSPage() {
     try {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
       const filters = user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : [];
-      const data = getDocsFromCollection("products", filters);
+      const data = await getDocsFromCollection("products", filters);
       const activeProducts = data.filter((p: Product) => p.stock > 0);
       setProducts(activeProducts);
     } catch {
@@ -75,7 +75,7 @@ export default function POSPage() {
     try {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
       const filters = user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : [];
-      const data = getDocsFromCollection("customers", filters);
+      const data = await getDocsFromCollection("customers", filters);
       setCustomers(data);
     } catch {
     }
@@ -227,7 +227,7 @@ export default function POSPage() {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
 
       for (const item of cart) {
-        updateDocInCollection("products", item.product.id, {
+        await updateDocInCollection("products", item.product.id, {
           stock: item.product.stock - item.quantity,
         });
       }
@@ -237,7 +237,7 @@ export default function POSPage() {
       const customerPhone =
         selectedCustomer?.phone || newCustomerPhone || "";
 
-      addDocToCollection("invoices", {
+      await addDocToCollection("invoices", {
         customerName: customerDisplayName,
         customerPhone,
         items: cart.map((item) => ({

@@ -29,7 +29,7 @@ export default function StockMovementsPage() {
   const fetchMovements = async () => {
     try {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
-      const data = getDocsFromCollection("stockMovements", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
+      const data = await getDocsFromCollection("stockMovements", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
       setMovements(data);
     } catch {
     } finally {

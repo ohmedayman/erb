@@ -51,7 +51,7 @@ export default function AccountsPage() {
   const fetchAccounts = async () => {
     try {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
-      const accounts = getDocsFromCollection("accounts", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
+      const accounts = await getDocsFromCollection("accounts", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
       setAccounts(accounts);
     } catch {
     } finally {
@@ -82,7 +82,7 @@ export default function AccountsPage() {
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     const user = JSON.parse(localStorage.getItem("user") || "{}");
-    addDocToCollection("accounts", { ...newAccount, storeId: user.storeId });
+    await addDocToCollection("accounts", { ...newAccount, storeId: user.storeId });
     setShowModal(false);
     setNewAccount({
       name: "",

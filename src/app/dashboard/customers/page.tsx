@@ -44,7 +44,7 @@ export default function CustomersPage() {
   const fetchCustomers = async () => {
     try {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
-      const customers = getDocsFromCollection("customers", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
+      const customers = await getDocsFromCollection("customers", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
       setCustomers(customers);
     } catch {
     } finally {
@@ -92,10 +92,10 @@ export default function CustomersPage() {
     try {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
       if (editingCustomer) {
-        updateDocInCollection("customers", editingCustomer.id, { ...form, storeId: user.storeId });
+        await updateDocInCollection("customers", editingCustomer.id, { ...form, storeId: user.storeId });
         toast.success("تم إضافة الزبون بنجاح");
       } else {
-        addDocToCollection("customers", { ...form, storeId: user.storeId });
+        await addDocToCollection("customers", { ...form, storeId: user.storeId });
         toast.success("تم إضافة الزبون بنجاح");
       }
       setShowModal(false);

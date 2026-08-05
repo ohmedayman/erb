@@ -14,6 +14,10 @@ import {
 } from "lucide-react";
 import { getDocsFromCollection, addDocToCollection } from "@/lib/localdb";
 
+const Skeleton = ({ className }: { className?: string }) => (
+  <div className={`animate-pulse bg-muted rounded ${className}`} />
+);
+
 const statusLabels: Record<string, string> = {
   active: "نشط",
   "on-leave": "إجازة",
@@ -203,9 +207,21 @@ export default function EmployeesPage() {
                 <tr>
                   <td
                     colSpan={6}
-                    className="px-5 py-8 text-center text-muted-foreground text-sm"
+                    className="px-5 py-4"
                   >
-                    بيتحمّل...
+                    <div className="space-y-3">
+                      {[1, 2, 3, 4].map((i) => (
+                        <div key={i} className="flex items-center gap-3">
+                          <Skeleton className="h-9 w-9 rounded-full shrink-0" />
+                          <Skeleton className="h-4 flex-1" />
+                          <Skeleton className="h-4 w-24" />
+                          <Skeleton className="h-5 w-16 rounded-full" />
+                          <Skeleton className="h-4 w-20" />
+                          <Skeleton className="h-4 w-24" />
+                          <Skeleton className="h-5 w-16 rounded-full" />
+                        </div>
+                      ))}
+                    </div>
                   </td>
                 </tr>
               ) : filtered.length === 0 ? (

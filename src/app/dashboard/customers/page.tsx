@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Search, Plus, X, Edit2 } from "lucide-react";
 import { getDocsFromCollection, addDocToCollection, updateDocInCollection } from "@/lib/localdb";
+import { toast } from "@/components/Toast";
 
 interface Customer {
   id: string;
@@ -10,11 +11,14 @@ interface Customer {
   phone: string;
   email: string;
   address: string;
-  taxId: string;
   type: string;
   balance: number;
   createdAt: string;
 }
+
+const Skeleton = ({ className }: { className?: string }) => (
+  <div className={`animate-pulse bg-muted rounded ${className}`} />
+);
 
 const typeConfig: Record<string, { label: string; class: string }> = {
   individual: { label: "فرد", class: "bg-blue-100 text-blue-700" },
@@ -33,7 +37,6 @@ export default function CustomersPage() {
     phone: "",
     email: "",
     address: "",
-    taxId: "",
     type: "individual",
     balance: 0,
   });
@@ -67,7 +70,6 @@ export default function CustomersPage() {
         phone: customer.phone,
         email: customer.email,
         address: customer.address,
-        taxId: customer.taxId,
         type: customer.type,
         balance: customer.balance,
       });
@@ -78,7 +80,6 @@ export default function CustomersPage() {
         phone: "",
         email: "",
         address: "",
-        taxId: "",
         type: "individual",
         balance: 0,
       });
@@ -92,12 +93,16 @@ export default function CustomersPage() {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
       if (editingCustomer) {
         updateDocInCollection("customers", editingCustomer.id, { ...form, storeId: user.storeId });
+        toast.success("تم إضافة الزبون بنجاح");
       } else {
         addDocToCollection("customers", { ...form, storeId: user.storeId });
+        toast.success("تم إضافة الزبون بنجاح");
       }
       setShowModal(false);
       fetchCustomers();
-    } catch {}
+    } catch {
+      toast.error("فيه مشكلة حصلت");
+    }
   };
 
   return (
@@ -159,8 +164,20 @@ export default function CustomersPage() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="px-5 py-8 text-center text-muted-foreground text-sm">
-                    بيتحمّل...
+                  <td colSpan={7} className="px-5 py-4">
+                    <div className="space-y-3">
+                      {[1, 2, 3, 4].map((i) => (
+                        <div key={i} className="flex items-center gap-3">
+                          <Skeleton className="h-4 flex-1" />
+                          <Skeleton className="h-4 w-28" />
+                          <Skeleton className="h-4 w-36" />
+                          <Skeleton className="h-5 w-14 rounded-full" />
+                          <Skeleton className="h-4 w-20" />
+                          <Skeleton className="h-4 w-24" />
+                          <Skeleton className="h-7 w-7 rounded" />
+                        </div>
+                      ))}
+                    </div>
                   </td>
                 </tr>
               ) : filtered.length === 0 ? (
@@ -284,19 +301,6 @@ export default function CustomersPage() {
                 />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">
-                    الرقم الضريبي
-                  </label>
-                  <input
-                    type="text"
-                    value={form.taxId}
-                    onChange={(e) => setForm({ ...form, taxId: e.target.value })}
-                    className="w-full px-3 py-2 bg-muted rounded-lg text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
-                    placeholder="الرقم الضريبي"
-                    dir="ltr"
-                  />
-                </div>
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-1">
                     النوع

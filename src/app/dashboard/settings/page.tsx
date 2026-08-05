@@ -198,10 +198,6 @@ export default function SettingsPage() {
               <div className="p-6 space-y-4">
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-1.5">الرقم الضريبي / الرقم الضريبي المضافة</label>
-                    <input type="text" value={storeData?.taxId || ""} onChange={(e) => updateField("taxId", e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="SA-12345678" />
-                  </div>
-                  <div>
                     <label className="block text-sm font-medium text-foreground mb-1.5">العملة</label>
                     <select value={storeData?.currency || "USD"} onChange={(e) => updateField("currency", e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50">
                       <option value="USD">USD - دولار أمريكي</option><option value="EUR">EUR - يورو</option><option value="GBP">GBP - جنيه إسترليني</option><option value="SAR">SAR - ريال سعودي</option><option value="AED">AED - درهم إماراتي</option><option value="EGP">EGP - جنيه مصري</option>

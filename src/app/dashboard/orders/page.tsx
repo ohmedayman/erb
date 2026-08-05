@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Search, Eye, ChevronDown, Plus, X, Package } from "lucide-react";
 import { getDocsFromCollection, addDocToCollection } from "@/lib/localdb";
+import { toast } from "@/components/Toast";
 
 const statusColors: Record<string, string> = {
   Pending: "bg-orange-100 text-orange-700 border border-orange-200",
@@ -74,33 +75,38 @@ export default function OrdersPage() {
 
   const handleAddOrder = () => {
     if (!newOrder.customerName || !newOrder.total) return;
-    const user = JSON.parse(localStorage.getItem("user") || "{}");
-    const orderNumber = `ORD-${Date.now().toString(36).toUpperCase()}`;
-    addDocToCollection("orders", {
-      orderNumber,
-      customerName: newOrder.customerName,
-      items: Number(newOrder.items) || 1,
-      total: Number(newOrder.total),
-      status: newOrder.status,
-      payment: newOrder.payment,
-      date: new Date().toISOString(),
-      storeId: user.storeId || "",
-    });
-    const updatedOrders = getDocsFromCollection(
-      "orders",
-      user.storeId
-        ? [{ field: "storeId", op: "==", value: user.storeId }]
-        : []
-    );
-    setOrders(updatedOrders);
-    setShowModal(false);
-    setNewOrder({
-      customerName: "",
-      items: 1,
-      total: "",
-      status: "Pending",
-      payment: "Pending",
-    });
+    try {
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      const orderNumber = `ORD-${Date.now().toString(36).toUpperCase()}`;
+      addDocToCollection("orders", {
+        orderNumber,
+        customerName: newOrder.customerName,
+        items: Number(newOrder.items) || 1,
+        total: Number(newOrder.total),
+        status: newOrder.status,
+        payment: newOrder.payment,
+        date: new Date().toISOString(),
+        storeId: user.storeId || "",
+      });
+      const updatedOrders = getDocsFromCollection(
+        "orders",
+        user.storeId
+          ? [{ field: "storeId", op: "==", value: user.storeId }]
+          : []
+      );
+      setOrders(updatedOrders);
+      setShowModal(false);
+      setNewOrder({
+        customerName: "",
+        items: 1,
+        total: "",
+        status: "Pending",
+        payment: "Pending",
+      });
+      toast.success("تم إضافة الأوردر بنجاح");
+    } catch {
+      toast.error("فيه مشكلة حصلت");
+    }
   };
 
   const statCards = [

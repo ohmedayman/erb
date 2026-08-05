@@ -17,6 +17,11 @@ import {
   X,
 } from "lucide-react";
 import { getDocsFromCollection, addDocToCollection } from "@/lib/localdb";
+import { toast } from "@/components/Toast";
+
+const Skeleton = ({ className }: { className?: string }) => (
+  <div className={`animate-pulse bg-muted rounded ${className}`} />
+);
 
 const categoryLabels: Record<string, string> = {
   rent: "إيجار",
@@ -120,19 +125,24 @@ export default function ExpensesPage() {
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
-    const user = JSON.parse(localStorage.getItem("user") || "{}");
-    addDocToCollection("expenses", { ...newExpense, storeId: user.storeId });
-    setShowModal(false);
-    setNewExpense({
-      description: "",
-      amount: "",
-      category: "rent",
-      paymentMethod: "cash",
-      date: new Date().toISOString().split("T")[0],
-      notes: "",
-      receiptNumber: "",
-    });
-    fetchExpenses();
+    try {
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      addDocToCollection("expenses", { ...newExpense, storeId: user.storeId });
+      setShowModal(false);
+      setNewExpense({
+        description: "",
+        amount: "",
+        category: "rent",
+        paymentMethod: "cash",
+        date: new Date().toISOString().split("T")[0],
+        notes: "",
+        receiptNumber: "",
+      });
+      fetchExpenses();
+      toast.success("تم إضافة المصروف بنجاح");
+    } catch {
+      toast.error("فيه مشكلة حصلت");
+    }
   };
 
   const formatCurrency = (amount: number) => {
@@ -286,9 +296,21 @@ export default function ExpensesPage() {
                 <tr>
                   <td
                     colSpan={6}
-                    className="px-5 py-8 text-center text-muted-foreground text-sm"
+                    className="px-5 py-4"
                   >
-                    بيتحمّل...
+                    <div className="space-y-3">
+                      {[1, 2, 3, 4].map((i) => (
+                        <div key={i} className="flex items-center gap-3">
+                          <Skeleton className="h-9 w-9 rounded-lg shrink-0" />
+                          <Skeleton className="h-4 flex-1" />
+                          <Skeleton className="h-4 w-24" />
+                          <Skeleton className="h-5 w-14 rounded-full" />
+                          <Skeleton className="h-5 w-14 rounded-full" />
+                          <Skeleton className="h-4 w-24" />
+                          <Skeleton className="h-4 w-16" />
+                        </div>
+                      ))}
+                    </div>
                   </td>
                 </tr>
               ) : filtered.length === 0 ? (

@@ -3,24 +3,38 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Warehouse, Eye, EyeOff, Globe } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Warehouse, Eye, EyeOff, Globe, Mail, Lock, Loader2 } from "lucide-react";
 import { findUserByUsername, getDB } from "@/lib/localdb";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({});
+  const [serverError, setServerError] = useState("");
   const router = useRouter();
+
+  const validate = () => {
+    const errs: { email?: string; password?: string } = {};
+    if (!email) errs.email = "البريد الإلكتروني مطلوب";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errs.email = "البريد الإلكتروني مش صحيح";
+    if (!password) errs.password = "الباسوورد مطلوب";
+    else if (password.length < 6) errs.password = "الباسوورد لازم 6 حروف على الأقل";
+    setFieldErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError("");
+    setServerError("");
+    if (!validate()) return;
 
+    setLoading(true);
     setTimeout(() => {
-      const user = findUserByUsername(username);
+      const db = getDB();
+      const user = db.users.find((u: any) => u.email === email || u.username === email);
       if (user && user.password === password) {
         localStorage.setItem("user", JSON.stringify({
           id: user.id,
@@ -33,14 +47,19 @@ export default function LoginPage() {
         localStorage.setItem("isLoggedIn", "true");
         router.push("/dashboard");
       } else {
-        setError("البيانات غلط");
+        setServerError("البريد أو الباسوورد غلط");
         setLoading(false);
       }
-    }, 300);
+    }, 500);
   };
 
   return (
-    <div className="min-h-screen flex bg-white">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.4 }}
+      className="min-h-screen flex bg-white"
+    >
       <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-orange-50 via-orange-50/50 to-blue-50 overflow-hidden">
         <div className="absolute inset-0">
           <div className="absolute top-20 left-20 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
@@ -91,39 +110,73 @@ export default function LoginPage() {
 
         <div className="flex-1 flex items-center justify-center px-8">
           <div className="w-full max-w-md">
-            <div className="bg-card rounded-2xl shadow-xl border border-border p-8">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="bg-card rounded-2xl shadow-xl border border-border p-8"
+            >
               <h1 className="text-2xl font-bold text-foreground">أهلاً بيك تاني!</h1>
               <p className="mt-2 text-sm text-muted-foreground">ادخل بياناتك عشان تدخل</p>
 
-              {error && (
-                <div className="mt-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
-                  {error}
-                </div>
-              )}
+              <AnimatePresence>
+                {serverError && (
+                  <motion.div
+                    initial={{ opacity: 0, x: 30 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 30 }}
+                    className="mt-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm"
+                  >
+                    {serverError}
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               <form onSubmit={handleLogin} className="mt-8 space-y-5">
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">اسم المستخدم</label>
-                  <input
-                    type="text"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    className="w-full px-4 py-3 rounded-lg border border-border bg-white text-foreground text-right focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
-                    placeholder="اكتب اسمك"
-                    required
-                  />
-                </div>
+                <motion.div
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: 0.2 }}
+                >
+                  <label className="block text-sm font-medium text-foreground mb-2">البريد الإلكتروني</label>
+                  <div className="relative">
+                    <Mail className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => { setEmail(e.target.value); setFieldErrors(prev => ({ ...prev, email: undefined })); }}
+                      className="w-full px-4 py-3 pr-10 pl-12 rounded-lg border border-border bg-white text-foreground text-right focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+                      placeholder="example@company.com"
+                    />
+                  </div>
+                  <AnimatePresence>
+                    {fieldErrors.email && (
+                      <motion.p
+                        initial={{ opacity: 0, x: 15 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 15 }}
+                        className="mt-1.5 text-red-500 text-xs"
+                      >
+                        {fieldErrors.email}
+                      </motion.p>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
 
-                <div>
+                <motion.div
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: 0.3 }}
+                >
                   <label className="block text-sm font-medium text-foreground mb-2">الباسوورد</label>
                   <div className="relative">
+                    <Lock className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                     <input
                       type={showPassword ? "text" : "password"}
                       value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="w-full px-4 py-3 rounded-lg border border-border bg-white text-foreground text-right focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all pl-12"
+                      onChange={(e) => { setPassword(e.target.value); setFieldErrors(prev => ({ ...prev, password: undefined })); }}
+                      className="w-full px-4 py-3 pr-10 pl-12 rounded-lg border border-border bg-white text-foreground text-right focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
                       placeholder="اكتب الباسوورد"
-                      required
                     />
                     <button
                       type="button"
@@ -133,42 +186,64 @@ export default function LoginPage() {
                       {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
                   </div>
+                  <AnimatePresence>
+                    {fieldErrors.password && (
+                      <motion.p
+                        initial={{ opacity: 0, x: 15 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 15 }}
+                        className="mt-1.5 text-red-500 text-xs"
+                      >
+                        {fieldErrors.password}
+                      </motion.p>
+                    )}
+                  </AnimatePresence>
                   <div className="mt-2 text-right">
                     <button type="button" className="text-sm text-primary hover:text-primary-hover transition-colors">
                       نسيت الباسوورد؟
                     </button>
                   </div>
-                </div>
+                </motion.div>
 
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full bg-primary text-white py-3 rounded-lg font-medium hover:bg-primary-hover transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary/25"
+                <motion.div
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: 0.4 }}
                 >
-                  {loading ? (
-                    <span className="flex items-center justify-center gap-2">
-                      <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                      </svg>
-                      بيتم الدخول...
-                    </span>
-                    ) : "ادخل"}
-                </button>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full bg-primary text-white py-3 rounded-lg font-medium hover:bg-primary-hover transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary/25 flex items-center justify-center gap-2"
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        بيتم الدخول...
+                      </>
+                    ) : (
+                      "ادخل"
+                    )}
+                  </button>
+                </motion.div>
               </form>
 
-              <div className="mt-6 text-center">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+                className="mt-6 text-center"
+              >
                 <p className="text-sm text-muted-foreground">
                   م عندك حساب؟{" "}
-                   <Link href="/signup" className="text-primary hover:text-primary-hover font-medium transition-colors">
-                     اعمل حساب
+                  <Link href="/signup" className="text-primary hover:text-primary-hover font-medium transition-colors">
+                    اعمل حساب
                   </Link>
                 </p>
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

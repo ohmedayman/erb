@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Search, Plus, X, Trash2, Printer, ChevronDown } from "lucide-react";
 import { getDocsFromCollection, addDocToCollection } from "@/lib/localdb";
+import { toast } from "@/components/Toast";
 
 interface InvoiceItem {
   name: string;
@@ -159,7 +160,10 @@ export default function InvoicesPage() {
       setForm({ customerName: "", customerPhone: "", notes: "", paymentMethod: "cash" });
       setItems([{ name: "", sku: "", quantity: 1, price: 0, total: 0 }]);
       fetchInvoices();
-    } catch {}
+      toast.success("تم إضافة الفاتورة بنجاح");
+    } catch {
+      toast.error("فيه مشكلة حصلت");
+    }
   };
 
   const handlePrint = (invoice: Invoice) => {

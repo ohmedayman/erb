@@ -3,75 +3,98 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Warehouse, Eye, EyeOff, Globe, CheckCircle } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Warehouse, Eye, EyeOff, Globe, CheckCircle, Mail, Lock, User, Loader2 } from "lucide-react";
 import { getDB, saveDB, findUserByUsername, addDocToCollection } from "@/lib/localdb";
+
+interface FormErrors {
+  name?: string;
+  email?: string;
+  password?: string;
+  confirmPassword?: string;
+}
 
 export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    username: "",
     password: "",
-    storeName: "",
+    confirmPassword: "",
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<FormErrors>({});
+  const [serverError, setServerError] = useState("");
   const router = useRouter();
+
+  const validate = () => {
+    const errs: FormErrors = {};
+    if (!formData.name.trim()) errs.name = "الاسم مطلوب";
+    if (!formData.email.trim()) errs.email = "البريد الإلكتروني مطلوب";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) errs.email = "البريد الإلكتروني مش صحيح";
+    if (!formData.password) errs.password = "الباسوورد مطلوب";
+    else if (formData.password.length < 6) errs.password = "الباسوورد لازم 6 حروف على الأقل";
+    if (!formData.confirmPassword) errs.confirmPassword = "تأكيد الباسوورد مطلوب";
+    else if (formData.password !== formData.confirmPassword) errs.confirmPassword = "الباسووردات مش متطابقة";
+    setFieldErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
 
   const handleSignup = (e: React.FormEvent) => {
     e.preventDefault();
+    setServerError("");
+    if (!validate()) return;
+
     setLoading(true);
-    setError("");
 
-    try {
-      if (findUserByUsername(formData.username)) {
-        setError("اسم المستخدم موجود خالص");
+    setTimeout(() => {
+      try {
+        const users = JSON.parse(localStorage.getItem("users") || "[]");
+        if (users.find((u: any) => u.email === formData.email)) {
+          setServerError("البريد الإلكتروني متسجل قبل كده");
+          setLoading(false);
+          return;
+        }
+
+        const newUser = {
+          id: "user-" + Date.now().toString(36),
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+          password: formData.password,
+          createdAt: new Date().toISOString(),
+        };
+
+        users.push(newUser);
+        localStorage.setItem("users", JSON.stringify(users));
+        localStorage.setItem("isLoggedIn", "true");
+        localStorage.setItem("user", JSON.stringify({
+          id: newUser.id,
+          name: newUser.name,
+          email: newUser.email,
+          role: "admin",
+        }));
+
+        router.push("/onboarding");
+      } catch (err: any) {
+        setServerError("حصل مشكلة: " + err.message);
         setLoading(false);
-        return;
       }
-
-      const storeId = "store-" + Date.now().toString(36);
-      const userId = "user-" + Date.now().toString(36);
-
-      addDocToCollection("stores", {
-        id: storeId,
-        name: formData.storeName,
-        ownerName: formData.name,
-        ownerEmail: formData.email,
-      });
-
-      const db = getDB();
-      db.users.push({
-        id: userId,
-        username: formData.username,
-        password: formData.password,
-        fullName: formData.name,
-        email: formData.email,
-        role: "admin",
-        storeId,
-      });
-      saveDB(db);
-
-      localStorage.setItem("user", JSON.stringify({
-        id: userId,
-        username: formData.username,
-        fullName: formData.name,
-        email: formData.email,
-        role: "admin",
-        storeId,
-      }));
-      localStorage.setItem("isLoggedIn", "true");
-
-      router.push("/onboarding");
-    } catch (err: any) {
-      setError("حصل مشكلة: " + err.message);
-      setLoading(false);
-    }
+    }, 500);
   };
 
+  const fieldVariants = [
+    { name: "name", icon: User, label: "الاسم", type: "text", placeholder: "اكتب اسمك الكامل", delay: 0.15 },
+    { name: "email", icon: Mail, label: "البريد الإلكتروني", type: "email", placeholder: "example@company.com", delay: 0.2 },
+  ];
+
   return (
-    <div className="min-h-screen flex bg-white">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.4 }}
+      className="min-h-screen flex bg-white"
+    >
       <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-orange-50 via-orange-50/50 to-blue-50 overflow-hidden">
         <div className="absolute inset-0">
           <div className="absolute top-20 left-20 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
@@ -116,75 +139,192 @@ export default function SignupPage() {
 
         <div className="flex-1 flex items-center justify-center px-8 py-6">
           <div className="w-full max-w-md">
-            <div className="bg-card rounded-2xl shadow-xl border border-border p-8">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="bg-card rounded-2xl shadow-xl border border-border p-8"
+            >
               <h1 className="text-2xl font-bold text-foreground">اعمل حساب</h1>
               <p className="mt-2 text-sm text-muted-foreground">جهّز نظام إدارة المخازن بتاعك</p>
 
-              {error && (
-                <div className="mt-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
-                  {error}
-                </div>
-              )}
+              <AnimatePresence>
+                {serverError && (
+                  <motion.div
+                    initial={{ opacity: 0, x: 30 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 30 }}
+                    className="mt-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm"
+                  >
+                    {serverError}
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               <form onSubmit={handleSignup} className="mt-8 space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1.5">اسمك الكامل</label>
-                  <input type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-foreground text-right focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm" placeholder="اكتب اسمك الكامل" required />
-                </div>
+                {fieldVariants.map(({ name, icon: Icon, label, type, placeholder, delay }) => (
+                  <motion.div
+                    key={name}
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay }}
+                  >
+                    <label className="block text-sm font-medium text-foreground mb-1.5">{label}</label>
+                    <div className="relative">
+                      <Icon className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <input
+                        type={type}
+                        value={(formData as any)[name]}
+                        onChange={(e) => {
+                          setFormData({ ...formData, [name]: e.target.value });
+                          setFieldErrors(prev => ({ ...prev, [name]: undefined }));
+                        }}
+                        className="w-full px-4 py-2.5 pr-10 rounded-lg border border-border bg-white text-foreground text-right focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm"
+                        placeholder={placeholder}
+                      />
+                    </div>
+                    <AnimatePresence>
+                      {(fieldErrors as any)[name] && (
+                        <motion.p
+                          initial={{ opacity: 0, x: 15 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: 15 }}
+                          className="mt-1 text-red-500 text-xs"
+                        >
+                          {(fieldErrors as any)[name]}
+                        </motion.p>
+                      )}
+                    </AnimatePresence>
+                  </motion.div>
+                ))}
 
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1.5">الإيميل</label>
-                  <input type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-foreground text-right focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm" placeholder="example@company.com" required />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1.5">اسم المحل</label>
-                  <input type="text" value={formData.storeName} onChange={(e) => setFormData({ ...formData, storeName: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-foreground text-right focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm" placeholder="محلّي" required />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1.5">اسم المستخدم</label>
-                  <input type="text" value={formData.username} onChange={(e) => setFormData({ ...formData, username: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-foreground text-right focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm" placeholder="اسمك" required />
-                </div>
-
-                <div>
+                <motion.div
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: 0.25 }}
+                >
                   <label className="block text-sm font-medium text-foreground mb-1.5">الباسوورد</label>
                   <div className="relative">
-                    <input type={showPassword ? "text" : "password"} value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-foreground text-right focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm pl-12" placeholder="8 حروف على الأقل" required minLength={8} />
-                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
+                    <Lock className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      value={formData.password}
+                      onChange={(e) => {
+                        setFormData({ ...formData, password: e.target.value });
+                        setFieldErrors(prev => ({ ...prev, password: undefined }));
+                      }}
+                      className="w-full px-4 py-2.5 pr-10 pl-10 rounded-lg border border-border bg-white text-foreground text-right focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm"
+                      placeholder="6 حروف على الأقل"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
-                </div>
+                  <AnimatePresence>
+                    {fieldErrors.password && (
+                      <motion.p
+                        initial={{ opacity: 0, x: 15 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 15 }}
+                        className="mt-1 text-red-500 text-xs"
+                      >
+                        {fieldErrors.password}
+                      </motion.p>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
 
-                <div className="flex items-start gap-2 pt-1">
+                <motion.div
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: 0.3 }}
+                >
+                  <label className="block text-sm font-medium text-foreground mb-1.5">تأكيد الباسوورد</label>
+                  <div className="relative">
+                    <Lock className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <input
+                      type={showConfirmPassword ? "text" : "password"}
+                      value={formData.confirmPassword}
+                      onChange={(e) => {
+                        setFormData({ ...formData, confirmPassword: e.target.value });
+                        setFieldErrors(prev => ({ ...prev, confirmPassword: undefined }));
+                      }}
+                      className="w-full px-4 py-2.5 pr-10 pl-10 rounded-lg border border-border bg-white text-foreground text-right focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm"
+                      placeholder="اكتب الباسوورد تاني"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                  <AnimatePresence>
+                    {fieldErrors.confirmPassword && (
+                      <motion.p
+                        initial={{ opacity: 0, x: 15 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 15 }}
+                        className="mt-1 text-red-500 text-xs"
+                      >
+                        {fieldErrors.confirmPassword}
+                      </motion.p>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: 0.35 }}
+                  className="flex items-start gap-2 pt-1"
+                >
                   <CheckCircle className="w-4 h-4 text-primary mt-0.5 shrink-0" />
                   <p className="text-xs text-muted-foreground">بالتسجيل أنت موافق على شروط الخدمة وسياسة الخصوصية</p>
-                </div>
+                </motion.div>
 
-                <button type="submit" disabled={loading} className="w-full bg-primary text-white py-3 rounded-lg font-medium hover:bg-primary-hover transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary/25 mt-2">
-                  {loading ? (
-                    <span className="flex items-center justify-center gap-2">
-                      <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                      </svg>
-                      البيتعمل الحساب...
-                    </span>
-                    ) : "اعمل حساب"}
-                </button>
+                <motion.div
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: 0.4 }}
+                >
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full bg-primary text-white py-3 rounded-lg font-medium hover:bg-primary-hover transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary/25 flex items-center justify-center gap-2"
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        بيسجّل...
+                      </>
+                    ) : (
+                      "اعمل حساب"
+                    )}
+                  </button>
+                </motion.div>
               </form>
 
-              <div className="mt-6 text-center">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.45 }}
+                className="mt-6 text-center"
+              >
                 <p className="text-sm text-muted-foreground">
-                   عندك حساب خالص؟{" "}
-                   <Link href="/login" className="text-primary hover:text-primary-hover font-medium transition-colors">ادخل</Link>
+                  عندك حساب خالص؟{" "}
+                  <Link href="/login" className="text-primary hover:text-primary-hover font-medium transition-colors">ادخل</Link>
                 </p>
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

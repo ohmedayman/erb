@@ -184,6 +184,7 @@ export default function RootLayout({
         <meta httpEquiv="Content-Security-Policy" content="upgrade-insecure-requests" />
         <link rel="canonical" href={siteUrl} />
         <link rel="manifest" href="/manifest.json" />
+        <link rel="apple-touch-icon" href="/icons/icon-192.png" />
       </head>
       <body className="min-h-full flex flex-col">
         <script
@@ -193,15 +194,60 @@ export default function RootLayout({
         <script
           dangerouslySetInnerHTML={{
             __html: `
+              // Register Service Worker
               if ('serviceWorker' in navigator) {
                 window.addEventListener('load', function() {
                   navigator.serviceWorker.register('/sw.js').then(function(reg) {
                     console.log('SW registered:', reg.scope);
+                    
+                    // Check for updates periodically
+                    setInterval(function() {
+                      reg.update();
+                    }, 60 * 60 * 1000); // Every hour
                   }).catch(function(err) {
                     console.log('SW failed:', err);
                   });
                 });
               }
+
+              // Handle install prompt
+              let deferredPrompt;
+              window.addEventListener('beforeinstallprompt', function(e) {
+                e.preventDefault();
+                deferredPrompt = e;
+                
+                // Show custom install button after 3 seconds
+                setTimeout(function() {
+                  if (deferredPrompt) {
+                    var installBtn = document.getElementById('pwa-install-btn');
+                    if (installBtn) {
+                      installBtn.style.display = 'flex';
+                    }
+                  }
+                }, 3000);
+              });
+
+              window.installPWA = function() {
+                if (deferredPrompt) {
+                  deferredPrompt.prompt();
+                  deferredPrompt.userChoice.then(function(choiceResult) {
+                    if (choiceResult.outcome === 'accepted') {
+                      console.log('PWA installed');
+                    }
+                    deferredPrompt = null;
+                    var installBtn = document.getElementById('pwa-install-btn');
+                    if (installBtn) installBtn.style.display = 'none';
+                  });
+                }
+              };
+
+              // Handle app installed
+              window.addEventListener('appinstalled', function() {
+                console.log('PWA installed successfully');
+                deferredPrompt = null;
+                var installBtn = document.getElementById('pwa-install-btn');
+                if (installBtn) installBtn.style.display = 'none';
+              });
             `,
           }}
         />

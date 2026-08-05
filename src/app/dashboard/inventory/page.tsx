@@ -49,7 +49,7 @@ export default function InventoryPage() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-card rounded-xl border border-border p-5">
           <p className="text-sm text-muted-foreground">اجمالي وحدات المخزون</p>
-          <p className="text-2xl font-bold text-foreground mt-1">{loading ? "..." : totalStock.toLocaleString("ar-SA")}</p>
+          <p className="text-2xl font-bold text-foreground mt-1">{loading ? "..." : totalStock.toLocaleString("ar-EG")}</p>
         </div>
         <div className="bg-card rounded-xl border border-border p-5">
           <p className="text-sm text-muted-foreground">تنبيهات المخزون القليل</p>

@@ -74,7 +74,7 @@ export default function NotificationsPage() {
     if (diff < 3600) return `منذ ${Math.floor(diff / 60)} دقيقة`;
     if (diff < 86400) return `منذ ${Math.floor(diff / 3600)} ساعة`;
     if (diff < 604800) return `منذ ${Math.floor(diff / 86400)} أيام`;
-    return created.toLocaleDateString("ar-SA");
+    return created.toLocaleDateString("ar-EG");
   };
 
   return (

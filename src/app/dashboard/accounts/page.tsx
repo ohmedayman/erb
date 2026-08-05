@@ -99,7 +99,7 @@ export default function AccountsPage() {
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("ar-SA", {
+    return new Intl.NumberFormat("ar-EG", {
       style: "decimal",
       minimumFractionDigits: 2,
     }).format(amount);

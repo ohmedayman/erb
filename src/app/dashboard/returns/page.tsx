@@ -121,13 +121,13 @@ export default function ReturnsPage() {
                       <td className="px-5 py-3 text-sm text-muted-foreground">{r.customerName}</td>
                       <td className="px-5 py-3 text-sm text-muted-foreground">{r.reason}</td>
                       <td className="px-5 py-3 text-sm font-medium text-foreground">{r.quantity}</td>
-                      <td className="px-5 py-3 text-sm font-medium text-foreground">${r.refundAmount}</td>
+                      <td className="px-5 py-3 text-sm font-medium text-foreground">{r.refundAmount} ج.م</td>
                       <td className="px-5 py-3">
                         <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${cfg.bg} ${cfg.text}`}>
                           {cfg.label}
                         </span>
                       </td>
-                      <td className="px-5 py-3 text-xs text-muted-foreground">{new Date(r.createdAt).toLocaleDateString("ar-SA")}</td>
+                      <td className="px-5 py-3 text-xs text-muted-foreground">{new Date(r.createdAt).toLocaleDateString("ar-EG")}</td>
                     </tr>
                   );
                 })

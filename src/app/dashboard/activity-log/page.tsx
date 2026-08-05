@@ -19,7 +19,7 @@ function timeAgo(dateStr: string): string {
   if (diff < 3600) return `منذ ${Math.floor(diff / 60)} دقيقة`;
   if (diff < 86400) return `منذ ${Math.floor(diff / 3600)} ساعة`;
   if (diff < 604800) return `منذ ${Math.floor(diff / 86400)} يوم`;
-  return date.toLocaleDateString("ar-SA");
+  return date.toLocaleDateString("ar-EG");
 }
 
 export default function ActivityLogPage() {

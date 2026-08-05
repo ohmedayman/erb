@@ -57,13 +57,13 @@ export default function AnalyticsPage() {
         const totalProducts = productsData.length;
         const pendingOrders = ordersData.filter((o: any) => o.status === "Pending").length;
         const totalCustomers = customersData.length;
-        const totalInvoices = invoicesData.length;
+        const totalRevenue = ordersData.reduce((sum: number, o: any) => sum + (Number(o.total) || 0), 0);
         const totalExpenses = expensesData.reduce((sum: number, e: any) => sum + (e.amount || 0), 0);
-        const netProfit = totalInvoices - totalExpenses;
+        const netProfit = totalRevenue - totalExpenses;
 
         setStats({
           stats: { totalProducts, pendingOrders },
-          totalInvoices,
+          totalInvoices: totalRevenue,
           totalExpenses,
           netProfit,
           totalCustomers,
@@ -162,7 +162,7 @@ export default function AnalyticsPage() {
   const summaryCards = [
     {
       label: "الإيرادات",
-      value: `$${(stats?.revenue || 0).toLocaleString()}`,
+      value: `${(stats?.revenue || 0).toLocaleString()} ج.م`,
       icon: TrendingUp,
       color: "bg-green-50 text-green-600",
     },
@@ -453,7 +453,7 @@ export default function AnalyticsPage() {
                     <p className="text-xs text-muted-foreground mt-1">
                       {product.stock || 0} وحدة في المخزون
                       {product.price
-                        ? ` · $${product.price}`
+                        ? ` · ${product.price} ج.م`
                         : ""}
                     </p>
                   </div>

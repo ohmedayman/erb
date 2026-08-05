@@ -85,7 +85,7 @@ export default function InstallmentsPage() {
   );
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("ar-SA", {
+    return new Intl.NumberFormat("ar-EG", {
       style: "decimal",
       minimumFractionDigits: 2,
     }).format(amount);
@@ -282,16 +282,16 @@ export default function InstallmentsPage() {
                         {inst.customerName}
                       </td>
                       <td className="px-5 py-3 text-sm font-medium text-foreground">
-                        {formatCurrency(inst.totalAmount)} ر.س
+                        {formatCurrency(inst.totalAmount)} ج.م
                       </td>
                       <td className="px-5 py-3 text-sm text-foreground">
-                        {formatCurrency(inst.installmentAmount)} ر.س
+                        {formatCurrency(inst.installmentAmount)} ج.م
                       </td>
                       <td className="px-5 py-3 text-sm text-green-600 font-medium">
-                        {formatCurrency(paid)} ر.س
+                        {formatCurrency(paid)} ج.م
                       </td>
                       <td className="px-5 py-3 text-sm text-red-600 font-medium">
-                        {formatCurrency(remaining > 0 ? remaining : 0)} ر.س
+                        {formatCurrency(remaining > 0 ? remaining : 0)} ج.م
                       </td>
                       <td className="px-5 py-3">
                         <span

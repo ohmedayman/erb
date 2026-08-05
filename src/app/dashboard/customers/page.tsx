@@ -215,10 +215,10 @@ export default function CustomersPage() {
                       </span>
                     </td>
                     <td className="px-5 py-3 text-sm font-medium text-foreground">
-                      {(customer.balance || 0).toFixed(2)} ر.س
+                      {(customer.balance || 0).toFixed(2)} ج.م
                     </td>
                     <td className="px-5 py-3 text-xs text-muted-foreground">
-                      {new Date(customer.createdAt).toLocaleDateString("ar-SA")}
+                      {new Date(customer.createdAt).toLocaleDateString("ar-EG")}
                     </td>
                     <td className="px-5 py-3">
                       <button

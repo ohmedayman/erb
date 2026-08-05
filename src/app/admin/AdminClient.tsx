@@ -120,19 +120,33 @@ export default function AdminPage() {
   const handleDelete = async () => {
     if (!deleteConfirm) return;
     setActionLoading(deleteConfirm.id);
-    await supabase.from(deleteConfirm.table).delete().eq("id", deleteConfirm.id);
-    await loadAllData(); setDeleteConfirm(null); setActionLoading(null);
+    try {
+      const { error } = await supabase.from(deleteConfirm.table).delete().eq("id", deleteConfirm.id);
+      if (error) throw error;
+      await loadAllData(); setDeleteConfirm(null);
+    } catch (e: any) {
+      alert("خطأ في الحذف: " + (e.message || "تأكد من صلاحياتك"));
+    } finally {
+      setActionLoading(null);
+    }
   };
 
   const handleSaveEdit = async () => {
     if (!editItem) return;
     setActionLoading(editItem.item.id);
-    const { id, created_at, updated_at, ...fields } = editItem.item;
-    await supabase.from(editItem.table).update({ ...fields, updated_at: new Date().toISOString() }).eq("id", editItem.item.id);
-    await loadAllData(); setEditItem(null); setActionLoading(null);
+    try {
+      const { id, created_at, updated_at, ...fields } = editItem.item;
+      const { error } = await supabase.from(editItem.table).update({ ...fields, updated_at: new Date().toISOString() }).eq("id", editItem.item.id);
+      if (error) throw error;
+      await loadAllData(); setEditItem(null);
+    } catch (e: any) {
+      alert("خطأ في الحفظ: " + (e.message || "تأكد من صلاحياتك"));
+    } finally {
+      setActionLoading(null);
+    }
   };
 
-  const handleLogout = () => { localStorage.removeItem("isLoggedIn"); localStorage.removeItem("user"); router.push("/login"); };
+  const handleLogout = async () => { await supabase.auth.signOut(); localStorage.removeItem("isLoggedIn"); localStorage.removeItem("user"); router.push("/login"); };
 
   if (!checked) return (
     <div className="min-h-screen bg-[#0f172a] flex items-center justify-center">

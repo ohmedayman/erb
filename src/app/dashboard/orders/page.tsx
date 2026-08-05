@@ -358,7 +358,7 @@ export default function OrdersPage() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-muted-foreground mb-1.5">
-                    المجموع ($)
+                    المجموع (ج.م)
                   </label>
                   <input
                     type="number"

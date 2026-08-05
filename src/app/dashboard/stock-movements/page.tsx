@@ -130,7 +130,7 @@ export default function StockMovementsPage() {
                       <td className="px-5 py-3 text-sm text-muted-foreground">{m.fromLocation || "-"}</td>
                       <td className="px-5 py-3 text-sm text-muted-foreground">{m.toLocation || "-"}</td>
                       <td className="px-5 py-3 text-sm text-muted-foreground">{m.reference || "-"}</td>
-                      <td className="px-5 py-3 text-xs text-muted-foreground">{new Date(m.createdAt).toLocaleDateString("ar-SA")}</td>
+                      <td className="px-5 py-3 text-xs text-muted-foreground">{new Date(m.createdAt).toLocaleDateString("ar-EG")}</td>
                     </tr>
                   );
                 })

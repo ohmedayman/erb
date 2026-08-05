@@ -361,7 +361,7 @@ export default function POSPage() {
                     {product.sku}
                   </p>
                   <p className="text-sm font-bold text-primary mt-1">
-                    {product.price.toFixed(2)} ر.س
+                    {product.price.toFixed(2)} ج.م
                   </p>
                   <p className="text-xs text-muted-foreground">
                     المخزون: {product.stock}
@@ -513,7 +513,7 @@ export default function POSPage() {
                     </button>
                   </div>
                   <span className="text-sm font-bold text-foreground">
-                    {(item.product.price * item.quantity).toFixed(2)} ر.س
+                    {(item.product.price * item.quantity).toFixed(2)} ج.م
                   </span>
                 </div>
               </div>
@@ -525,15 +525,15 @@ export default function POSPage() {
           <div className="space-y-1.5 text-sm">
             <div className="flex justify-between text-muted-foreground">
               <span>المجموع الفرعي:</span>
-              <span>{subtotal.toFixed(2)} ر.س</span>
+              <span>{subtotal.toFixed(2)} ج.م</span>
             </div>
             <div className="flex justify-between text-muted-foreground">
               <span>الضريبة (15%):</span>
-              <span>{tax.toFixed(2)} ر.س</span>
+              <span>{tax.toFixed(2)} ج.م</span>
             </div>
             <div className="flex justify-between text-lg font-bold border-t border-border pt-2">
               <span>التوتال:</span>
-              <span className="text-primary">{total.toFixed(2)} ر.س</span>
+              <span className="text-primary">{total.toFixed(2)} ج.م</span>
             </div>
           </div>
 
@@ -632,15 +632,15 @@ export default function POSPage() {
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between text-muted-foreground">
                   <span>المجموع الفرعي:</span>
-                  <span>{subtotal.toFixed(2)} ر.س</span>
+                  <span>{subtotal.toFixed(2)} ج.م</span>
                 </div>
                 <div className="flex justify-between text-muted-foreground">
                   <span>الضريبة (15%):</span>
-                  <span>{tax.toFixed(2)} ر.س</span>
+                  <span>{tax.toFixed(2)} ج.م</span>
                 </div>
                 <div className="flex justify-between text-xl font-bold border-t border-border pt-2">
                   <span>التوتال:</span>
-                  <span className="text-primary">{total.toFixed(2)} ر.س</span>
+                  <span className="text-primary">{total.toFixed(2)} ج.م</span>
                 </div>
               </div>
             </div>

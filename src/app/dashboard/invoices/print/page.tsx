@@ -159,8 +159,8 @@ export default function InvoicePrintPage() {
                   <td className="py-3 px-4 text-sm text-gray-600">{index + 1}</td>
                   <td className="py-3 px-4 text-sm font-medium text-gray-900">{item.name}</td>
                   <td className="py-3 px-4 text-sm text-gray-600 text-center">{item.qty}</td>
-                  <td className="py-3 px-4 text-sm text-gray-600 text-center">${item.price.toFixed(2)}</td>
-                  <td className="py-3 px-4 text-sm font-medium text-gray-900 text-center">${item.total.toFixed(2)}</td>
+                  <td className="py-3 px-4 text-sm text-gray-600 text-center">{item.price.toFixed(2)} ج.م</td>
+                  <td className="py-3 px-4 text-sm font-medium text-gray-900 text-center">{item.total.toFixed(2)} ج.م</td>
                 </tr>
               ))}
             </tbody>
@@ -171,15 +171,15 @@ export default function InvoicePrintPage() {
             <div className="w-64 space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500">المجموع الفرعي</span>
-                <span className="text-gray-900">${invoice.subtotal.toFixed(2)}</span>
+                <span className="text-gray-900">{invoice.subtotal.toFixed(2)} ج.م</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500">الضريبة (15%)</span>
-                <span className="text-gray-900">${invoice.tax.toFixed(2)}</span>
+                <span className="text-gray-900">{invoice.tax.toFixed(2)} ج.م</span>
               </div>
               <div className="flex justify-between text-base font-bold border-t border-gray-200 pt-2">
                 <span className="text-gray-900">الإجمالي</span>
-                <span className="text-gray-900">${invoice.total.toFixed(2)}</span>
+                <span className="text-gray-900">{invoice.total.toFixed(2)} ج.م</span>
               </div>
             </div>
           </div>

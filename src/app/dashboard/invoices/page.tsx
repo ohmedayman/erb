@@ -178,8 +178,8 @@ export default function InvoicesPage() {
           <td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;">${i + 1}</td>
           <td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;font-weight:500;">${item.name}</td>
           <td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;text-align:center;">${item.quantity}</td>
-          <td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;text-align:left;">${item.price.toFixed(2)} ر.س</td>
-          <td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;text-align:left;font-weight:600;">${(item.quantity * item.price).toFixed(2)} ر.س</td>
+          <td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;text-align:left;">${item.price.toFixed(2)} ج.م</td>
+          <td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;text-align:left;font-weight:600;">${(item.quantity * item.price).toFixed(2)} ج.م</td>
         </tr>`
       )
       .join("");
@@ -233,7 +233,7 @@ export default function InvoicesPage() {
     <div class="store-name">${storeName}</div>
     <div class="invoice-title">فاتورة مبيعات</div>
     <div style="font-size:12px;color:#777;margin-top:4px;">رقم الفاتورة: ${invoice.invoiceNumber}</div>
-    <div style="font-size:12px;color:#777;">التاريخ: ${new Date(invoice.createdAt).toLocaleDateString("ar-SA", { year: "numeric", month: "long", day: "numeric" })}</div>
+    <div style="font-size:12px;color:#777;">التاريخ: ${new Date(invoice.createdAt).toLocaleDateString("ar-EG", { year: "numeric", month: "long", day: "numeric" })}</div>
   </div>
 
   <div class="info-row">
@@ -261,15 +261,15 @@ export default function InvoicesPage() {
   <div class="totals">
     <div class="total-row">
       <span>المجموع الفرعي</span>
-      <span>${invoice.subtotal.toFixed(2)} ر.س</span>
+      <span>${invoice.subtotal.toFixed(2)} ج.م</span>
     </div>
     <div class="total-row">
       <span>الضريبة (15%)</span>
-      <span>${invoice.tax.toFixed(2)} ر.س</span>
+      <span>${invoice.tax.toFixed(2)} ج.م</span>
     </div>
     <div class="total-row total-final">
       <span>الإجمالي</span>
-      <span>${invoice.total.toFixed(2)} ر.س</span>
+      <span>${invoice.total.toFixed(2)} ج.م</span>
     </div>
   </div>
 
@@ -405,7 +405,7 @@ export default function InvoicesPage() {
                       {invoice.customerName}
                     </td>
                     <td className="px-5 py-3 text-sm font-semibold text-foreground">
-                      {(invoice.total || 0).toFixed(2)} ر.س
+                      {(invoice.total || 0).toFixed(2)} ج.م
                     </td>
                     <td className="px-5 py-3">
                       <span
@@ -420,7 +420,7 @@ export default function InvoicesPage() {
                       {paymentLabels[invoice.paymentMethod] || invoice.paymentMethod}
                     </td>
                     <td className="px-5 py-3 text-xs text-muted-foreground">
-                      {new Date(invoice.createdAt).toLocaleDateString("ar-SA")}
+                      {new Date(invoice.createdAt).toLocaleDateString("ar-EG")}
                     </td>
                     <td className="px-5 py-3">
                       <button
@@ -541,15 +541,15 @@ export default function InvoicesPage() {
               <div className="bg-muted/50 rounded-lg p-4 space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">المجموع الفرعي:</span>
-                  <span className="font-medium">{subtotal.toFixed(2)} ر.س</span>
+                  <span className="font-medium">{subtotal.toFixed(2)} ج.م</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">الضريبة (15%):</span>
-                  <span className="font-medium">{tax.toFixed(2)} ر.س</span>
+                  <span className="font-medium">{tax.toFixed(2)} ج.م</span>
                 </div>
                 <div className="flex justify-between text-base font-bold border-t border-border pt-2">
                   <span>الإجمالي:</span>
-                  <span className="text-primary">{total.toFixed(2)} ر.س</span>
+                  <span className="text-primary">{total.toFixed(2)} ج.م</span>
                 </div>
               </div>
 

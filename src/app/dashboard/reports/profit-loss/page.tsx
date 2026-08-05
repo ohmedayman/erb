@@ -84,7 +84,7 @@ export default function ProfitLossPage() {
   }, []);
 
   const formatCurrency = (amount: number) => {
-    return amount.toLocaleString("ar-SA", {
+    return amount.toLocaleString("ar-EG", {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     });
@@ -229,10 +229,10 @@ export default function ProfitLossPage() {
                         {item.month}
                       </td>
                       <td className="px-5 py-3 text-sm text-green-600 font-medium">
-                        {formatCurrency(item.revenue)} ر.س
+                        {formatCurrency(item.revenue)} ج.م
                       </td>
                       <td className="px-5 py-3 text-sm text-red-600 font-medium">
-                        {formatCurrency(item.expenses)} ر.س
+                        {formatCurrency(item.expenses)} ج.م
                       </td>
                       <td className="px-5 py-3">
                         <span
@@ -243,7 +243,7 @@ export default function ProfitLossPage() {
                           }`}
                         >
                           {item.profit >= 0 ? "+" : ""}
-                          {formatCurrency(item.profit)} ر.س
+                          {formatCurrency(item.profit)} ج.م
                         </span>
                       </td>
                     </tr>
@@ -304,7 +304,7 @@ export default function ProfitLossPage() {
                             {cat.percentage.toFixed(1)}%
                           </span>
                           <span className="text-sm font-medium text-foreground">
-                            {formatCurrency(cat.amount)} ر.س
+                            {formatCurrency(cat.amount)} ج.م
                           </span>
                         </div>
                       </div>

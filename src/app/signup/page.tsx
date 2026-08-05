@@ -86,7 +86,19 @@ export default function SignupPage() {
           });
 
         if (insertError) {
-          console.error("Error saving user:", insertError);
+          console.error("Error saving user to registered_users:", insertError.message, insertError);
+          const { error: upsertError } = await supabase
+            .from("registered_users")
+            .upsert({
+              id: data.user.id,
+              full_name: formData.name.trim(),
+              email: data.user.email,
+              role: "user",
+              subscription_status: "pending",
+            }, { onConflict: "id" });
+          if (upsertError) {
+            console.error("Upsert also failed:", upsertError.message);
+          }
         }
 
         localStorage.setItem("isLoggedIn", "true");

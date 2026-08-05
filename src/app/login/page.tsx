@@ -91,14 +91,14 @@ export default function LoginPage() {
           return;
         }
 
+        // Check subscription status
         const { data: orders } = await supabase
           .from("subscription_orders")
-          .select("id")
+          .select("id, status")
           .eq("user_id", data.user.id)
-          .eq("status", "approved")
+          .order("created_at", { ascending: false })
           .limit(1);
 
-        // Fetch store data from Supabase
         const { data: storeData } = await supabase
           .from("stores")
           .select("id, name")
@@ -109,14 +109,34 @@ export default function LoginPage() {
           localStorage.setItem("store", JSON.stringify({ id: storeData.id, name: storeData.name }));
         }
 
-        if (!localStorage.getItem("user_prefs")) {
-          localStorage.setItem("user_prefs", JSON.stringify({
-            storeName: storeData?.name || "",
-            onboardingDone: true,
-          }));
+        if (!orders || orders.length === 0) {
+          // No subscription order — go to checkout
+          router.push("/checkout");
+          return;
         }
 
-        router.push("/dashboard");
+        if (orders[0].status === "pending") {
+          // Has pending order — show waiting message
+          setServerError("طلبك قيد المراجعة من الإدارة. هتتقبل في أقرب وقت! 🕐");
+          setLoading(false);
+          return;
+        }
+
+        if (orders[0].status === "approved") {
+          // Approved — go to dashboard
+          if (!localStorage.getItem("user_prefs")) {
+            localStorage.setItem("user_prefs", JSON.stringify({
+              storeName: storeData?.name || "",
+              onboardingDone: true,
+            }));
+          }
+          router.push("/dashboard");
+          return;
+        }
+
+        // Rejected or other
+        setServerError("تم رفض طلب اشتراكك. تواصل مع الدعم على 01028707543");
+        setLoading(false);
       }
     } catch {
       setServerError("فيه مشكلة حصلت — حاول تاني");

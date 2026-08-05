@@ -269,13 +269,13 @@ export default function ProductsPage() {
         </div>
 
         <div className="bg-card rounded-xl border border-border overflow-hidden">
-          <div className="overflow-x-auto">
+          {/* Desktop Table */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-border bg-muted/50">
                   <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">المنتج</th>
                   <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">الرمز</th>
-                  <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">الباركود</th>
                   <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">الفئة</th>
                   <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">السعر</th>
                   <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">المخزون</th>
@@ -285,7 +285,7 @@ export default function ProductsPage() {
               </thead>
               <tbody>
                 {loading ? (
-                  <tr><td colSpan={8} className="px-5 py-4">
+                  <tr><td colSpan={7} className="px-5 py-4">
                     <div className="space-y-3">
                       {[1, 2, 3, 4].map((i) => (
                         <div key={i} className="flex items-center gap-3">
@@ -302,7 +302,7 @@ export default function ProductsPage() {
                     </div>
                   </td></tr>
                 ) : filtered.length === 0 ? (
-                  <tr><td colSpan={8} className="px-5 py-8 text-center text-muted-foreground text-sm">مفيش منتجات</td></tr>
+                  <tr><td colSpan={7} className="px-5 py-8 text-center text-muted-foreground text-sm">مفيش منتجات</td></tr>
                 ) : (
                   filtered.map((product) => (
                     <tr key={product.id} className="border-b border-border last:border-0 hover:bg-muted/50 transition-colors">
@@ -317,15 +317,12 @@ export default function ProductsPage() {
                         </div>
                       </td>
                       <td className="px-5 py-3 text-sm text-muted-foreground font-mono">{product.sku}</td>
-                      <td className="px-5 py-3">
-                        <BarcodeSVG value={product.sku || "N/A"} />
-                      </td>
                       <td className="px-5 py-3 text-sm text-muted-foreground">{product.category}</td>
                       <td className="px-5 py-3 text-sm font-medium text-foreground">{(product.price || 0).toLocaleString("ar-EG")} ج.م</td>
                       <td className="px-5 py-3 text-sm text-foreground">{product.stock}</td>
                       <td className="px-5 py-3">
                         <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${product.stock > (product.minStock || 10) ? "bg-green-50 text-green-600" : product.stock > 0 ? "bg-yellow-50 text-yellow-600" : "bg-red-50 text-red-600"}`}>
-                          {product.stock > (product.stock || 10) ? "شغّال" : product.stock > 0 ? "مخزون قليل" : "خلص"}
+                          {product.stock > (product.minStock || 10) ? "شغّال" : product.stock > 0 ? "مخزون قليل" : "خلص"}
                         </span>
                       </td>
                       <td className="px-5 py-3">
@@ -340,6 +337,63 @@ export default function ProductsPage() {
                 )}
               </tbody>
             </table>
+          </div>
+
+          {/* Mobile Cards */}
+          <div className="md:hidden divide-y divide-border">
+            {loading ? (
+              <div className="p-4 space-y-3">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="flex items-center gap-3">
+                    <Skeleton className="h-12 w-12 rounded-lg shrink-0" />
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-4 w-3/4" />
+                      <Skeleton className="h-3 w-1/2" />
+                    </div>
+                    <Skeleton className="h-8 w-20 rounded" />
+                  </div>
+                ))}
+              </div>
+            ) : filtered.length === 0 ? (
+              <div className="py-8 text-center text-muted-foreground text-sm">مفيش منتجات</div>
+            ) : (
+              filtered.map((product) => (
+                <div key={product.id} className="p-4 hover:bg-muted/50 transition-colors">
+                  <div className="flex items-start gap-3">
+                    {product.imageUrl ? (
+                      <img src={product.imageUrl} alt={product.name} className="w-12 h-12 rounded-lg object-cover border border-border shrink-0" />
+                    ) : (
+                      <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center shrink-0"><Package className="w-5 h-5 text-muted-foreground" /></div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2">
+                        <h3 className="text-sm font-semibold text-foreground truncate">{product.name}</h3>
+                        <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-medium shrink-0 ${product.stock > (product.minStock || 10) ? "bg-green-50 text-green-600" : product.stock > 0 ? "bg-yellow-50 text-yellow-600" : "bg-red-50 text-red-600"}`}>
+                          {product.stock > (product.minStock || 10) ? "شغّال" : product.stock > 0 ? "قليل" : "خلص"}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                        <span className="font-mono">{product.sku}</span>
+                        <span>•</span>
+                        <span>{product.category || "بدون فئة"}</span>
+                      </div>
+                      <div className="flex items-center justify-between mt-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-bold text-foreground">{(product.price || 0).toLocaleString("ar-EG")} ج.م</span>
+                          <span className="text-xs text-muted-foreground">|</span>
+                          <span className="text-xs text-muted-foreground">مخزون: {product.stock}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <button onClick={() => { setBarcodeProduct(product); setBarcodeQty(1); }} className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"><Printer className="w-4 h-4" /></button>
+                          <button onClick={() => { setEditingProduct(product); setImagePreview(product.imageUrl || null); setShowModal(true); }} className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"><Edit className="w-4 h-4" /></button>
+                          <button onClick={() => handleDelete(product.id)} className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"><Trash2 className="w-4 h-4" /></button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>

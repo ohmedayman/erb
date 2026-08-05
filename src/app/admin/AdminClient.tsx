@@ -114,12 +114,32 @@ export default function AdminClient() {
     setChecked(true);
     if (!admin) return;
     loadAllData();
+    // Request notification permission for admin
+    if ("Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission();
+    }
   }, [router, loadAllData]);
 
   useEffect(() => {
     const channel = supabase
       .channel("admin-changes")
-      .on("postgres_changes", { event: "*", schema: "public", table: "subscription_orders" }, () => loadAllData())
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "subscription_orders" }, (payload) => {
+        loadAllData();
+        // Browser notification for new orders
+        if (Notification.permission === "granted") {
+          new Notification("طلب اشتراك جديد! 🎉", {
+            body: `طلب من ${payload.new?.user_name || "مستخدم جديد"}`,
+            icon: "/icons/icon-192.png",
+            tag: "new-order",
+          });
+        }
+        // Play notification sound
+        try {
+          const audio = new Audio("data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdH+JkI+If3V1goqOj42JhYB7foOJkI+NiYSAfH2FiZCPjYmEgHx+hYqQj42JhYB8foWKkI+NiYWAfH6FipCPjYmFgHx+hYqQj42JhYB8foWKkI+NiYWAfH6FipCPjYmFgHx+hYqQj42JhYB8foWKkI+NiYWAfH6FipCPjYmFgHx+hYqQj42JhYB8fg==");
+          audio.volume = 0.3;
+          audio.play().catch(() => {});
+        } catch {}
+      })
       .on("postgres_changes", { event: "*", schema: "public", table: "registered_users" }, () => loadAllData())
       .subscribe();
     return () => { supabase.removeChannel(channel); };

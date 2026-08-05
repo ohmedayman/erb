@@ -106,6 +106,25 @@ export default function SignupPage() {
           }
         }
 
+        const storeId = data.user.id;
+        const storeName = formData.name.trim() + " - مخزن";
+
+        const { error: storeError } = await supabase
+          .from("stores")
+          .upsert({
+            id: storeId,
+            name: storeName,
+            user_id: data.user.id,
+            business_type: "general",
+            team_size: "1-5",
+            features: ["products", "orders", "invoices", "customers", "inventory", "expenses", "employees", "shipping", "installments", "accounts", "purchaseOrders", "warehouses", "suppliers", "returns", "analytics"],
+            onboarding_done: true,
+          }, { onConflict: "id" });
+
+        if (storeError) {
+          console.error("Error creating store:", storeError.message);
+        }
+
         localStorage.setItem("isLoggedIn", "true");
         localStorage.setItem("user", JSON.stringify({
           id: data.user.id,
@@ -113,14 +132,19 @@ export default function SignupPage() {
           email: data.user.email,
           fullName: formData.name.trim(),
           role: "user",
+          storeId: storeId,
+        }));
+        localStorage.setItem("store", JSON.stringify({
+          id: storeId,
+          name: storeName,
+        }));
+        localStorage.setItem("user_prefs", JSON.stringify({
+          storeName: storeName,
+          features: ["products", "orders", "invoices", "customers", "inventory", "expenses", "employees", "shipping", "installments", "accounts", "purchaseOrders", "warehouses", "suppliers", "returns", "analytics"],
+          onboardingDone: true,
         }));
 
-        if (data.session) {
-          router.push("/checkout");
-        } else {
-          setServerError("تم التسجيل بنجاح! لو مش لاقي إيميل تأكيد، تواصل معنا على 01028707543 ونهدّك على طول.");
-          setTimeout(() => router.push("/checkout"), 3000);
-        }
+        router.push("/dashboard");
       }
     } catch (err: any) {
       setServerError("حصل مشكلة: " + err.message);

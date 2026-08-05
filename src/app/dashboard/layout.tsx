@@ -125,21 +125,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     setVisibleLinks(links);
 
     if (!isAdmin) {
-      const checkSubscription = async () => {
+      const checkOnboarding = async () => {
         try {
-          const { supabase } = await import("@/lib/supabase");
-          const { data } = await supabase
-            .from("subscription_orders")
-            .select("id")
-            .eq("user_id", user.id)
-            .eq("status", "approved")
-            .limit(1);
-
-          if (!data || data.length === 0) {
-            router.push("/checkout");
-            return;
-          }
-
           const prefs = JSON.parse(localStorage.getItem("user_prefs") || "null");
           if (!prefs?.onboardingDone) {
             router.push("/onboarding");
@@ -149,7 +136,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           // Allow access on error
         }
       };
-      checkSubscription();
+      checkOnboarding();
     }
   }, [router]);
 

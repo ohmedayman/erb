@@ -263,6 +263,17 @@ export default function POSPage() {
       setShowNewCustomer(false);
       setShowPayment(false);
       fetchProducts();
+
+      try {
+        const { notifyNewOrder, checkLowStock } = await import("@/lib/notifications");
+        await notifyNewOrder({
+          id: Date.now().toString(),
+          order_number: "POS-" + Date.now().toString(36).toUpperCase(),
+          customer_name: customerDisplayName,
+          total: total,
+        }, user.storeId);
+        await checkLowStock(user.storeId);
+      } catch {}
     } catch {
     } finally {
       setProcessing(false);

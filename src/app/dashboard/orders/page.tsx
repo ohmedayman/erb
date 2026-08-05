@@ -105,6 +105,17 @@ export default function OrdersPage() {
         payment: "Pending",
       });
       toast.success("تم إضافة الأوردر بنجاح");
+
+      try {
+        const { notifyNewOrder, checkLowStock } = await import("@/lib/notifications");
+        await notifyNewOrder({
+          id: Date.now().toString(),
+          order_number: orderNumber,
+          customer_name: newOrder.customerName,
+          total: Number(newOrder.total),
+        }, user.storeId);
+        await checkLowStock(user.storeId);
+      } catch {}
     } catch {
       toast.error("فيه مشكلة حصلت");
     }

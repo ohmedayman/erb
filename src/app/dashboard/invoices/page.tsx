@@ -162,6 +162,16 @@ export default function InvoicesPage() {
       setItems([{ name: "", sku: "", quantity: 1, price: 0, total: 0 }]);
       fetchInvoices();
       toast.success("تم إضافة الفاتورة بنجاح");
+
+      try {
+        const { notifyPayment } = await import("@/lib/notifications");
+        await notifyPayment({
+          id: Date.now().toString(),
+          invoice_number: invoiceNum,
+          total: sub + tx,
+          payment_status: "unpaid",
+        }, user.storeId);
+      } catch {}
     } catch {
       toast.error("فيه مشكلة حصلت");
     }

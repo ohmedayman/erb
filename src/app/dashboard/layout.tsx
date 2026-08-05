@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Warehouse, LayoutDashboard, Package, ShoppingCart, BarChart3, Settings,
   Users, Bell, Search, Menu, X, LogOut, ChevronDown, Truck, ClipboardList,
@@ -13,6 +13,7 @@ import {
 import { supabase } from "@/lib/supabase";
 import Image from "next/image";
 import { OfflineIndicator, InstallPrompt, SyncStatus } from "@/app/components/PWAComponents";
+import { getUnreadCount, subscribeToNotifications, requestNotificationPermission } from "@/lib/notifications";
 
 const allSidebarLinks: Record<string, { href: string; label: string; icon: any }> = {
   dashboard: { href: "/dashboard", label: "البورد", icon: LayoutDashboard },
@@ -69,6 +70,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [username, setUsername] = useState("مستخدم");
   const [storeName, setStoreName] = useState("");
   const [visibleLinks, setVisibleLinks] = useState<typeof allSidebarLinks>({});
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [showNotifPanel, setShowNotifPanel] = useState(false);
+  const [recentNotifs, setRecentNotifs] = useState<any[]>([]);
 
   useEffect(() => {
     const isLoggedIn = localStorage.getItem("isLoggedIn");
@@ -138,6 +142,32 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       checkSubscription();
     }
   }, [router]);
+
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    const storeId = user.storeId;
+    if (!storeId) return;
+
+    requestNotificationPermission();
+
+    const loadUnread = async () => {
+      const count = await getUnreadCount(storeId);
+      setUnreadCount(count);
+    };
+    loadUnread();
+
+    const interval = setInterval(loadUnread, 15000);
+
+    const unsubscribe = subscribeToNotifications(storeId, (notif) => {
+      setUnreadCount((prev) => prev + 1);
+      setRecentNotifs((prev) => [notif, ...prev].slice(0, 10));
+    });
+
+    return () => {
+      clearInterval(interval);
+      unsubscribe();
+    };
+  }, []);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -225,10 +255,82 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 <span id="pwa-status-text">متصل</span>
               </span>
             </div>
-            <button className="relative p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors">
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-1.5 left-1.5 w-2 h-2 bg-primary rounded-full" />
-            </button>
+            <div className="relative">
+              <button
+                onClick={() => setShowNotifPanel(!showNotifPanel)}
+                className="relative p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
+              >
+                <Bell className="w-5 h-5" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-0.5 -left-0.5 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 animate-pulse">
+                    {unreadCount > 99 ? "99+" : unreadCount}
+                  </span>
+                )}
+              </button>
+
+              {showNotifPanel && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setShowNotifPanel(false)} />
+                  <div className="absolute left-0 mt-2 w-80 bg-card rounded-xl shadow-2xl border border-border z-50 overflow-hidden">
+                    <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+                      <h3 className="font-bold text-foreground text-sm">الإشعارات</h3>
+                      {unreadCount > 0 && (
+                        <button
+                          onClick={async () => {
+                            const { markAllAsRead } = await import("@/lib/notifications");
+                            await markAllAsRead();
+                            setUnreadCount(0);
+                            setRecentNotifs((prev) => prev.map((n) => ({ ...n, read: true })));
+                          }}
+                          className="text-xs text-primary hover:underline"
+                        >
+                          قراءة الكل
+                        </button>
+                      )}
+                    </div>
+                    <div className="max-h-80 overflow-y-auto">
+                      {recentNotifs.length === 0 ? (
+                        <div className="py-8 text-center text-muted-foreground text-sm">
+                          <Bell className="w-8 h-8 mx-auto mb-2 opacity-30" />
+                          لا توجد إشعارات جديدة
+                        </div>
+                      ) : (
+                        recentNotifs.map((notif) => (
+                          <Link
+                            key={notif.id}
+                            href={notif.action_url || "/dashboard/notifications"}
+                            onClick={() => {
+                              setShowNotifPanel(false);
+                              if (!notif.read) {
+                                const { markAsRead } = require("@/lib/notifications");
+                                markAsRead(notif.id);
+                                setUnreadCount((prev) => Math.max(0, prev - 1));
+                              }
+                            }}
+                            className={`flex items-start gap-3 px-4 py-3 hover:bg-muted/50 transition-colors border-b border-border/50 ${!notif.read ? "bg-primary/5" : ""}`}
+                          >
+                            <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${!notif.read ? "bg-primary" : "bg-transparent"}`} />
+                            <div className="flex-1 min-w-0">
+                              <p className={`text-sm ${!notif.read ? "font-semibold text-foreground" : "text-muted-foreground"}`}>
+                                {notif.title}
+                              </p>
+                              <p className="text-xs text-muted-foreground mt-0.5 truncate">{notif.message}</p>
+                            </div>
+                          </Link>
+                        ))
+                      )}
+                    </div>
+                    <Link
+                      href="/dashboard/notifications"
+                      onClick={() => setShowNotifPanel(false)}
+                      className="block text-center py-2.5 text-sm text-primary hover:bg-muted/50 transition-colors border-t border-border"
+                    >
+                      عرض كل الإشعارات
+                    </Link>
+                  </div>
+                </>
+              )}
+            </div>
 
             <div className="relative">
               <button onClick={() => setUserMenuOpen(!userMenuOpen)} className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-muted transition-colors">

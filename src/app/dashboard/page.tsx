@@ -109,13 +109,13 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">البورد{storeName ? ` — ${storeName}` : ""}</h1>
-        <p className="text-muted-foreground text-sm mt-1">أهلاً بيك تاني! شوف شغلك من هنا.</p>
+        <h1 className="text-2xl font-bold text-foreground animate-fade-in-down">البورد{storeName ? ` — ${storeName}` : ""}</h1>
+        <p className="text-muted-foreground text-sm mt-1 animate-fade-in stagger-1">أهلاً بيك تاني! شوف شغلك من هنا.</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4">
         {allStats.map((stat: any, i: number) => (
-          <div key={i} className="bg-card rounded-xl p-5 border border-border hover:shadow-md transition-shadow">
+          <div key={i} className={`bg-card rounded-xl p-5 border border-border hover:shadow-md transition-shadow animate-fade-in-up stagger-${i + 1} hover-lift`}>
             <div className="flex items-center justify-between">
               <div className={`w-11 h-11 ${stat.color} rounded-xl flex items-center justify-center`}>
                 <stat.icon className="w-5 h-5" />
@@ -134,7 +134,7 @@ export default function DashboardPage() {
       {(has("orders") || has("products")) && (
         <div className="grid lg:grid-cols-3 gap-6">
           {has("orders") && (
-            <div className="lg:col-span-2 bg-card rounded-xl border border-border">
+            <div className="lg:col-span-2 bg-card rounded-xl border border-border animate-fade-in hover-lift">
               <div className="px-5 py-4 border-b border-border">
                 <h2 className="font-semibold text-foreground">آخر الطلبات</h2>
               </div>
@@ -155,7 +155,7 @@ export default function DashboardPage() {
                       <tr><td colSpan={4} className="px-5 py-8 text-center text-muted-foreground text-sm">مفيش طلبات لسه</td></tr>
                     ) : (
                       data?.recentOrders?.map((order: any, i: number) => (
-                        <tr key={i} className="border-b border-border last:border-0 hover:bg-muted/50 transition-colors">
+                        <tr key={i} className={`border-b border-border last:border-0 hover:bg-muted/50 transition-colors table-row-enter stagger-${i + 1}`}>
                           <td className="px-5 py-3 text-sm font-medium text-foreground">{order.orderNumber || order.id}</td>
                           <td className="px-5 py-3 text-sm text-muted-foreground">{order.customerName}</td>
                           <td className="px-5 py-3">
@@ -174,7 +174,7 @@ export default function DashboardPage() {
           )}
 
           {has("products") && (
-            <div className="bg-card rounded-xl border border-border">
+            <div className="bg-card rounded-xl border border-border animate-fade-in hover-lift">
               <div className="px-5 py-4 border-b border-border">
                 <h2 className="font-semibold text-foreground">أحسن المنتجات</h2>
               </div>
@@ -185,7 +185,7 @@ export default function DashboardPage() {
                   <p className="text-sm text-muted-foreground text-center">مفيش منتجات لسه</p>
                 ) : (
                   data?.topProducts?.map((product: any, i: number) => (
-                    <div key={i} className="flex items-center gap-3">
+                    <div key={i} className={`flex items-center gap-3 animate-fade-in-right stagger-${i + 1}`}>
                       <div className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center shrink-0">
                         <Package className="w-5 h-5 text-muted-foreground" />
                       </div>
@@ -209,7 +209,7 @@ export default function DashboardPage() {
       {(has("invoices") || has("expenses")) && (
         <div className="grid lg:grid-cols-2 gap-6">
           {has("invoices") && (
-            <div className="bg-card rounded-xl border border-border">
+            <div className="bg-card rounded-xl border border-border animate-fade-in hover-lift">
               <div className="px-5 py-4 border-b border-border flex items-center justify-between">
                 <h2 className="font-semibold text-foreground">آخر الفواتير</h2>
                 <span className="text-xs text-muted-foreground">توتال: {data?.totalInvoices ?? 0}</span>
@@ -231,7 +231,7 @@ export default function DashboardPage() {
                       <tr><td colSpan={4} className="px-5 py-8 text-center text-muted-foreground text-sm">مفيش فواتير لسه</td></tr>
                     ) : (
                       data?.recentInvoices?.map((invoice: any, i: number) => (
-                        <tr key={i} className="border-b border-border last:border-0 hover:bg-muted/50 transition-colors">
+                        <tr key={i} className={`border-b border-border last:border-0 hover:bg-muted/50 transition-colors table-row-enter stagger-${i + 1}`}>
                           <td className="px-5 py-3 text-sm font-medium text-foreground">{invoice.invoiceNumber}</td>
                           <td className="px-5 py-3 text-sm text-muted-foreground">{invoice.customerName}</td>
                           <td className="px-5 py-3">
@@ -252,7 +252,7 @@ export default function DashboardPage() {
           )}
 
           {has("expenses") && (
-            <div className="bg-card rounded-xl border border-border">
+            <div className="bg-card rounded-xl border border-border animate-fade-in hover-lift">
               <div className="px-5 py-4 border-b border-border flex items-center justify-between">
                 <h2 className="font-semibold text-foreground">ملخص المصروفات الشهري</h2>
                 <span className="text-xs text-muted-foreground">الإجمالي: {formatCurrency(data?.totalExpenses ?? 0)}</span>
@@ -267,7 +267,7 @@ export default function DashboardPage() {
                     {data.monthlyExpenses.map((item: any, i: number) => {
                       const maxAmount = Math.max(...data.monthlyExpenses.map((e: any) => e.amount), 1);
                       return (
-                        <div key={i} className="flex items-center gap-3">
+                        <div key={i} className={`flex items-center gap-3 animate-fade-in-right stagger-${i + 1}`}>
                           <span className="text-xs text-muted-foreground w-20 text-left shrink-0">{item.month}</span>
                           <div className="flex-1 bg-muted rounded-full h-5 overflow-hidden">
                             <div className="bg-red-400 h-full rounded-full transition-all duration-500" style={{ width: `${Math.max((item.amount / maxAmount) * 100, item.amount > 0 ? 4 : 0)}%` }} />

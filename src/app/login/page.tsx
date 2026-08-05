@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Warehouse, Eye, EyeOff, Globe, Mail, Lock, Loader2, CheckCircle } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import Image from "next/image";
+import SEOHead from "@/components/SEOHead";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -115,6 +116,12 @@ export default function LoginPage() {
       transition={{ duration: 0.4 }}
       className="min-h-screen flex bg-white"
     >
+      <SEOHead
+        title="تسجيل الدخول - StockFlow"
+        description="ادخل على حسابك في StockFlow نظام إدارة المخازن الاحترافي. سجل دخولك وابدأ إدارة مخزونك ومنتجاتك وعملاءك."
+        keywords="تسجيل دخول, login,StockFlow, إدارة مخازن, دخول النظام"
+        canonical="https://stockflow.vexonet.online/login"
+      />
       <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-orange-50 via-orange-50/50 to-blue-50 overflow-hidden">
         <div className="absolute inset-0">
           <div className="absolute top-20 left-20 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />

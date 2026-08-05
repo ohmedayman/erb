@@ -10,6 +10,7 @@ import {
   UserPlus, Settings, Rocket, ArrowLeft,
 } from "lucide-react";
 import Image from "next/image";
+import SEOHead from "@/components/SEOHead";
 
 function AnimateOnScroll({ children, className = "", delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -123,6 +124,29 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-white overflow-x-hidden" dir="rtl">
+      <SEOHead
+        title="StockFlow - أفضل نظام إدارة مخازن ومخزون في مصر | SaaS"
+        description="StockFlow هو نظام إدارة مخازن ومخزون SaaS متكامل مصمم للشركات المصرية. أدر منتجاتك وعملاءك وفواتيرك وأوردراتك ومصروفاتك وموظفينك في مكان واحد. تقارير لحظية، باركود، شحن، نقاط بيع. ابدأ مجاناً!"
+        keywords="نظام إدارة مخازن, إدارة مخزون, مخازن مصري, SaaS, إدارة منتجات, إدارة عملاء, فواتير, نقاط بيع, باركود, شحن, تقارير مبيعات"
+        canonical="https://stockflow.vexonet.online"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          name: "StockFlow - نظام إدارة المخازن والمخزون",
+          description: "نظام إدارة مخازن ومخزون SaaS متكامل للشركات المصرية",
+          url: "https://stockflow.vexonet.online",
+          breadcrumb: {
+            "@type": "BreadcrumbList",
+            itemListElement: [
+              { "@type": "ListItem", position: 1, name: "الرئيسية", item: "https://stockflow.vexonet.online" },
+              { "@type": "ListItem", position: 2, name: "المنتجات", item: "https://stockflow.vexonet.online/dashboard/products" },
+              { "@type": "ListItem", position: 3, name: "الأوردرات", item: "https://stockflow.vexonet.online/dashboard/orders" },
+              { "@type": "ListItem", position: 4, name: "الفواتير", item: "https://stockflow.vexonet.online/dashboard/invoices" },
+              { "@type": "ListItem", position: 5, name: "الزبائن", item: "https://stockflow.vexonet.online/dashboard/customers" },
+            ],
+          },
+        }}
+      />
       {/* Navigation */}
       <motion.nav
         initial={{ y: -100 }}

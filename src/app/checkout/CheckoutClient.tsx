@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import Image from "next/image";
+import SEOHead from "@/components/SEOHead";
 
 const PAYMENT_METHODS = [
   {
@@ -232,6 +233,12 @@ export default function CheckoutPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-blue-50">
+      <SEOHead
+        title="اختيار خطة الاشتراك - StockFlow"
+        description="اختار خطة الاشتراك المناسبة لك في StockFlow. خطط متنوعة من 1,500 إلى 6,000 ج.م سنوياً. ابدأ إدارة مخزونك الآن."
+        keywords="اشتراك, خطة, subscription, StockFlow, إدارة مخازن, باقة"
+        canonical="https://stockflow.vexonet.online/checkout"
+      />
       {/* Header */}
       <div className="bg-white/80 backdrop-blur-sm border-b border-border sticky top-0 z-40">
         <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">

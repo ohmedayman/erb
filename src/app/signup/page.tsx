@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Warehouse, Eye, EyeOff, Globe, CheckCircle, Mail, Lock, User, Loader2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import Image from "next/image";
+import SEOHead from "@/components/SEOHead";
 
 interface FormErrors {
   name?: string;
@@ -114,6 +115,12 @@ export default function SignupPage() {
       transition={{ duration: 0.4 }}
       className="min-h-screen flex bg-white"
     >
+      <SEOHead
+        title="اعمل حساب جديد - StockFlow"
+        description="سجّل حساب جديد في StockFlow وابدأ إدارة مخزونك ومنتجاتك وعملاءك مجاناً. نظام إدارة مخازن SaaS متكامل للشركات المصرية."
+        keywords="حساب جديد, تسجيل, register, StockFlow, إدارة مخازن, نظام مجاني"
+        canonical="https://stockflow.vexonet.online/signup"
+      />
       <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-orange-50 via-orange-50/50 to-blue-50 overflow-hidden">
         <div className="absolute inset-0">
           <div className="absolute top-20 left-20 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />

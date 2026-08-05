@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import Image from "next/image";
+import { OfflineIndicator, InstallPrompt, SyncStatus } from "@/app/components/PWAComponents";
 
 const allSidebarLinks: Record<string, { href: string; label: string; icon: any }> = {
   dashboard: { href: "/dashboard", label: "البورد", icon: LayoutDashboard },
@@ -151,6 +152,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="min-h-screen flex bg-background">
+      <OfflineIndicator />
+      <InstallPrompt />
+      <SyncStatus />
       {sidebarOpen && <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />}
 
       <aside className={`fixed lg:static inset-y-0 right-0 left-auto z-50 w-64 bg-sidebar-bg transform transition-transform duration-200 ease-in-out lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "translate-x-full"}`}>
@@ -215,6 +219,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
 
           <div className="flex items-center gap-3 mr-auto">
+            <div id="pwa-sync-indicator" className="hidden">
+              <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <span className="w-2 h-2 rounded-full bg-green-400" id="pwa-status-dot" />
+                <span id="pwa-status-text">متصل</span>
+              </span>
+            </div>
             <button className="relative p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors">
               <Bell className="w-5 h-5" />
               <span className="absolute top-1.5 left-1.5 w-2 h-2 bg-primary rounded-full" />

@@ -1,4 +1,4 @@
-import { getDocs, getDoc, addDoc, updateDoc, deleteDoc, generateId } from "./database";
+import { getDocs, getDoc, addDoc, updateDoc, deleteDoc, generateId } from "./offline-database";
 
 export { generateId };
 

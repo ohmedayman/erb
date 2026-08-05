@@ -185,11 +185,27 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="StockFlow" />
         <meta httpEquiv="Content-Security-Policy" content="upgrade-insecure-requests" />
         <link rel="canonical" href={siteUrl} />
+        <link rel="manifest" href="/manifest.json" />
       </head>
       <body className="min-h-full flex flex-col">
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                  navigator.serviceWorker.register('/sw.js').then(function(reg) {
+                    console.log('SW registered:', reg.scope);
+                  }).catch(function(err) {
+                    console.log('SW failed:', err);
+                  });
+                });
+              }
+            `,
+          }}
         />
         {children}
         <ToastProvider />

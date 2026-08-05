@@ -114,11 +114,8 @@ export default function SignupPage() {
           .upsert({
             id: storeId,
             name: storeName,
-            user_id: data.user.id,
-            business_type: "general",
-            team_size: "1-5",
-            features: ["products", "orders", "invoices", "customers", "inventory", "expenses", "employees", "shipping", "installments", "accounts", "purchaseOrders", "warehouses", "suppliers", "returns", "analytics"],
-            onboarding_done: true,
+            owner_name: formData.name.trim(),
+            owner_email: data.user.email,
           }, { onConflict: "id" });
 
         if (storeError) {

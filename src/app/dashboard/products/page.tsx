@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Package, Plus, Search, Edit, Trash2, Printer, Minus, PlusIcon, Download } from "lucide-react";
+import { Package, Plus, Search, Edit, Trash2, Printer, Minus, PlusIcon, Download, Image as ImageIcon, X } from "lucide-react";
 import { getDocsFromCollection, addDocToCollection, updateDocInCollection, deleteDocFromCollection } from "@/lib/localdb";
 import { exportToExcel } from "@/lib/excel";
 import { toast } from "@/components/Toast";
 import JsBarcode from "jsbarcode";
+import { supabase } from "@/lib/supabase";
 
 const Skeleton = ({ className }: { className?: string }) => (
   <div className={`animate-pulse bg-muted rounded ${className}`} />
@@ -49,7 +50,10 @@ export default function ProductsPage() {
   const [newProduct, setNewProduct] = useState({ name: "", sku: "", category: "", price: "", stock: "", minStock: "" });
   const [barcodeProduct, setBarcodeProduct] = useState<any>(null);
   const [barcodeQty, setBarcodeQty] = useState(1);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
   const printRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const fetchProducts = async () => {
     try {
@@ -66,26 +70,99 @@ export default function ProductsPage() {
 
   const filtered = products.filter((p) => p.name.toLowerCase().includes(search.toLowerCase()) || p.sku.toLowerCase().includes(search.toLowerCase()));
 
+  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("الصورة كبيرة — الحد الأقصى 5 ميجا");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (ev) => setImagePreview(ev.target?.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  const uploadImage = async (file: File): Promise<string | null> => {
+    try {
+      const ext = file.name.split(".").pop();
+      const path = `products/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+      const { error } = await supabase.storage.from("product-images").upload(path, file);
+      if (error) {
+        console.error("Upload error:", error);
+        return null;
+      }
+      const { data } = supabase.storage.from("product-images").getPublicUrl(path);
+      return data?.publicUrl || null;
+    } catch {
+      return null;
+    }
+  };
+
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      setUploading(true);
       const user = JSON.parse(localStorage.getItem("user") || "{}");
-      await addDocToCollection("products", { ...newProduct, price: parseFloat(newProduct.price), stock: parseInt(newProduct.stock), minStock: parseInt(newProduct.minStock || "10"), storeId: user.storeId });
+
+      let imageUrl = null;
+      if (imagePreview) {
+        const res = await fetch(imagePreview);
+        const blob = await res.blob();
+        const file = new File([blob], "product.jpg", { type: blob.type });
+        imageUrl = await uploadImage(file);
+      }
+
+      await addDocToCollection("products", {
+        ...newProduct,
+        price: parseFloat(newProduct.price),
+        stock: parseInt(newProduct.stock),
+        minStock: parseInt(newProduct.minStock || "10"),
+        storeId: user.storeId,
+        imageUrl,
+      });
       setShowModal(false);
       setNewProduct({ name: "", sku: "", category: "", price: "", stock: "", minStock: "" });
+      setImagePreview(null);
       fetchProducts();
       toast.success("تم إضافة المنتج بنجاح");
     } catch {
       toast.error("فيه مشكلة حصلت");
+    } finally {
+      setUploading(false);
     }
   };
 
   const handleEdit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await updateDocInCollection("products", editingProduct.id, { ...editingProduct, price: parseFloat(editingProduct.price), stock: parseInt(editingProduct.stock), minStock: parseInt(editingProduct.minStock) });
-    setEditingProduct(null);
-    fetchProducts();
-    toast.success("تم حفظ التغييرات");
+    try {
+      setUploading(true);
+
+      let imageUrl = editingProduct.imageUrl;
+      if (imagePreview && imagePreview !== editingProduct.imageUrl) {
+        const res = await fetch(imagePreview);
+        const blob = await res.blob();
+        const file = new File([blob], "product.jpg", { type: blob.type });
+        imageUrl = await uploadImage(file);
+      }
+
+      await updateDocInCollection("products", editingProduct.id, {
+        ...editingProduct,
+        price: parseFloat(editingProduct.price),
+        stock: parseInt(editingProduct.stock),
+        minStock: parseInt(editingProduct.minStock),
+        imageUrl,
+      });
+      setEditingProduct(null);
+      setImagePreview(null);
+      fetchProducts();
+      toast.success("تم حفظ التغييرات");
+    } catch {
+      toast.error("فيه مشكلة حصلت");
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleDelete = async (id: string) => {
@@ -231,7 +308,11 @@ export default function ProductsPage() {
                     <tr key={product.id} className="border-b border-border last:border-0 hover:bg-muted/50 transition-colors">
                       <td className="px-5 py-3">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 bg-muted rounded-lg flex items-center justify-center"><Package className="w-4 h-4 text-muted-foreground" /></div>
+                          {product.imageUrl ? (
+                            <img src={product.imageUrl} alt={product.name} className="w-9 h-9 rounded-lg object-cover border border-border" />
+                          ) : (
+                            <div className="w-9 h-9 bg-muted rounded-lg flex items-center justify-center"><Package className="w-4 h-4 text-muted-foreground" /></div>
+                          )}
                           <span className="text-sm font-medium text-foreground">{product.name}</span>
                         </div>
                       </td>
@@ -240,7 +321,7 @@ export default function ProductsPage() {
                         <BarcodeSVG value={product.sku || "N/A"} />
                       </td>
                       <td className="px-5 py-3 text-sm text-muted-foreground">{product.category}</td>
-                      <td className="px-5 py-3 text-sm font-medium text-foreground">${product.price}</td>
+                      <td className="px-5 py-3 text-sm font-medium text-foreground">{(product.price || 0).toLocaleString("ar-EG")} ج.م</td>
                       <td className="px-5 py-3 text-sm text-foreground">{product.stock}</td>
                       <td className="px-5 py-3">
                         <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${product.stock > (product.minStock || 10) ? "bg-green-50 text-green-600" : product.stock > 0 ? "bg-yellow-50 text-yellow-600" : "bg-red-50 text-red-600"}`}>
@@ -250,7 +331,7 @@ export default function ProductsPage() {
                       <td className="px-5 py-3">
                         <div className="flex items-center justify-start gap-1">
                           <button onClick={() => { setBarcodeProduct(product); setBarcodeQty(1); }} className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors" title="طباعة باركود"><Printer className="w-4 h-4" /></button>
-                          <button onClick={() => { setEditingProduct(product); setShowModal(true); }} className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors"><Edit className="w-4 h-4" /></button>
+                          <button onClick={() => { setEditingProduct(product); setImagePreview(product.imageUrl || null); setShowModal(true); }} className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors"><Edit className="w-4 h-4" /></button>
                           <button onClick={() => handleDelete(product.id)} className="p-1.5 text-muted-foreground hover:text-red-500 hover:bg-red-50 rounded-md transition-colors"><Trash2 className="w-4 h-4" /></button>
                         </div>
                       </td>
@@ -265,12 +346,39 @@ export default function ProductsPage() {
 
       {showModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-card rounded-2xl shadow-xl w-full max-w-md border border-border">
-            <div className="px-6 py-4 border-b border-border flex items-center justify-between">
+          <div className="bg-card rounded-2xl shadow-xl w-full max-w-md border border-border max-h-[90vh] overflow-y-auto">
+            <div className="px-6 py-4 border-b border-border flex items-center justify-between sticky top-0 bg-card z-10">
               <h2 className="text-lg font-semibold text-foreground">{editingProduct ? "عدّل المنتج" : "اضف منتج"}</h2>
-              <button onClick={() => { setShowModal(false); setEditingProduct(null); }} className="text-muted-foreground hover:text-foreground">✕</button>
+              <button onClick={() => { setShowModal(false); setEditingProduct(null); setImagePreview(null); }} className="text-muted-foreground hover:text-foreground p-1 rounded-lg hover:bg-muted">✕</button>
             </div>
             <form onSubmit={editingProduct ? handleEdit : handleAdd} className="p-6 space-y-4">
+              {/* Image Upload */}
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1.5">صورة المنتج</label>
+                <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
+                {imagePreview ? (
+                  <div className="relative inline-block">
+                    <img src={imagePreview} alt="معاينة" className="w-24 h-24 rounded-xl object-cover border border-border" />
+                    <button
+                      type="button"
+                      onClick={() => { setImagePreview(null); if (fileInputRef.current) fileInputRef.current.value = ""; }}
+                      className="absolute -top-2 -left-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-full border-2 border-dashed border-border rounded-xl p-6 text-center hover:border-primary/40 hover:bg-primary/5 transition-colors"
+                  >
+                    <ImageIcon className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+                    <p className="text-sm text-muted-foreground">اضغط لاختيار صورة</p>
+                    <p className="text-xs text-muted-foreground/60 mt-1">JPEG, PNG, WebP — حد أقصى 5 ميجا</p>
+                  </button>
+                )}
+              </div>
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1.5">اسم المنتج</label>
                 <input type="text" value={editingProduct?.name || newProduct.name} onChange={(e) => editingProduct ? setEditingProduct({ ...editingProduct, name: e.target.value }) : setNewProduct({ ...newProduct, name: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" required />
@@ -300,8 +408,12 @@ export default function ProductsPage() {
                 </div>
               </div>
               <div className="flex gap-3 pt-2">
-                <button type="button" onClick={() => { setShowModal(false); setEditingProduct(null); }} className="flex-1 py-2.5 rounded-lg border border-border text-sm font-medium hover:bg-muted transition-colors">إلغاء</button>
-                <button type="submit" className="flex-1 py-2.5 rounded-lg bg-primary text-white text-sm font-medium hover:bg-primary-hover transition-colors">{editingProduct ? "حفظ التغييرات" : "اضف منتج"}</button>
+                <button type="button" onClick={() => { setShowModal(false); setEditingProduct(null); setImagePreview(null); }} className="flex-1 py-2.5 rounded-lg border border-border text-sm font-medium hover:bg-muted transition-colors">إلغاء</button>
+                <button type="submit" disabled={uploading} className="flex-1 py-2.5 rounded-lg bg-primary text-white text-sm font-medium hover:bg-primary-hover transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
+                  {uploading ? (
+                    <><svg className="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/></svg> جاري الرفع...</>
+                  ) : editingProduct ? "حفظ التغييرات" : "اضف منتج"}
+                </button>
               </div>
             </form>
           </div>

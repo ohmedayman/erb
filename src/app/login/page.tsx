@@ -4,9 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Warehouse, Eye, EyeOff, Globe } from "lucide-react";
-import { auth, db } from "@/lib/firebase";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { collection, query, where, getDocs } from "firebase/firestore";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -22,33 +19,30 @@ export default function LoginPage() {
     setError("");
 
     try {
-      const usersRef = collection(db, "users");
-      const q = query(usersRef, where("username", "==", username));
-      const snapshot = await getDocs(q);
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
 
-      if (snapshot.empty) {
-        setError("اسم المستخدم غير موجود");
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || "حدث خطأ");
         setLoading(false);
         return;
       }
 
-      const userDoc = snapshot.docs[0];
-      const userData = userDoc.data();
-      const email = userData.email;
-
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const token = await userCredential.user.getIdToken();
-      localStorage.setItem("firebaseToken", token);
+      if (data.customToken) {
+        localStorage.setItem("customToken", data.customToken);
+      }
+      if (data.user) {
+        localStorage.setItem("user", JSON.stringify(data.user));
+      }
 
       router.push("/dashboard");
     } catch (err: any) {
-      if (err.code === "auth/wrong-password" || err.code === "auth/invalid-credential") {
-        setError("كلمة المرور غير صحيحة");
-      } else if (err.code === "auth/user-not-found") {
-        setError("المستخدم غير موجود");
-      } else {
-        setError("حدث خطأ ما");
-      }
+      setError("حدث خطأ في الاتصال بالخادم");
       setLoading(false);
     }
   };

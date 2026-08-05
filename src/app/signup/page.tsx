@@ -4,9 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Warehouse, Eye, EyeOff, Globe, CheckCircle } from "lucide-react";
-import { auth, db } from "@/lib/firebase";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { doc, setDoc, collection, query, where, getDocs } from "firebase/firestore";
 
 export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -27,58 +24,33 @@ export default function SignupPage() {
     setError("");
 
     try {
-      const usersRef = collection(db, "users");
-      const usernameQuery = query(usersRef, where("username", "==", formData.username));
-      const usernameSnapshot = await getDocs(usernameQuery);
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: formData.username,
+          email: formData.email,
+          password: formData.password,
+          fullName: formData.name,
+          storeName: formData.storeName,
+        }),
+      });
 
-      if (!usernameSnapshot.empty) {
-        setError("اسم المستخدم مستخدم بالفعل");
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || "حدث خطأ");
         setLoading(false);
         return;
       }
 
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        formData.email,
-        formData.password
-      );
-
-      await updateProfile(userCredential.user, {
-        displayName: formData.name,
-      });
-
-      const storeRef = doc(collection(db, "stores"));
-      const newStore = {
-        id: storeRef.id,
-        name: formData.storeName,
-        ownerId: userCredential.user.uid,
-        createdAt: new Date().toISOString(),
-      };
-      await setDoc(storeRef, newStore);
-
-      await setDoc(doc(db, "users", userCredential.user.uid), {
-        fullName: formData.name,
-        email: formData.email,
-        username: formData.username,
-        role: "owner",
-        storeId: storeRef.id,
-        createdAt: new Date().toISOString(),
-      });
-
-      const token = await userCredential.user.getIdToken();
-      localStorage.setItem("firebaseToken", token);
-
-      router.push("/dashboard");
-    } catch (err: any) {
-      if (err.code === "auth/email-already-in-use") {
-        setError("البريد الإلكتروني مستخدم بالفعل");
-      } else if (err.code === "auth/weak-password") {
-        setError("كلمة المرور ضعيفة جداً");
-      } else if (err.code === "auth/invalid-email") {
-        setError("البريد الإلكتروني غير صالح");
-      } else {
-        setError("حدث خطأ ما");
+      if (data.customToken) {
+        localStorage.setItem("customToken", data.customToken);
       }
+
+      router.push("/login");
+    } catch (err: any) {
+      setError("حدث خطأ في الاتصال بالخادم");
       setLoading(false);
     }
   };

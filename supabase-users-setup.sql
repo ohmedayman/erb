@@ -41,7 +41,7 @@ DO $$ BEGIN
 END $$;
 
 INSERT INTO subscription_plans (id, name, price, duration, features) VALUES
-  ('plan-basic', 'StockFlow Basic', 1500.00, 'yearly', '["منتجات غير محدودة", "زبائن وموردين", "فواتير بسيطة", "تقارير أساسية"]'),
-  ('plan-pro', 'StockFlow Pro', 3000.00, 'yearly', '["منتجات غير محدودة", "زبائن وموردين", "فواتير وأوردرات", "تقارير وتحليلات", "شحن وتوصيل", "باركود وطباعة", "إشعارات فورية", "إعدادات كاملة"]'),
-  ('plan-enterprise', 'StockFlow Enterprise', 6000.00, 'yearly', '["كل مميزات Pro", "فريق عمل غير محدود", "تقارير متقدمة", "API كامل", "دعم فني أولوي", "تخصيص كامل"]')
+  ('plan-pro', 'StockFlow Pro', 3000.00, 'yearly', '["منتجات غير محدودة", "زبائن وموردين", "فواتير وأوردرات", "تقارير وتحليلات", "شحن وتوصيل", "باركود وطباعة", "إشعارات فورية", "إعدادات كاملة", "نقاط بيع POS", "إدارة الموظفين", "الأقساط والحسابات", "المصروفات والقيود اليومية"]')
 ON CONFLICT (id) DO NOTHING;
+
+DELETE FROM subscription_plans WHERE id IN ('plan-basic', 'plan-enterprise');

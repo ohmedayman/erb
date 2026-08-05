@@ -16,26 +16,6 @@ import SEOHead from "@/components/SEOHead";
 
 const PAYMENT_METHODS = [
   {
-    id: "fawry",
-    name: "فوري",
-    icon: Building2,
-    color: "from-blue-500 to-blue-600",
-    bgColor: "bg-blue-50",
-    borderColor: "border-blue-200",
-    textColor: "text-blue-600",
-    description: "ادفع عن طريق فوري من أي فرع قريب منك",
-      instructions: [
-        "روح لأي فرع فوري قريب منك",
-        "قولهم عايز تدفع لـ StockFlow",
-        "ادفع المبلغ المطلوب",
-        "احتفظ بالرقم المرجعي",
-        "ادخل الرقم المرجعي هنا"
-      ],
-    accountName: "StockFlow SaaS",
-    accountNumber: "0123456789",
-    notes: "الدفع الفوري — التأكيد خلال 5 دقائق"
-  },
-  {
     id: "vodafone_cash",
     name: "فودافون كاش",
     icon: Smartphone,
@@ -47,12 +27,12 @@ const PAYMENT_METHODS = [
     instructions: [
       "افتح تطبيق فودافون كاش",
       "اختر 'تحويل للمحفضة'",
-      "ابعت على الرقم: 01012345678",
-      "ادفع المبلغ المطلوب",
+      "ابعت على الرقم: 01028707543",
+      "ادفع مبلغ 1,500 ج.م (المقدم)",
       "احتفظ برقم العملية"
     ],
-    accountName: "StockFlow SaaS",
-    accountNumber: "01012345678",
+    accountName: "محمد ا*** ي***",
+    accountNumber: "01028707543",
     notes: "التحويل الفوري — التأكيد خلال 10 دقائق"
   },
   {
@@ -67,13 +47,33 @@ const PAYMENT_METHODS = [
     instructions: [
       "افتح تطبيق البنك بتاعك",
       "اختر InstaPay",
-      "ابعت على البريد: payment@stockflow.vexonet.online",
-      "ادفع المبلغ المطلوب",
+      "ابعت على الرقم: 01028707543",
+      "ادفع مبلغ 1,500 ج.م (المقدم)",
       "احتفظ برقم العملية"
     ],
-    accountName: "StockFlow SaaS",
-    accountNumber: "payment@stockflow.vexonet.online",
+    accountName: "محمد ا*** ي***",
+    accountNumber: "01028707543",
     notes: "التحويل الفوري — التأكيد خلال 15 دقيقة"
+  },
+  {
+    id: "fawry",
+    name: "فوري",
+    icon: Building2,
+    color: "from-blue-500 to-blue-600",
+    bgColor: "bg-blue-50",
+    borderColor: "border-blue-200",
+    textColor: "text-blue-600",
+    description: "ادفع عن طريق فوري من أي فرع قريب منك",
+    instructions: [
+      "روح لأي فرع فوري قريب منك",
+      "قولهم عايز تدفع لـ StockFlow",
+      "ادفع مبلغ 1,500 ج.م (المقدم)",
+      "احتفظ بالرقم المرجعي",
+      "ادخل الرقم المرجعي هنا"
+    ],
+    accountName: "محمد ا*** ي***",
+    accountNumber: "01028707543",
+    notes: "الدفع الفوري — التأكيد خلال 5 دقائق"
   },
   {
     id: "bank_transfer",
@@ -87,21 +87,43 @@ const PAYMENT_METHODS = [
     instructions: [
       "روح لأي فرع بنكي",
       "اعمل حوالة بنكية على الحساب",
-      "ادفع المبلغ المطلوب",
-      "اسم الحساب: StockFlow SaaS",
+      "ادفع مبلغ 1,500 ج.م (المقدم)",
+      "اسم الحساب: محمد ا*** ي***",
       "احتفظ بسند الحوالة"
     ],
-    accountName: "StockFlow SaaS",
-    accountNumber: "1234567890123",
-    bankName: "البنك الأهلي المصري",
+    accountName: "محمد ا*** ي***",
+    accountNumber: "01028707543",
     notes: "الحوالة البنكية — التأكيد خلال 24 ساعة"
   }
 ];
 
+const PLAN = {
+  id: "plan-pro",
+  name: "StockFlow Pro",
+  price: 3000,
+  upfront: 1500,
+  installment: 500,
+  installments: 3,
+  duration: "سنوي",
+  features: [
+    "منتجات غير محدودة",
+    "زبائن وموردين",
+    "فواتير وأوردرات",
+    "تقارير وتحليلات",
+    "شحن وتوصيل",
+    "باركود وطباعة",
+    "إشعارات فورية",
+    "إعدادات كاملة",
+    "نقاط بيع POS",
+    "إدارة الموظفين",
+    "الأقساط والحسابات",
+    "المصروفات والقيود اليومية",
+  ]
+};
+
 export default function CheckoutPage() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
-  const [selectedPlan, setSelectedPlan] = useState<string>("plan-pro");
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
   const [transactionId, setTransactionId] = useState("");
   const [userName, setUserName] = useState("");
@@ -111,27 +133,6 @@ export default function CheckoutPage() {
   const [copied, setCopied] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [orderId, setOrderId] = useState("");
-  const [plans, setPlans] = useState<any[]>([]);
-
-  useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem("user") || "null");
-    if (!stored) {
-      router.push("/login");
-      return;
-    }
-    setUser(stored);
-    setUserName(stored.name || stored.fullName || "");
-    loadPlans();
-  }, [router]);
-
-  const loadPlans = async () => {
-    try {
-      const { data } = await supabase.from("subscription_plans").select("*").eq("is_active", true).order("price");
-      if (data && data.length > 0) setPlans(data);
-    } catch {}
-  };
-
-  const currentPlan = plans.find(p => p.id === selectedPlan) || { name: "StockFlow Pro", price: 3000, duration: "yearly", features: [] };
 
   useEffect(() => {
     const stored = JSON.parse(localStorage.getItem("user") || "null");
@@ -159,9 +160,9 @@ export default function CheckoutPage() {
         user_name: userName,
         user_email: user.email,
         user_phone: userPhone,
-        plan_name: currentPlan.name,
-        plan_price: currentPlan.price,
-        plan_duration: currentPlan.duration || "yearly",
+        plan_name: PLAN.name,
+        plan_price: PLAN.upfront,
+        plan_duration: PLAN.duration,
         payment_method: selectedMethod,
         payment_details: PAYMENT_METHODS.find(m => m.id === selectedMethod)?.notes || "",
         transaction_id: transactionId,
@@ -193,6 +194,11 @@ export default function CheckoutPage() {
   if (orderSuccess) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-blue-50 flex items-center justify-center p-4">
+        <SEOHead
+          title="تم استلام طلبك - StockFlow"
+          description="تم استلام طلب الدفع بتاعك بنجاح. الادمن هيتأكد من الدفع ونبعتلك إشعار."
+          canonical="https://stockflow.vexonet.online/checkout"
+        />
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -207,6 +213,10 @@ export default function CheckoutPage() {
             <p className="text-sm text-muted-foreground">رقم الطلب</p>
             <p className="text-lg font-bold text-foreground font-mono">{orderId.slice(0, 8).toUpperCase()}</p>
           </div>
+          <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 mb-4 text-right">
+            <p className="text-sm font-medium text-orange-800 mb-1">المبلغ المدفوع: 1,500 ج.م (المقدم)</p>
+            <p className="text-xs text-orange-600">القسط الشهري: 500 ج.م × 3 شهور</p>
+          </div>
           <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6 text-right">
             <div className="flex items-center gap-2 mb-2">
               <Clock className="w-4 h-4 text-blue-600" />
@@ -216,6 +226,7 @@ export default function CheckoutPage() {
               <li>• الادمن هيتأكد من الدفع</li>
               <li>• هنبعتلك إشعار على البريد</li>
               <li>• بعد التأكيد هتقدر تدخل النظام</li>
+              <li>• الأقساط الباقية (500 × 2) هتتحط في النظام</li>
             </ul>
           </div>
           <Link
@@ -234,11 +245,12 @@ export default function CheckoutPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-blue-50">
       <SEOHead
-        title="اختيار خطة الاشتراك - StockFlow"
-        description="اختار خطة الاشتراك المناسبة لك في StockFlow. خطط متنوعة من 1,500 إلى 6,000 ج.م سنوياً. ابدأ إدارة مخزونك الآن."
-        keywords="اشتراك, خطة, subscription, StockFlow, إدارة مخازن, باقة"
+        title="اختيار طريقة الدفع - StockFlow Pro"
+        description="ادفع مقدم 1,500 ج.م واشتغل على StockFlow Pro. الباقي يتقسط على 3 شهور 500 ج.م شهرياً."
+        keywords="اشتراك, دفع, StockFlow Pro, قسط, management system"
         canonical="https://stockflow.vexonet.online/checkout"
       />
+
       {/* Header */}
       <div className="bg-white/80 backdrop-blur-sm border-b border-border sticky top-0 z-40">
         <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
@@ -256,7 +268,7 @@ export default function CheckoutPage() {
       <div className="max-w-5xl mx-auto px-4 py-8">
         {/* Progress Steps */}
         <div className="flex items-center justify-center gap-2 mb-8">
-          {[1, 2, 3].map((s) => (
+          {[1, 2].map((s) => (
             <div key={s} className="flex items-center gap-2">
               <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all ${
                 step >= s
@@ -265,7 +277,7 @@ export default function CheckoutPage() {
               }`}>
                 {step > s ? <CheckCircle className="w-5 h-5" /> : s}
               </div>
-              {s < 3 && (
+              {s < 2 && (
                 <div className={`w-16 h-1 rounded-full transition-all ${step > s ? "bg-primary" : "bg-muted"}`} />
               )}
             </div>
@@ -275,70 +287,71 @@ export default function CheckoutPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Step 1: Order Summary */}
+            {/* Step 1: Plan Details */}
             {step === 1 && (
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
                 <div className="bg-white rounded-2xl shadow-lg border border-border p-6">
-                  <h2 className="text-xl font-bold text-foreground mb-2">اختار خطة الاشتراك</h2>
-                  <p className="text-sm text-muted-foreground mb-6">اختار الخطة اللي تناسبك</p>
+                  <h2 className="text-xl font-bold text-foreground mb-2">StockFlow Pro</h2>
+                  <p className="text-sm text-muted-foreground mb-6">نظام إدارة المخازن الكامل</p>
+
+                  <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl p-6 text-white mb-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <div>
+                        <h3 className="text-lg font-bold">اشتراك سنوي</h3>
+                        <p className="text-orange-100 text-sm">ادفع مقدم والباقي يتقسط</p>
+                      </div>
+                      <Star className="w-8 h-8 text-orange-200" />
+                    </div>
+                    <div className="border-t border-orange-400/30 pt-4">
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-3xl font-bold">1,500</span>
+                        <span className="text-orange-200">ج.م مقدم</span>
+                      </div>
+                      <p className="text-orange-200 text-sm mt-1">+ 500 ج.م شهرياً لمدة 3 شهور</p>
+                    </div>
+                  </div>
 
                   <div className="space-y-3 mb-6">
-                    {plans.map((plan) => (
-                      <button
-                        key={plan.id}
-                        onClick={() => setSelectedPlan(plan.id)}
-                        className={`w-full p-5 rounded-2xl border-2 text-right transition-all ${
-                          selectedPlan === plan.id
-                            ? "border-primary bg-primary/5 ring-2 ring-offset-2 ring-primary/20"
-                            : "border-border hover:border-border/80 hover:bg-muted/50"
-                        }`}
-                      >
-                        <div className="flex items-center justify-between mb-3">
-                          <div>
-                            <h3 className="text-lg font-bold text-foreground">{plan.name}</h3>
-                            <p className="text-sm text-muted-foreground">{plan.id === 'plan-enterprise' ? 'للشركات الكبيرة' : plan.id === 'plan-pro' ? 'للشركات الناشئة' : 'للبداية'}</p>
-                          </div>
-                          <div className="text-left">
-                            <p className="text-2xl font-bold text-primary">{plan.price?.toLocaleString()} ج.م</p>
-                            <p className="text-xs text-muted-foreground">سنوياً</p>
-                          </div>
+                    <h4 className="font-medium text-foreground">مميزات الاشتراك:</h4>
+                    <div className="grid grid-cols-2 gap-2">
+                      {PLAN.features.map((text, i) => (
+                        <div key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <CheckCircle className="w-4 h-4 text-green-500 shrink-0" />
+                          <span>{text}</span>
                         </div>
-                        <div className="border-t border-border pt-3">
-                          <div className="grid grid-cols-2 gap-2">
-                            {(plan.features || []).map((feature: string, i: number) => (
-                              <div key={i} className="flex items-center gap-2 text-xs text-muted-foreground">
-                                <CheckCircle className="w-3.5 h-3.5 text-green-500 shrink-0" />
-                                <span>{feature}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </button>
-                    ))}
-                    {plans.length === 0 && (
-                      <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl p-6 text-white">
-                        <div className="flex items-center justify-between mb-4">
-                          <div>
-                            <h3 className="text-lg font-bold">StockFlow Pro</h3>
-                            <p className="text-orange-100 text-sm">نظام إدارة المخازن الكامل</p>
-                          </div>
-                          <Star className="w-8 h-8 text-orange-200" />
-                        </div>
-                        <div className="border-t border-orange-400/30 pt-4">
-                          <div className="flex items-baseline gap-1">
-                            <span className="text-3xl font-bold">3,000</span>
-                            <span className="text-orange-200">ج.م / سنوياً</span>
-                          </div>
-                          <p className="text-orange-200 text-sm mt-1">250 ج.م فقط شهرياً</p>
-                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 mb-6">
+                    <h4 className="font-medium text-orange-800 mb-2">جدول الدفع:</h4>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-orange-700">المقدم (الآن)</span>
+                        <span className="font-bold text-orange-800">1,500 ج.م</span>
                       </div>
-                    )}
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-orange-700">الشهر الأول</span>
+                        <span className="font-medium text-orange-700">500 ج.م</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-orange-700">الشهر الثاني</span>
+                        <span className="font-medium text-orange-700">500 ج.م</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-orange-700">الشهر الثالث</span>
+                        <span className="font-medium text-orange-700">500 ج.م</span>
+                      </div>
+                      <div className="border-t border-orange-200 pt-2 flex items-center justify-between">
+                        <span className="font-medium text-orange-800">الإجمالي</span>
+                        <span className="text-lg font-bold text-orange-800">3,000 ج.م</span>
+                      </div>
+                    </div>
                   </div>
 
                   <button
                     onClick={() => setStep(2)}
-                    disabled={!selectedPlan}
-                    className="w-full bg-primary text-white py-3 rounded-xl font-medium hover:bg-primary-hover transition-all shadow-lg shadow-primary/25 flex items-center justify-center gap-2 disabled:opacity-50"
+                    className="w-full bg-primary text-white py-3 rounded-xl font-medium hover:bg-primary-hover transition-all shadow-lg shadow-primary/25 flex items-center justify-center gap-2"
                   >
                     اختار طريقة الدفع
                     <ArrowLeft className="w-5 h-5" />
@@ -347,187 +360,162 @@ export default function CheckoutPage() {
               </motion.div>
             )}
 
-            {/* Step 2: Payment Method */}
+            {/* Step 2: Payment */}
             {step === 2 && (
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
-                <div className="bg-white rounded-2xl shadow-lg border border-border p-6">
-                  <h2 className="text-xl font-bold text-foreground mb-2">اختار طريقة الدفع</h2>
-                  <p className="text-sm text-muted-foreground mb-6">اختار الطريقة اللي تناسبك</p>
+                {!selectedMethod ? (
+                  <div className="bg-white rounded-2xl shadow-lg border border-border p-6">
+                    <h2 className="text-xl font-bold text-foreground mb-2">اختار طريقة الدفع</h2>
+                    <p className="text-sm text-muted-foreground mb-6">ادفع المقدم 1,500 ج.م</p>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {PAYMENT_METHODS.map((method) => (
-                      <button
-                        key={method.id}
-                        onClick={() => setSelectedMethod(method.id)}
-                        className={`p-4 rounded-xl border-2 text-right transition-all ${
-                          selectedMethod === method.id
-                            ? `${method.borderColor} ${method.bgColor} ring-2 ring-offset-2 ring-primary/20`
-                            : "border-border hover:border-border/80 hover:bg-muted/50"
-                        }`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${method.color} flex items-center justify-center`}>
-                            <method.icon className="w-5 h-5 text-white" />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {PAYMENT_METHODS.map((method) => (
+                        <button
+                          key={method.id}
+                          onClick={() => setSelectedMethod(method.id)}
+                          className={`p-4 rounded-xl border-2 text-right transition-all hover:border-primary/50 hover:bg-primary/5`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${method.color} flex items-center justify-center`}>
+                              <method.icon className="w-5 h-5 text-white" />
+                            </div>
+                            <div className="text-right">
+                              <p className="font-medium text-foreground">{method.name}</p>
+                              <p className="text-xs text-muted-foreground">{method.description}</p>
+                            </div>
                           </div>
-                          <div className="text-right">
-                            <p className="font-medium text-foreground">{method.name}</p>
-                            <p className="text-xs text-muted-foreground">{method.description}</p>
-                          </div>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
+                        </button>
+                      ))}
+                    </div>
 
-                  <div className="flex gap-3 mt-6">
                     <button
                       onClick={() => setStep(1)}
-                      className="px-6 py-3 rounded-xl border border-border text-muted-foreground hover:bg-muted transition-all"
+                      className="mt-4 px-6 py-3 rounded-xl border border-border text-muted-foreground hover:bg-muted transition-all"
                     >
                       رجوع
                     </button>
-                    <button
-                      onClick={() => setStep(3)}
-                      disabled={!selectedMethod}
-                      className="flex-1 bg-primary text-white py-3 rounded-xl font-medium hover:bg-primary-hover transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary/25 flex items-center justify-center gap-2"
-                    >
-                      إتمام الدفع
-                      <ArrowLeft className="w-5 h-5" />
-                    </button>
                   </div>
-                </div>
-              </motion.div>
-            )}
-
-            {/* Step 3: Payment Details */}
-            {step === 3 && selectedMethodData && (
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
-                {/* Payment Instructions */}
-                <div className="bg-white rounded-2xl shadow-lg border border-border p-6">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${selectedMethodData.color} flex items-center justify-center`}>
-                      <selectedMethodData.icon className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <h2 className="text-xl font-bold text-foreground">{selectedMethodData.name}</h2>
-                      <p className="text-sm text-muted-foreground">{selectedMethodData.notes}</p>
-                    </div>
-                  </div>
-
-                  {/* Amount */}
-                  <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl p-4 text-white text-center mb-6">
-                    <p className="text-orange-200 text-sm">المبلغ المطلوب</p>
-                    <p className="text-3xl font-bold">{currentPlan.price?.toLocaleString()} ج.م</p>
-                  </div>
-
-                  {/* Account Details */}
-                  <div className="bg-muted rounded-xl p-4 mb-6 text-right">
-                    <p className="text-sm font-medium text-foreground mb-2">بيانات الحساب:</p>
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground">اسم الحساب:</span>
-                        <span className="text-sm font-medium text-foreground">{selectedMethodData.accountName}</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground">رقم الحساب:</span>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-mono font-medium text-foreground">{selectedMethodData.accountNumber}</span>
-                          <button
-                            onClick={() => handleCopy(selectedMethodData.accountNumber)}
-                            className="p-1 rounded hover:bg-background transition-colors"
-                          >
-                            {copied ? <CheckCircle className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4 text-muted-foreground" />}
-                          </button>
+                ) : selectedMethodData && (
+                  <>
+                    <div className="bg-white rounded-2xl shadow-lg border border-border p-6">
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${selectedMethodData.color} flex items-center justify-center`}>
+                          <selectedMethodData.icon className="w-6 h-6 text-white" />
+                        </div>
+                        <div>
+                          <h2 className="text-xl font-bold text-foreground">{selectedMethodData.name}</h2>
+                          <p className="text-sm text-muted-foreground">{selectedMethodData.notes}</p>
                         </div>
                       </div>
-                      {selectedMethodData.bankName && (
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-muted-foreground">البنك:</span>
-                          <span className="text-sm font-medium text-foreground">{selectedMethodData.bankName}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
 
-                  {/* Steps */}
-                  <div className="space-y-3 mb-6">
-                    <p className="font-medium text-foreground">خطوات الدفع:</p>
-                    {selectedMethodData.instructions.map((instruction, i) => (
-                      <div key={i} className="flex items-start gap-3">
-                        <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-                          <span className="text-xs font-bold text-primary">{i + 1}</span>
-                        </div>
-                        <p className="text-sm text-muted-foreground">{instruction}</p>
+                      <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl p-4 text-white text-center mb-6">
+                        <p className="text-orange-200 text-sm">المبلغ المطلوب (المقدم)</p>
+                        <p className="text-3xl font-bold">1,500 ج.م</p>
+                        <p className="text-orange-200 text-xs mt-1">+ 500 ج.م شهرياً لمدة 3 شهور</p>
                       </div>
-                    ))}
-                  </div>
-                </div>
 
-                {/* Payment Form */}
-                <div className="bg-white rounded-2xl shadow-lg border border-border p-6">
-                  <h3 className="text-lg font-bold text-foreground mb-4">بيانات الدفع</h3>
+                      <div className="bg-muted rounded-xl p-4 mb-6 text-right">
+                        <p className="text-sm font-medium text-foreground mb-2">بيانات الحساب:</p>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-muted-foreground">اسم الحساب:</span>
+                            <span className="text-sm font-medium text-foreground">{selectedMethodData.accountName}</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-muted-foreground">رقم الحساب:</span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-mono font-medium text-foreground">{selectedMethodData.accountNumber}</span>
+                              <button
+                                onClick={() => handleCopy(selectedMethodData.accountNumber)}
+                                className="p-1 rounded hover:bg-background transition-colors"
+                              >
+                                {copied ? <CheckCircle className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4 text-muted-foreground" />}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
 
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-1.5">الاسم الكامل</label>
-                      <input
-                        type="text"
-                        value={userName}
-                        onChange={(e) => setUserName(e.target.value)}
-                        className="w-full px-4 py-3 rounded-xl border border-border bg-white text-foreground text-right focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
-                        placeholder="الاسم كما هو في الحساب البنكي"
-                      />
+                      <div className="space-y-3 mb-6">
+                        <p className="font-medium text-foreground">خطوات الدفع:</p>
+                        {selectedMethodData.instructions.map((instruction, i) => (
+                          <div key={i} className="flex items-start gap-3">
+                            <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                              <span className="text-xs font-bold text-primary">{i + 1}</span>
+                            </div>
+                            <p className="text-sm text-muted-foreground">{instruction}</p>
+                          </div>
+                        ))}
+                      </div>
                     </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-1.5">رقم الموبايل</label>
-                      <input
-                        type="tel"
-                        value={userPhone}
-                        onChange={(e) => setUserPhone(e.target.value)}
-                        className="w-full px-4 py-3 rounded-xl border border-border bg-white text-foreground text-right focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
-                        placeholder="01XXXXXXXXX"
-                      />
-                    </div>
+                    <div className="bg-white rounded-2xl shadow-lg border border-border p-6">
+                      <h3 className="text-lg font-bold text-foreground mb-4">بيانات الدفع</h3>
 
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-1.5">رقم العملية / الرقم المرجعي</label>
-                      <input
-                        type="text"
-                        value={transactionId}
-                        onChange={(e) => setTransactionId(e.target.value)}
-                        className="w-full px-4 py-3 rounded-xl border border-border bg-white text-foreground text-right focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
-                        placeholder="الرقم اللي استلمته بعد الدفع"
-                      />
-                      <p className="mt-1 text-xs text-muted-foreground">مهم جداً — ده اللي هنتحقق بيه من الدفع</p>
-                    </div>
-                  </div>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-foreground mb-1.5">الاسم الكامل</label>
+                          <input
+                            type="text"
+                            value={userName}
+                            onChange={(e) => setUserName(e.target.value)}
+                            className="w-full px-4 py-3 rounded-xl border border-border bg-white text-foreground text-right focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+                            placeholder="الاسم كما هو في الحساب البنكي"
+                          />
+                        </div>
 
-                  <div className="flex gap-3 mt-6">
-                    <button
-                      onClick={() => setStep(2)}
-                      className="px-6 py-3 rounded-xl border border-border text-muted-foreground hover:bg-muted transition-all"
-                    >
-                      رجوع
-                    </button>
-                    <button
-                      onClick={handleSubmitOrder}
-                      disabled={!transactionId || !userPhone || !userName || loading}
-                      className="flex-1 bg-primary text-white py-3 rounded-xl font-medium hover:bg-primary-hover transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary/25 flex items-center justify-center gap-2"
-                    >
-                      {loading ? (
-                        <>
-                          <Loader2 className="w-5 h-5 animate-spin" />
-                          بيتم الإرسال...
-                        </>
-                      ) : (
-                        <>
-                          <CheckCircle className="w-5 h-5" />
-                          تأكيد الطلب
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </div>
+                        <div>
+                          <label className="block text-sm font-medium text-foreground mb-1.5">رقم الموبايل</label>
+                          <input
+                            type="tel"
+                            value={userPhone}
+                            onChange={(e) => setUserPhone(e.target.value)}
+                            className="w-full px-4 py-3 rounded-xl border border-border bg-white text-foreground text-right focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+                            placeholder="01XXXXXXXXX"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-foreground mb-1.5">رقم العملية / الرقم المرجعي</label>
+                          <input
+                            type="text"
+                            value={transactionId}
+                            onChange={(e) => setTransactionId(e.target.value)}
+                            className="w-full px-4 py-3 rounded-xl border border-border bg-white text-foreground text-right focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+                            placeholder="الرقم اللي استلمته بعد الدفع"
+                          />
+                          <p className="mt-1 text-xs text-muted-foreground">مهم جداً — ده اللي هنتحقق بيه من الدفع</p>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-3 mt-6">
+                        <button
+                          onClick={() => setSelectedMethod(null)}
+                          className="px-6 py-3 rounded-xl border border-border text-muted-foreground hover:bg-muted transition-all"
+                        >
+                          رجوع
+                        </button>
+                        <button
+                          onClick={handleSubmitOrder}
+                          disabled={!transactionId || !userPhone || !userName || loading}
+                          className="flex-1 bg-primary text-white py-3 rounded-xl font-medium hover:bg-primary-hover transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary/25 flex items-center justify-center gap-2"
+                        >
+                          {loading ? (
+                            <>
+                              <Loader2 className="w-5 h-5 animate-spin" />
+                              بيتم الإرسال...
+                            </>
+                          ) : (
+                            <>
+                              <CheckCircle className="w-5 h-5" />
+                              تأكيد الدفع — 1,500 ج.م
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                )}
               </motion.div>
             )}
           </div>
@@ -539,20 +527,26 @@ export default function CheckoutPage() {
               <div className="space-y-3">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">الخطة</span>
-                  <span className="font-medium text-foreground">{currentPlan.name}</span>
+                  <span className="font-medium text-foreground">StockFlow Pro</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">المدة</span>
-                  <span className="font-medium text-foreground">سنوياً</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">المبلغ</span>
-                  <span className="font-medium text-foreground">{currentPlan.price?.toLocaleString()} ج.م</span>
+                  <span className="font-medium text-foreground">سنوي</span>
                 </div>
                 <div className="border-t border-border pt-3">
-                  <div className="flex justify-between">
-                    <span className="font-medium text-foreground">الإجمالي</span>
-                    <span className="text-lg font-bold text-primary">{currentPlan.price?.toLocaleString()} ج.م</span>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span className="text-muted-foreground">المقدم</span>
+                    <span className="font-bold text-primary">1,500 ج.م</span>
+                  </div>
+                  <div className="flex justify-between text-sm text-muted-foreground mb-1">
+                    <span>القسط الشهري</span>
+                    <span>500 ج.م × 3</span>
+                  </div>
+                  <div className="border-t border-border pt-2 mt-2">
+                    <div className="flex justify-between">
+                      <span className="font-medium text-foreground">الإجمالي</span>
+                      <span className="text-lg font-bold text-primary">3,000 ج.م</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -576,7 +570,7 @@ export default function CheckoutPage() {
                 <div className="flex items-start gap-2">
                   <AlertCircle className="w-4 h-4 text-red-500 mt-0.5 shrink-0" />
                   <p className="text-xs text-red-600">
-                   IMPORTANT: احتفظ برقم العملية! ده محتاج للتأكيد
+                    احتفظ برقم العملية! ده محتاج للتأكيد
                   </p>
                 </div>
               </div>

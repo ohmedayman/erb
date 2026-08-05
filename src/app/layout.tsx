@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Cairo } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import ToastProvider from "@/components/ToastProvider";
 
@@ -206,6 +207,10 @@ export default function RootLayout({
         />
         {children}
         <ToastProvider />
+        <Script
+          src="https://cdn.jotfor.ms/agent/embedjs/019fd362562870008d912d62274b76525a2e/embed.js"
+          strategy="lazyOnload"
+        />
       </body>
     </html>
   );

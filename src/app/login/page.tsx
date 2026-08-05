@@ -81,7 +81,7 @@ export default function LoginPage() {
           fullName: data.user.user_metadata?.full_name || data.user.email,
           name: data.user.user_metadata?.full_name || data.user.email,
           role: "admin",
-          storeId: data.user.user_metadata?.store_id || "store-001",
+          storeId: data.user.id,
         }));
         localStorage.setItem("isLoggedIn", "true");
 
@@ -96,6 +96,17 @@ export default function LoginPage() {
           .eq("user_id", data.user.id)
           .eq("status", "approved")
           .limit(1);
+
+        // Fetch store data from Supabase
+        const { data: storeData } = await supabase
+          .from("stores")
+          .select("id, name")
+          .eq("id", data.user.id)
+          .single();
+
+        if (storeData) {
+          localStorage.setItem("store", JSON.stringify({ id: storeData.id, name: storeData.name }));
+        }
 
         if (orders && orders.length > 0) {
           const prefs = JSON.parse(localStorage.getItem("user_prefs") || "null");

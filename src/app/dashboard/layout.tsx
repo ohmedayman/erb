@@ -66,6 +66,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [username, setUsername] = useState("مستخدم");
+  const [storeName, setStoreName] = useState("");
   const [visibleLinks, setVisibleLinks] = useState<typeof allSidebarLinks>({});
 
   useEffect(() => {
@@ -85,6 +86,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
 
     setUsername(user.fullName || user.username || user.name || "مستخدم");
+
+    const store = JSON.parse(localStorage.getItem("store") || "null");
+    if (store?.name) setStoreName(store.name);
 
     const links: typeof allSidebarLinks = { dashboard: allSidebarLinks.dashboard };
 
@@ -152,7 +156,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div className="flex items-center gap-2 px-5 h-16 border-b border-white/10">
             <Link href="/dashboard" className="flex items-center gap-2.5">
               <Image src="/favicon.svg" alt="StockFlow" width={36} height={36} />
-              <span className="text-lg font-bold text-white">Stock<span className="text-orange-400">Flow</span></span>
+              <div>
+                <span className="text-lg font-bold text-white">Stock<span className="text-orange-400">Flow</span></span>
+                {storeName && <p className="text-[10px] text-sidebar-text truncate max-w-[140px]">{storeName}</p>}
+              </div>
             </Link>
             <button onClick={() => setSidebarOpen(false)} className="mr-auto lg:hidden text-sidebar-text hover:text-white">
               <X className="w-5 h-5" />

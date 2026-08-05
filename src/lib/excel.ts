@@ -1,10 +1,21 @@
 import * as XLSX from "xlsx";
 
+function getStoreName(): string {
+  if (typeof window === "undefined") return "";
+  try {
+    const store = JSON.parse(localStorage.getItem("store") || "{}");
+    return store.name || "";
+  } catch { return ""; }
+}
+
 export function exportToExcel(data: any[], filename: string, sheetName: string = "Sheet1") {
   if (!data || data.length === 0) {
     alert("مفيش بيانات للتصدير");
     return;
   }
+
+  const storeName = getStoreName();
+  const finalFilename = storeName ? `${storeName}_${filename}` : filename;
 
   const worksheet = XLSX.utils.json_to_sheet(data);
 
@@ -20,13 +31,16 @@ export function exportToExcel(data: any[], filename: string, sheetName: string =
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
 
-  XLSX.writeFile(workbook, `${filename}.xlsx`);
+  XLSX.writeFile(workbook, `${finalFilename}.xlsx`);
 }
 
 export function exportMultipleSheets(
   sheets: { name: string; data: any[] }[],
   filename: string
 ) {
+  const storeName = getStoreName();
+  const finalFilename = storeName ? `${storeName}_${filename}` : filename;
+
   const workbook = XLSX.utils.book_new();
 
   for (const sheet of sheets) {
@@ -43,5 +57,5 @@ export function exportMultipleSheets(
     XLSX.utils.book_append_sheet(workbook, worksheet, sheet.name);
   }
 
-  XLSX.writeFile(workbook, `${filename}.xlsx`);
+  XLSX.writeFile(workbook, `${finalFilename}.xlsx`);
 }

@@ -35,6 +35,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${siteUrl}/dashboard/team`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.4 },
     { url: `${siteUrl}/dashboard/settings`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.4 },
     { url: `${siteUrl}/admin`, lastModified: new Date(), changeFrequency: "daily" as const, priority: 0.3 },
+    { url: `${siteUrl}/privacy`, lastModified: new Date(), changeFrequency: "yearly" as const, priority: 0.3 },
+    { url: `${siteUrl}/terms`, lastModified: new Date(), changeFrequency: "yearly" as const, priority: 0.3 },
+    { url: `${siteUrl}/contact`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.4 },
   ];
 
   return staticPages;

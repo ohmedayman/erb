@@ -78,7 +78,7 @@ export default function SignupPage() {
           role: "admin",
         }));
 
-        router.push("/onboarding");
+        router.push("/checkout");
       }
     } catch (err: any) {
       setServerError("حصل مشكلة: " + err.message);

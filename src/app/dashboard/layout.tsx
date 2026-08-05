@@ -10,6 +10,7 @@ import {
   Receipt, CreditCard, UserCircle, Wallet, BookOpen, NotebookPen, UserCog, PieChart,
   CalendarCheck, TrendingUp,
 } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 
 const allSidebarLinks: Record<string, { href: string; label: string; icon: any }> = {
   dashboard: { href: "/dashboard", label: "البورد", icon: LayoutDashboard },
@@ -37,6 +38,7 @@ const allSidebarLinks: Record<string, { href: string; label: string; icon: any }
   notifications: { href: "/dashboard/notifications", label: "الإشعارات", icon: BellRing },
   team: { href: "/dashboard/team", label: "الفريق", icon: Users },
   settings: { href: "/dashboard/settings", label: "الإعدادات", icon: Settings },
+  adminOrders: { href: "/dashboard/admin/orders", label: "طلبات الدفع", icon: CreditCard },
 };
 
 const featureToLinks: Record<string, string[]> = {
@@ -73,32 +75,37 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       return;
     }
 
-    const prefs = JSON.parse(localStorage.getItem("user_prefs") || "null");
-    if (!prefs || !prefs.onboardingDone) {
-      router.push("/onboarding");
-      return;
-    }
+    const checkSubscription = async () => {
+      const prefs = JSON.parse(localStorage.getItem("user_prefs") || "null");
+      if (!prefs || !prefs.onboardingDone) {
+        router.push("/onboarding");
+        return;
+      }
 
-    setUsername(user.fullName || user.username || "مستخدم");
+      setUsername(user.fullName || user.username || "مستخدم");
 
-    const enabledFeatures: string[] = prefs.features || [];
-    const links: typeof allSidebarLinks = { dashboard: allSidebarLinks.dashboard };
+      const enabledFeatures: string[] = prefs.features || [];
+      const links: typeof allSidebarLinks = { dashboard: allSidebarLinks.dashboard };
 
-    for (const feature of enabledFeatures) {
-      const linkKeys = featureToLinks[feature] || [];
-      for (const key of linkKeys) {
-        if (allSidebarLinks[key]) {
-          links[key] = allSidebarLinks[key];
+      for (const feature of enabledFeatures) {
+        const linkKeys = featureToLinks[feature] || [];
+        for (const key of linkKeys) {
+          if (allSidebarLinks[key]) {
+            links[key] = allSidebarLinks[key];
+          }
         }
       }
-    }
 
-    if (prefs.shipping) links.shipping = allSidebarLinks.shipping;
-    if (prefs.installments) links.installments = allSidebarLinks.installments;
+      if (prefs.shipping) links.shipping = allSidebarLinks.shipping;
+      if (prefs.installments) links.installments = allSidebarLinks.installments;
 
-    links.settings = allSidebarLinks.settings;
+      links.settings = allSidebarLinks.settings;
+      links.adminOrders = allSidebarLinks.adminOrders;
 
-    setVisibleLinks(links);
+      setVisibleLinks(links);
+    };
+
+    checkSubscription();
   }, [router]);
 
   const handleLogout = () => {

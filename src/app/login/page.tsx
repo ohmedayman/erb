@@ -73,14 +73,15 @@ export default function LoginPage() {
 
       if (data.user) {
         const email = (data.user.email || "").toLowerCase();
-        const isAdmin = email.includes("admin") || ["admin@stockflow.com", "m44408335@gmail.com", "admin@stockflow.vexonet.online"].includes(email);
+        const ADMIN_EMAILS = ["admin@stockflow.com", "m44408335@gmail.com", "admin@stockflow.vexonet.online"];
+        const isAdmin = ADMIN_EMAILS.includes(email);
 
         localStorage.setItem("user", JSON.stringify({
           id: data.user.id,
           email: data.user.email,
           fullName: data.user.user_metadata?.full_name || data.user.email,
           name: data.user.user_metadata?.full_name || data.user.email,
-          role: "admin",
+          role: isAdmin ? "admin" : "user",
           storeId: data.user.id,
         }));
         localStorage.setItem("isLoggedIn", "true");
@@ -108,16 +109,14 @@ export default function LoginPage() {
           localStorage.setItem("store", JSON.stringify({ id: storeData.id, name: storeData.name }));
         }
 
-        if (orders && orders.length > 0) {
-          const prefs = JSON.parse(localStorage.getItem("user_prefs") || "null");
-          if (!prefs?.onboardingDone) {
-            router.push("/onboarding");
-          } else {
-            router.push("/dashboard");
-          }
-        } else {
-          router.push("/checkout");
+        if (!localStorage.getItem("user_prefs")) {
+          localStorage.setItem("user_prefs", JSON.stringify({
+            storeName: storeData?.name || "",
+            onboardingDone: true,
+          }));
         }
+
+        router.push("/dashboard");
       }
     } catch {
       setServerError("فيه مشكلة حصلت — حاول تاني");

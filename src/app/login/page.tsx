@@ -98,7 +98,12 @@ export default function LoginPage() {
           .limit(1);
 
         if (orders && orders.length > 0) {
-          router.push("/dashboard");
+          const prefs = JSON.parse(localStorage.getItem("user_prefs") || "null");
+          if (!prefs?.onboardingDone) {
+            router.push("/onboarding");
+          } else {
+            router.push("/dashboard");
+          }
         } else {
           router.push("/checkout");
         }

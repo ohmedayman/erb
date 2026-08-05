@@ -118,6 +118,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
           if (!data || data.length === 0) {
             router.push("/checkout");
+            return;
+          }
+
+          const prefs = JSON.parse(localStorage.getItem("user_prefs") || "null");
+          if (!prefs?.onboardingDone) {
+            router.push("/onboarding");
+            return;
           }
         } catch {
           // Allow access on error

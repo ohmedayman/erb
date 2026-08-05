@@ -10,7 +10,7 @@ import {
   X,
   Check,
 } from "lucide-react";
-import { auth } from "@/lib/firebase";
+import { getDocsFromCollection, addDocToCollection } from "@/lib/localdb";
 
 interface JournalLine {
   accountCode: string;
@@ -36,17 +36,10 @@ export default function JournalPage() {
 
   const fetchEntries = async () => {
     try {
-      const token = await auth.currentUser?.getIdToken();
-      const [entriesRes, accountsRes] = await Promise.all([
-        fetch("/api/journal", {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        fetch("/api/accounts", {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-      ]);
-      const entriesData = await entriesRes.json();
-      const accountsData = await accountsRes.json();
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      const filters = user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : [];
+      const entriesData = getDocsFromCollection("journalEntries", filters);
+      const accountsData = getDocsFromCollection("accounts", filters);
       setEntries(entriesData);
       setAccounts(accountsData);
     } catch {
@@ -116,7 +109,7 @@ export default function JournalPage() {
     e.preventDefault();
     if (!isBalanced) return;
 
-    const token = await auth.currentUser?.getIdToken();
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
     const formattedLines = newEntry.lines.map((l) => ({
       accountCode: l.accountCode,
       accountName: l.accountName,
@@ -124,32 +117,25 @@ export default function JournalPage() {
       credit: parseFloat(l.credit) || 0,
     }));
 
-    const res = await fetch("/api/journal", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        date: newEntry.date,
-        description: newEntry.description,
-        entries: formattedLines,
-        totalDebit,
-        totalCredit,
-      }),
+    addDocToCollection("journalEntries", {
+      date: newEntry.date,
+      description: newEntry.description,
+      entries: formattedLines,
+      totalDebit,
+      totalCredit,
+      status: "draft",
+      storeId: user.storeId,
     });
-    if (res.ok) {
-      setShowModal(false);
-      setNewEntry({
-        date: new Date().toISOString().split("T")[0],
-        description: "",
-        lines: [
-          { accountCode: "", accountName: "", debit: "", credit: "" },
-          { accountCode: "", accountName: "", debit: "", credit: "" },
-        ],
-      });
-      fetchEntries();
-    }
+    setShowModal(false);
+    setNewEntry({
+      date: new Date().toISOString().split("T")[0],
+      description: "",
+      lines: [
+        { accountCode: "", accountName: "", debit: "", credit: "" },
+        { accountCode: "", accountName: "", debit: "", credit: "" },
+      ],
+    });
+    fetchEntries();
   };
 
   const formatCurrency = (amount: number) => {

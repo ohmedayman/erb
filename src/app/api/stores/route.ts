@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyFirebaseToken } from "@/lib/auth";
-import { collections } from "@/lib/firestore";
+import { col } from "@/lib/firestore";
 
 export async function GET(request: NextRequest) {
   const user = await verifyFirebaseToken(request);
@@ -8,7 +8,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
   }
 
-  const doc = await collections.stores.doc(user.storeId).get();
+  const storesCol = await col("stores");
+  const doc = await storesCol.doc(user.storeId).get();
 
   if (!doc.exists) {
     return NextResponse.json({ error: "المتجر غير موجود" }, { status: 404 });
@@ -23,7 +24,8 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
   }
 
-  const doc = await collections.stores.doc(user.storeId).get();
+  const storesCol = await col("stores");
+  const doc = await storesCol.doc(user.storeId).get();
 
   if (!doc.exists) {
     return NextResponse.json({ error: "المتجر غير موجود" }, { status: 404 });
@@ -63,7 +65,7 @@ export async function PUT(request: NextRequest) {
 
   updateData.updatedAt = new Date().toISOString();
 
-  await collections.stores.doc(user.storeId).update(updateData);
-  const updated = await collections.stores.doc(user.storeId).get();
+  await storesCol.doc(user.storeId).update(updateData);
+  const updated = await storesCol.doc(user.storeId).get();
   return NextResponse.json({ id: updated.id, ...updated.data() });
 }

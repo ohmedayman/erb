@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Truck, Package, MapPin, Clock } from "lucide-react";
-import { auth } from "@/lib/firebase";
+import { getDocsFromCollection } from "@/lib/localdb";
 
 const statusColors: Record<string, string> = {
   "In Transit": "bg-blue-50 text-blue-600",
@@ -25,11 +25,8 @@ export default function ShippingPage() {
   useEffect(() => {
     const fetchShipments = async () => {
       try {
-        const token = await auth.currentUser?.getIdToken();
-        const res = await fetch("/api/shipments", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const data = await res.json();
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
+        const data = getDocsFromCollection("shipments", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
         setShipments(data);
       } catch {
       } finally {

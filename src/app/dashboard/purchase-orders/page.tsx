@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { ShoppingCart, Plus, Search } from "lucide-react";
-import { auth } from "@/lib/firebase";
+import { getDocsFromCollection, addDocToCollection } from "@/lib/localdb";
 
 export default function PurchaseOrdersPage() {
   const [purchaseOrders, setPurchaseOrders] = useState<any[]>([]);
@@ -18,12 +18,9 @@ export default function PurchaseOrdersPage() {
 
   const fetchPurchaseOrders = async () => {
     try {
-      const token = await auth.currentUser?.getIdToken();
-      const res = await fetch("/api/purchase-orders", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      setPurchaseOrders(data.purchaseOrders || []);
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      const data = getDocsFromCollection("purchaseOrders", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
+      setPurchaseOrders(data || []);
     } catch {
     } finally {
       setLoading(false);
@@ -42,25 +39,18 @@ export default function PurchaseOrdersPage() {
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
-    const token = await auth.currentUser?.getIdToken();
-    const res = await fetch("/api/purchase-orders", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        supplierName: newOrder.supplierName,
-        items: parseInt(newOrder.items),
-        total: parseFloat(newOrder.total),
-        expectedDate: newOrder.expectedDate || undefined,
-      }),
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    addDocToCollection("purchaseOrders", {
+      supplierName: newOrder.supplierName,
+      items: parseInt(newOrder.items),
+      total: parseFloat(newOrder.total),
+      expectedDate: newOrder.expectedDate || undefined,
+      status: "Pending",
+      storeId: user.storeId,
     });
-    if (res.ok) {
-      setShowModal(false);
-      setNewOrder({ supplierName: "", items: "", total: "", expectedDate: "" });
-      fetchPurchaseOrders();
-    }
+    setShowModal(false);
+    setNewOrder({ supplierName: "", items: "", total: "", expectedDate: "" });
+    fetchPurchaseOrders();
   };
 
   const statusLabel = (status: string) => {

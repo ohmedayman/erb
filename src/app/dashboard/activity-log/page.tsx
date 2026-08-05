@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { PlusCircle, Edit3, Trash2, Clock, CircleDot } from "lucide-react";
-import { auth } from "@/lib/firebase";
+import { getDocsFromCollection } from "@/lib/localdb";
 
 const actionConfig: Record<string, { bg: string; text: string; icon: any; label: string }> = {
   create: { bg: "bg-green-50", text: "text-green-600", icon: PlusCircle, label: "إنشاء" },
@@ -29,11 +29,8 @@ export default function ActivityLogPage() {
   useEffect(() => {
     const fetchLogs = async () => {
       try {
-        const token = await auth.currentUser?.getIdToken();
-        const res = await fetch("/api/activity-logs", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const data = await res.json();
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
+        const data = getDocsFromCollection("activityLogs", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
         setLogs(data);
       } catch {
       } finally {

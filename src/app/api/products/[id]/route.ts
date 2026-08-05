@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyFirebaseToken } from "@/lib/auth";
-import { collections } from "@/lib/firestore";
+import { col } from "@/lib/firestore";
 
 export async function GET(
   request: NextRequest,
@@ -12,7 +12,8 @@ export async function GET(
   }
 
   const { id } = await params;
-  const doc = await collections.products.doc(id).get();
+  const productsCol = await col("products");
+  const doc = await productsCol.doc(id).get();
 
   if (!doc.exists || doc.data()?.storeId !== user.storeId) {
     return NextResponse.json({ error: "غير موجود" }, { status: 404 });
@@ -31,7 +32,8 @@ export async function PUT(
   }
 
   const { id } = await params;
-  const doc = await collections.products.doc(id).get();
+  const productsCol = await col("products");
+  const doc = await productsCol.doc(id).get();
 
   if (!doc.exists || doc.data()?.storeId !== user.storeId) {
     return NextResponse.json({ error: "غير موجود" }, { status: 404 });
@@ -60,8 +62,8 @@ export async function PUT(
     status,
   };
 
-  await collections.products.doc(id).update(updateData);
-  const updated = await collections.products.doc(id).get();
+  await productsCol.doc(id).update(updateData);
+  const updated = await productsCol.doc(id).get();
   return NextResponse.json({ id: updated.id, ...updated.data() });
 }
 
@@ -75,12 +77,13 @@ export async function DELETE(
   }
 
   const { id } = await params;
-  const doc = await collections.products.doc(id).get();
+  const productsCol = await col("products");
+  const doc = await productsCol.doc(id).get();
 
   if (!doc.exists || doc.data()?.storeId !== user.storeId) {
     return NextResponse.json({ error: "غير موجود" }, { status: 404 });
   }
 
-  await collections.products.doc(id).delete();
+  await productsCol.doc(id).delete();
   return NextResponse.json({ success: true });
 }

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Package, Plus, Search, Filter, Edit, Trash2, Eye, Printer } from "lucide-react";
-import { auth } from "@/lib/firebase";
+import { getDocsFromCollection, addDocToCollection, updateDocInCollection, deleteDocFromCollection } from "@/lib/localdb";
 
 function BarcodeCanvas({ value, width = 200, height = 80 }: { value: string; width?: number; height?: number }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -51,12 +51,9 @@ export default function ProductsPage() {
 
   const fetchProducts = async () => {
     try {
-      const token = await auth.currentUser?.getIdToken();
-      const res = await fetch("/api/products", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      setProducts(data);
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      const products = getDocsFromCollection("products", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
+      setProducts(products);
     } catch {
     } finally {
       setLoading(false);
@@ -69,47 +66,24 @@ export default function ProductsPage() {
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
-    const token = await auth.currentUser?.getIdToken();
-    const res = await fetch("/api/products", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ ...newProduct, price: parseFloat(newProduct.price), stock: parseInt(newProduct.stock), minStock: parseInt(newProduct.minStock || "10") }),
-    });
-    if (res.ok) {
-      setShowModal(false);
-      setNewProduct({ name: "", sku: "", category: "", price: "", stock: "", minStock: "" });
-      fetchProducts();
-    }
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    addDocToCollection("products", { ...newProduct, price: parseFloat(newProduct.price), stock: parseInt(newProduct.stock), minStock: parseInt(newProduct.minStock || "10"), storeId: user.storeId });
+    setShowModal(false);
+    setNewProduct({ name: "", sku: "", category: "", price: "", stock: "", minStock: "" });
+    fetchProducts();
   };
 
   const handleEdit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const token = await auth.currentUser?.getIdToken();
-    const res = await fetch(`/api/products/${editingProduct.id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ ...editingProduct, price: parseFloat(editingProduct.price), stock: parseInt(editingProduct.stock), minStock: parseInt(editingProduct.minStock) }),
-    });
-    if (res.ok) {
-      setEditingProduct(null);
-      fetchProducts();
-    }
+    updateDocInCollection("products", editingProduct.id, { ...editingProduct, price: parseFloat(editingProduct.price), stock: parseInt(editingProduct.stock), minStock: parseInt(editingProduct.minStock) });
+    setEditingProduct(null);
+    fetchProducts();
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm("هل أنت متأكد من حذف هذا المنتج؟")) return;
-    const token = await auth.currentUser?.getIdToken();
-    const res = await fetch(`/api/products/${id}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (res.ok) fetchProducts();
+    deleteDocFromCollection("products", id);
+    fetchProducts();
   };
 
   return (

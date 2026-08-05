@@ -13,8 +13,7 @@ import {
   TrendingUp,
   CreditCard,
 } from "lucide-react";
-import { auth } from "@/lib/firebase";
-
+import { getDocsFromCollection } from "@/lib/localdb";
 const statusMap: Record<string, string> = {
   Delivered: "تم التوصيل",
   Shipped: "تم الشحن",
@@ -29,12 +28,43 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const token = await auth.currentUser?.getIdToken();
-        const res = await fetch("/api/dashboard/stats", {
-          headers: { Authorization: `Bearer ${token}` },
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
+        const products = getDocsFromCollection("products", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
+        const orders = getDocsFromCollection("orders", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
+        const customers = getDocsFromCollection("customers", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
+        const invoices = getDocsFromCollection("invoices", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
+        const expenses = getDocsFromCollection("expenses", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
+        
+        const totalProducts = products.length;
+        const pendingOrders = orders.filter((o: any) => o.status === "Pending").length;
+        const totalCustomers = customers.length;
+        const totalInvoices = invoices.length;
+        const totalExpenses = expenses.reduce((sum: number, e: any) => sum + (e.amount || 0), 0);
+        const netProfit = totalInvoices - totalExpenses;
+        
+        const recentOrders = orders.slice(0, 5);
+        const recentInvoices = invoices.slice(0, 5);
+        const topProducts = products.slice(0, 5);
+        
+        const monthlyExpenses = expenses.slice(0, 6).map((e: any) => ({
+          month: new Date(e.date).toLocaleDateString("ar-SA", { month: "short" }),
+          amount: e.amount || 0,
+        }));
+
+        setData({
+          stats: {
+            totalProducts,
+            pendingOrders,
+          },
+          totalInvoices,
+          totalExpenses,
+          netProfit,
+          totalCustomers,
+          recentOrders,
+          recentInvoices,
+          topProducts,
+          monthlyExpenses,
         });
-        const json = await res.json();
-        setData(json);
       } catch {
       } finally {
         setLoading(false);

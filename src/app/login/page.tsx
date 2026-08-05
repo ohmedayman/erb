@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Warehouse, Eye, EyeOff, Globe } from "lucide-react";
+import { findUserByUsername, getDB } from "@/lib/localdb";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -13,36 +14,29 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const router = useRouter();
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
-    try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.error || "حدث خطأ");
+    setTimeout(() => {
+      const user = findUserByUsername(username);
+      if (user && user.password === password) {
+        localStorage.setItem("user", JSON.stringify({
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          fullName: user.fullName,
+          role: user.role,
+          storeId: user.storeId,
+        }));
+        localStorage.setItem("isLoggedIn", "true");
+        router.push("/dashboard");
+      } else {
+        setError("بيانات الدخول غير صحيحة");
         setLoading(false);
-        return;
       }
-
-      if (data.token) {
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("user", JSON.stringify(data.user));
-      }
-
-      router.push("/dashboard");
-    } catch (err: any) {
-      setError("حدث خطأ في الاتصال بالخادم");
-      setLoading(false);
-    }
+    }, 300);
   };
 
   return (

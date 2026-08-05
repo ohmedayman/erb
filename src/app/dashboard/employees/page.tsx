@@ -12,7 +12,7 @@ import {
   UserX,
   DollarSign,
 } from "lucide-react";
-import { auth } from "@/lib/firebase";
+import { getDocsFromCollection, addDocToCollection } from "@/lib/localdb";
 
 const statusLabels: Record<string, string> = {
   active: "نشط",
@@ -46,12 +46,9 @@ export default function EmployeesPage() {
 
   const fetchEmployees = async () => {
     try {
-      const token = await auth.currentUser?.getIdToken();
-      const res = await fetch("/api/employees", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      setEmployees(data);
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      const employees = getDocsFromCollection("employees", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
+      setEmployees(employees);
     } catch {
     } finally {
       setLoading(false);
@@ -77,31 +74,22 @@ export default function EmployeesPage() {
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
-    const token = await auth.currentUser?.getIdToken();
-    const res = await fetch("/api/employees", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(newEmployee),
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    addDocToCollection("employees", { ...newEmployee, storeId: user.storeId });
+    setShowModal(false);
+    setNewEmployee({
+      name: "",
+      email: "",
+      phone: "",
+      position: "",
+      department: "",
+      salary: "",
+      hireDate: new Date().toISOString().split("T")[0],
+      status: "active",
+      bankAccount: "",
+      nationalId: "",
     });
-    if (res.ok) {
-      setShowModal(false);
-      setNewEmployee({
-        name: "",
-        email: "",
-        phone: "",
-        position: "",
-        department: "",
-        salary: "",
-        hireDate: new Date().toISOString().split("T")[0],
-        status: "active",
-        bankAccount: "",
-        nationalId: "",
-      });
-      fetchEmployees();
-    }
+    fetchEmployees();
   };
 
   const formatCurrency = (amount: number) => {

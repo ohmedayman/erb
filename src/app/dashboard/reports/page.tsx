@@ -10,7 +10,7 @@ import {
   Package,
   AlertCircle,
 } from "lucide-react";
-import { auth } from "@/lib/firebase";
+import { getDocsFromCollection } from "@/lib/localdb";
 
 interface ReportData {
   totalRevenue: number;
@@ -38,12 +38,33 @@ export default function ReportsPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const token = await auth.currentUser?.getIdToken();
-        const res = await fetch("/api/reports", {
-          headers: { Authorization: `Bearer ${token}` },
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
+        const filters = user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : [];
+        const ordersData = getDocsFromCollection("orders", filters);
+        const productsData = getDocsFromCollection("products", filters);
+        const invoicesData = getDocsFromCollection("invoices", filters);
+        const expensesData = getDocsFromCollection("expenses", filters);
+        const customersData = getDocsFromCollection("customers", filters);
+
+        const totalRevenue = invoicesData.reduce((sum: number, i: any) => sum + (i.total || 0), 0);
+        const totalExpenses = expensesData.reduce((sum: number, e: any) => sum + (e.amount || 0), 0);
+        const netProfit = totalRevenue - totalExpenses;
+
+        setData({
+          totalRevenue,
+          totalExpenses,
+          netProfit,
+          topSellingProducts: productsData.slice(0, 5).map((p: any) => ({ name: p.name, quantity: p.stock || 0, revenue: (p.price || 0) * (p.stock || 0) })),
+          expensesByCategory: expensesData.reduce((acc: any[], e: any) => {
+            const existing = acc.find((a) => a.categoryKey === e.category);
+            if (existing) { existing.amount += e.amount || 0; } else { acc.push({ category: e.category, categoryKey: e.category, amount: e.amount || 0 }); }
+            return acc;
+          }, []),
+          monthlyRevenue: [],
+          outstandingInvoices: invoicesData.filter((i: any) => i.status !== "paid").slice(0, 10).map((i: any) => ({ id: i.id, invoiceNumber: i.invoiceNumber, customerName: i.customerName, total: i.total || 0, status: i.status, createdAt: i.createdAt || i.date })),
+          totalInvoices: invoicesData.length,
+          unpaidInvoices: invoicesData.filter((i: any) => i.status !== "paid").length,
         });
-        const json = await res.json();
-        setData(json);
       } catch {
       } finally {
         setLoading(false);

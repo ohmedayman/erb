@@ -15,7 +15,7 @@ import {
   User,
   Receipt,
 } from "lucide-react";
-import { auth } from "@/lib/firebase";
+import { getDocsFromCollection, addDocToCollection, updateDocInCollection } from "@/lib/localdb";
 
 interface Product {
   id: string;
@@ -60,11 +60,9 @@ export default function POSPage() {
 
   const fetchProducts = async () => {
     try {
-      const token = await auth.currentUser?.getIdToken();
-      const res = await fetch("/api/products", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      const filters = user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : [];
+      const data = getDocsFromCollection("products", filters);
       const activeProducts = data.filter((p: Product) => p.stock > 0);
       setProducts(activeProducts);
     } catch {
@@ -75,11 +73,9 @@ export default function POSPage() {
 
   const fetchCustomers = async () => {
     try {
-      const token = await auth.currentUser?.getIdToken();
-      const res = await fetch("/api/customers", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      const filters = user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : [];
+      const data = getDocsFromCollection("customers", filters);
       setCustomers(data);
     } catch {
     }
@@ -228,18 +224,11 @@ export default function POSPage() {
     if (cart.length === 0) return;
     setProcessing(true);
     try {
-      const token = await auth.currentUser?.getIdToken();
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
 
       for (const item of cart) {
-        await fetch(`/api/products/${item.product.id}`, {
-          method: "PUT",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            stock: item.product.stock - item.quantity,
-          }),
+        updateDocInCollection("products", item.product.id, {
+          stock: item.product.stock - item.quantity,
         });
       }
 
@@ -248,29 +237,23 @@ export default function POSPage() {
       const customerPhone =
         selectedCustomer?.phone || newCustomerPhone || "";
 
-      await fetch("/api/invoices", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          customerName: customerDisplayName,
-          customerPhone,
-          items: cart.map((item) => ({
-            name: item.product.name,
-            sku: item.product.sku,
-            quantity: item.quantity,
-            price: item.product.price,
-            total: item.product.price * item.quantity,
-          })),
-          subtotal,
-          tax,
-          total,
-          status: "paid",
-          paymentMethod,
-          notes: "تم البيع من نقطة البيع",
-        }),
+      addDocToCollection("invoices", {
+        customerName: customerDisplayName,
+        customerPhone,
+        items: cart.map((item) => ({
+          name: item.product.name,
+          sku: item.product.sku,
+          quantity: item.quantity,
+          price: item.product.price,
+          total: item.product.price * item.quantity,
+        })),
+        subtotal,
+        tax,
+        total,
+        status: "paid",
+        paymentMethod,
+        notes: "تم البيع من نقطة البيع",
+        storeId: user.storeId,
       });
 
       setCart([]);

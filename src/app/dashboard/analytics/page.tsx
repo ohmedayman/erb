@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { BarChart3, Package, ShoppingCart, TrendingUp } from "lucide-react";
-import { auth } from "@/lib/firebase";
+import { getDocsFromCollection } from "@/lib/localdb";
+
+
 import {
   BarChart,
   Bar,
@@ -44,20 +46,28 @@ export default function AnalyticsPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const token = await auth.currentUser?.getIdToken();
-        const headers = { Authorization: `Bearer ${token}` };
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
+        const filters = user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : [];
+        const ordersData = getDocsFromCollection("orders", filters);
+        const productsData = getDocsFromCollection("products", filters);
+        const invoicesData = getDocsFromCollection("invoices", filters);
+        const expensesData = getDocsFromCollection("expenses", filters);
+        const customersData = getDocsFromCollection("customers", filters);
 
-        const [statsRes, ordersRes, productsRes] = await Promise.all([
-          fetch("/api/dashboard/stats", { headers }),
-          fetch("/api/orders", { headers }),
-          fetch("/api/products", { headers }),
-        ]);
+        const totalProducts = productsData.length;
+        const pendingOrders = ordersData.filter((o: any) => o.status === "Pending").length;
+        const totalCustomers = customersData.length;
+        const totalInvoices = invoicesData.length;
+        const totalExpenses = expensesData.reduce((sum: number, e: any) => sum + (e.amount || 0), 0);
+        const netProfit = totalInvoices - totalExpenses;
 
-        const statsData = await statsRes.json();
-        const ordersData = await ordersRes.json();
-        const productsData = await productsRes.json();
-
-        setStats(statsData);
+        setStats({
+          stats: { totalProducts, pendingOrders },
+          totalInvoices,
+          totalExpenses,
+          netProfit,
+          totalCustomers,
+        });
         setOrders(Array.isArray(ordersData) ? ordersData : []);
         setProducts(Array.isArray(productsData) ? productsData : []);
       } catch {

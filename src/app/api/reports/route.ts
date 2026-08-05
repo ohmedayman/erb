@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyFirebaseToken } from "@/lib/auth";
-import { collections } from "@/lib/firestore";
+import { col } from "@/lib/firestore";
 
 export async function GET(request: NextRequest) {
   const user = await verifyFirebaseToken(request);
@@ -8,12 +8,19 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
   }
 
+  const [invoicesCol, expensesCol, productsCol, ordersCol] = await Promise.all([
+    col("invoices"),
+    col("expenses"),
+    col("products"),
+    col("orders"),
+  ]);
+
   const [invoicesSnap, expensesSnap, productsSnap, ordersSnap] =
     await Promise.all([
-      collections.invoices.where("storeId", "==", user.storeId).get(),
-      collections.expenses.where("storeId", "==", user.storeId).get(),
-      collections.products.where("storeId", "==", user.storeId).get(),
-      collections.orders.where("storeId", "==", user.storeId).get(),
+      invoicesCol.where("storeId", "==", user.storeId).get(),
+      expensesCol.where("storeId", "==", user.storeId).get(),
+      productsCol.where("storeId", "==", user.storeId).get(),
+      ordersCol.where("storeId", "==", user.storeId).get(),
     ]);
 
   const invoices = invoicesSnap.docs.map(

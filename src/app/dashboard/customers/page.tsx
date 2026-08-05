@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Search, Plus, X, Edit2 } from "lucide-react";
-import { auth } from "@/lib/firebase";
+import { getDocsFromCollection, addDocToCollection, updateDocInCollection } from "@/lib/localdb";
 
 interface Customer {
   id: string;
@@ -40,12 +40,9 @@ export default function CustomersPage() {
 
   const fetchCustomers = async () => {
     try {
-      const token = await auth.currentUser?.getIdToken();
-      const res = await fetch("/api/customers", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      setCustomers(data);
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      const customers = getDocsFromCollection("customers", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
+      setCustomers(customers);
     } catch {
     } finally {
       setLoading(false);
@@ -92,25 +89,11 @@ export default function CustomersPage() {
   const handleSubmit = async () => {
     if (!form.name) return;
     try {
-      const token = await auth.currentUser?.getIdToken();
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
       if (editingCustomer) {
-        await fetch(`/api/customers/${editingCustomer.id}`, {
-          method: "PUT",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(form),
-        });
+        updateDocInCollection("customers", editingCustomer.id, { ...form, storeId: user.storeId });
       } else {
-        await fetch("/api/customers", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(form),
-        });
+        addDocToCollection("customers", { ...form, storeId: user.storeId });
       }
       setShowModal(false);
       fetchCustomers();

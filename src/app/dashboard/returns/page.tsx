@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { RotateCcw, Plus, X } from "lucide-react";
-import { auth } from "@/lib/firebase";
+import { getDocsFromCollection, addDocToCollection } from "@/lib/localdb";
 
 const statusConfig: Record<string, { bg: string; text: string; label: string }> = {
   Pending: { bg: "bg-yellow-50", text: "text-yellow-600", label: "معلق" },
@@ -27,11 +27,8 @@ export default function ReturnsPage() {
 
   const fetchReturns = async () => {
     try {
-      const token = await auth.currentUser?.getIdToken();
-      const res = await fetch("/api/returns", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      const data = getDocsFromCollection("returns", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
       setReturns(data);
     } catch {
     } finally {
@@ -47,15 +44,8 @@ export default function ReturnsPage() {
     e.preventDefault();
     setSubmitting(true);
     try {
-      const token = await auth.currentUser?.getIdToken();
-      await fetch("/api/returns", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(form),
-      });
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      addDocToCollection("returns", { ...form, storeId: user.storeId });
       setShowModal(false);
       setForm({
         orderNumber: "",

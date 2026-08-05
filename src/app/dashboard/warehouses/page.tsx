@@ -10,7 +10,7 @@ import {
   MapPin,
   User,
 } from "lucide-react";
-import { auth } from "@/lib/firebase";
+import { getDocsFromCollection, addDocToCollection, updateDocInCollection, deleteDocFromCollection } from "@/lib/localdb";
 
 export default function WarehousesPage() {
   const [warehouses, setWarehouses] = useState<any[]>([]);
@@ -30,11 +30,8 @@ export default function WarehousesPage() {
 
   const fetchWarehouses = async () => {
     try {
-      const token = await auth.currentUser?.getIdToken();
-      const res = await fetch("/api/warehouses", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      const data = getDocsFromCollection("warehouses", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
       setWarehouses(data);
     } catch {
     } finally {
@@ -54,61 +51,32 @@ export default function WarehousesPage() {
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
-    const token = await auth.currentUser?.getIdToken();
-    const res = await fetch("/api/warehouses", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        ...newWarehouse,
-        capacity: parseInt(newWarehouse.capacity) || 0,
-      }),
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    addDocToCollection("warehouses", { ...newWarehouse, capacity: parseInt(newWarehouse.capacity) || 0, storeId: user.storeId });
+    setShowModal(false);
+    setNewWarehouse({
+      name: "",
+      code: "",
+      address: "",
+      city: "",
+      capacity: "",
+      manager: "",
+      phone: "",
     });
-    if (res.ok) {
-      setShowModal(false);
-      setNewWarehouse({
-        name: "",
-        code: "",
-        address: "",
-        city: "",
-        capacity: "",
-        manager: "",
-        phone: "",
-      });
-      fetchWarehouses();
-    }
+    fetchWarehouses();
   };
 
   const handleEdit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const token = await auth.currentUser?.getIdToken();
-    const res = await fetch(`/api/warehouses/${editingWarehouse.id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        ...editingWarehouse,
-        capacity: parseInt(editingWarehouse.capacity) || 0,
-      }),
-    });
-    if (res.ok) {
-      setEditingWarehouse(null);
-      fetchWarehouses();
-    }
+    updateDocInCollection("warehouses", editingWarehouse.id, { ...editingWarehouse, capacity: parseInt(editingWarehouse.capacity) || 0 });
+    setEditingWarehouse(null);
+    fetchWarehouses();
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm("هل أنت متأكد من حذف هذا المستودع؟")) return;
-    const token = await auth.currentUser?.getIdToken();
-    const res = await fetch(`/api/warehouses/${id}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (res.ok) fetchWarehouses();
+    deleteDocFromCollection("warehouses", id);
+    fetchWarehouses();
   };
 
   const openModal = (warehouse?: any) => {

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { UserPlus, Shield, Edit, Trash2 } from "lucide-react";
-import { auth } from "@/lib/firebase";
+import { getDocsFromCollection, addDocToCollection, deleteDocFromCollection } from "@/lib/localdb";
 
 const roleColors: Record<string, string> = {
   Admin: "bg-purple-50 text-purple-600",
@@ -28,11 +28,8 @@ export default function TeamPage() {
 
   const fetchMembers = async () => {
     try {
-      const token = await auth.currentUser?.getIdToken();
-      const res = await fetch("/api/team", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      const data = getDocsFromCollection("teamMembers", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
       setMembers(data);
     } catch {
     } finally {
@@ -44,20 +41,11 @@ export default function TeamPage() {
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
-    const token = await auth.currentUser?.getIdToken();
-    const res = await fetch("/api/team", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(newMember),
-    });
-    if (res.ok) {
-      setShowModal(false);
-      setNewMember({ name: "", email: "", role: "Staff" });
-      fetchMembers();
-    }
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    addDocToCollection("teamMembers", { ...newMember, status: "Active", storeId: user.storeId });
+    setShowModal(false);
+    setNewMember({ name: "", email: "", role: "Staff" });
+    fetchMembers();
   };
 
   return (

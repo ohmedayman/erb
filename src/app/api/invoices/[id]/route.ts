@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyFirebaseToken } from "@/lib/auth";
-import { collections } from "@/lib/firestore";
+import { col } from "@/lib/firestore";
 
 export async function GET(
   request: NextRequest,
@@ -12,7 +12,8 @@ export async function GET(
   }
 
   const { id } = await params;
-  const doc = await collections.invoices.doc(id).get();
+  const invoicesCol = await col("invoices");
+  const doc = await invoicesCol.doc(id).get();
 
   if (!doc.exists || doc.data()?.storeId !== user.storeId) {
     return NextResponse.json({ error: "غير موجود" }, { status: 404 });
@@ -31,7 +32,8 @@ export async function PUT(
   }
 
   const { id } = await params;
-  const doc = await collections.invoices.doc(id).get();
+  const invoicesCol = await col("invoices");
+  const doc = await invoicesCol.doc(id).get();
 
   if (!doc.exists || doc.data()?.storeId !== user.storeId) {
     return NextResponse.json({ error: "غير موجود" }, { status: 404 });
@@ -53,8 +55,8 @@ export async function PUT(
     updatedAt: new Date().toISOString(),
   };
 
-  await collections.invoices.doc(id).update(updateData);
-  const updated = await collections.invoices.doc(id).get();
+  await invoicesCol.doc(id).update(updateData);
+  const updated = await invoicesCol.doc(id).get();
   return NextResponse.json({ id: updated.id, ...updated.data() });
 }
 
@@ -68,12 +70,13 @@ export async function DELETE(
   }
 
   const { id } = await params;
-  const doc = await collections.invoices.doc(id).get();
+  const invoicesCol = await col("invoices");
+  const doc = await invoicesCol.doc(id).get();
 
   if (!doc.exists || doc.data()?.storeId !== user.storeId) {
     return NextResponse.json({ error: "غير موجود" }, { status: 404 });
   }
 
-  await collections.invoices.doc(id).delete();
+  await invoicesCol.doc(id).delete();
   return NextResponse.json({ success: true });
 }

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyFirebaseToken } from "@/lib/auth";
-import { collections } from "@/lib/firestore";
+import { col } from "@/lib/firestore";
 
 export async function GET(
   request: NextRequest,
@@ -12,7 +12,8 @@ export async function GET(
   }
 
   const { id } = await params;
-  const doc = await collections.orders.doc(id).get();
+  const ordersCol = await col("orders");
+  const doc = await ordersCol.doc(id).get();
 
   if (!doc.exists || doc.data()?.storeId !== user.storeId) {
     return NextResponse.json({ error: "غير موجود" }, { status: 404 });
@@ -31,7 +32,8 @@ export async function PUT(
   }
 
   const { id } = await params;
-  const doc = await collections.orders.doc(id).get();
+  const ordersCol = await col("orders");
+  const doc = await ordersCol.doc(id).get();
 
   if (!doc.exists || doc.data()?.storeId !== user.storeId) {
     return NextResponse.json({ error: "غير موجود" }, { status: 404 });
@@ -48,7 +50,7 @@ export async function PUT(
     payment: body.payment ?? existing.payment,
   };
 
-  await collections.orders.doc(id).update(updateData);
-  const updated = await collections.orders.doc(id).get();
+  await ordersCol.doc(id).update(updateData);
+  const updated = await ordersCol.doc(id).get();
   return NextResponse.json({ id: updated.id, ...updated.data() });
 }

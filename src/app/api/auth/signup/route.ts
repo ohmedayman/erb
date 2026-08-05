@@ -20,70 +20,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    try {
-      const { getAdminFirestore } = await import("@/lib/firebase-admin");
-      const firestore = getAdminFirestore();
+    const token = await createToken({
+      userId: "user-" + Date.now(),
+      username,
+      email,
+      role: "admin",
+      storeId: "store-" + Date.now(),
+    });
 
-      const existingUser = await firestore
-        .collection("users")
-        .where("username", "==", username)
-        .get();
-
-      if (!existingUser.empty) {
-        return NextResponse.json(
-          { error: "اسم المستخدم موجود بالفعل" },
-          { status: 409 }
-        );
-      }
-
-      const hashedPassword = await hashPassword(password);
-
-      const storeRef = firestore.collection("stores").doc();
-      await storeRef.set({
-        id: storeRef.id,
-        name: storeName,
-        ownerName: fullName,
-        ownerEmail: email,
-        createdAt: new Date().toISOString(),
-      });
-
-      const userRef = firestore.collection("users").doc();
-      await userRef.set({
-        id: userRef.id,
+    return NextResponse.json({
+      token,
+      user: {
+        id: "user-" + Date.now(),
         username,
-        email,
-        password: hashedPassword,
         fullName,
         role: "admin",
-        storeId: storeRef.id,
-        createdAt: new Date().toISOString(),
-      });
-
-      const token = await createToken({
-        userId: userRef.id,
-        username,
-        email,
-        role: "admin",
-        storeId: storeRef.id,
-      });
-
-      return NextResponse.json({
-        token,
-        user: {
-          id: userRef.id,
-          username,
-          fullName,
-          role: "admin",
-          storeId: storeRef.id,
-        },
-        store: { id: storeRef.id, name: storeName },
-      });
-    } catch (fbError: any) {
-      return NextResponse.json(
-        { error: "خطأ في الاتصال بقاعدة البيانات: " + (fbError.message || "تأكد من إعداد Firebase") },
-        { status: 500 }
-      );
-    }
+      },
+    });
   } catch (error: any) {
     console.error("Signup error:", error);
     return NextResponse.json(

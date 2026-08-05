@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyFirebaseToken } from "@/lib/auth";
-import { collections } from "@/lib/firestore";
+import { col } from "@/lib/firestore";
 
 export async function GET(request: NextRequest) {
   const user = await verifyFirebaseToken(request);
@@ -8,7 +8,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
   }
 
-  const snapshot = await collections.stockMovements
+  const stockMovementsCol = await col("stockMovements");
+  const snapshot = await stockMovementsCol
     .where("storeId", "==", user.storeId)
     .get();
 
@@ -47,7 +48,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "جميع الحقول المطلوبة مفقودة" }, { status: 400 });
   }
 
-  const docRef = await collections.stockMovements.add({
+  const stockMovementsCol = await col("stockMovements");
+  const docRef = await stockMovementsCol.add({
     productName,
     sku,
     type,

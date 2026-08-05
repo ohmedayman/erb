@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyFirebaseToken } from "@/lib/auth";
-import { collections } from "@/lib/firestore";
+import { col } from "@/lib/firestore";
 
 export async function GET(request: NextRequest) {
   const user = await verifyFirebaseToken(request);
@@ -8,7 +8,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
   }
 
-  const snapshot = await collections.invoices
+  const invoicesCol = await col("invoices");
+  const snapshot = await invoicesCol
     .where("storeId", "==", user.storeId)
     .get();
 
@@ -60,7 +61,8 @@ export async function POST(request: NextRequest) {
   const calculatedTotal = calculatedSubtotal + calculatedTax;
   const finalTotal = total !== undefined ? parseFloat(total) : calculatedTotal;
 
-  const docRef = await collections.invoices.add({
+  const invoicesCol = await col("invoices");
+  const docRef = await invoicesCol.add({
     invoiceNumber,
     customerName,
     customerPhone: customerPhone || "",
@@ -87,7 +89,8 @@ export async function POST(request: NextRequest) {
     const installmentAmount = finalTotal / installmentCount;
     const startDate = new Date().toISOString().split("T")[0];
 
-    await collections.installments.add({
+    const installmentsCol = await col("installments");
+    await installmentsCol.add({
       invoiceId: docRef.id,
       invoiceNumber,
       customerName,

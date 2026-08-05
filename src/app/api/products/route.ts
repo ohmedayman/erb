@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyFirebaseToken } from "@/lib/auth";
-import { collections } from "@/lib/firestore";
+import { col } from "@/lib/firestore";
 
 export async function GET(request: NextRequest) {
   const user = await verifyFirebaseToken(request);
@@ -8,7 +8,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
   }
 
-  const snapshot = await collections.products
+  const productsCol = await col("products");
+  const snapshot = await productsCol
     .where("storeId", "==", user.storeId)
     .get();
 
@@ -41,7 +42,8 @@ export async function POST(request: NextRequest) {
   if (st === 0) status = "Out of Stock";
   else if (st <= min) status = "Low Stock";
 
-  const docRef = await collections.products.add({
+  const productsCol = await col("products");
+  const docRef = await productsCol.add({
     name,
     sku: finalSku,
     category,

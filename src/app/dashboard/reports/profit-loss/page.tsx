@@ -9,7 +9,7 @@ import {
   FileText,
   Download,
 } from "lucide-react";
-import { auth } from "@/lib/firebase";
+import { getDocsFromCollection } from "@/lib/localdb";
 
 interface MonthlyBreakdown {
   month: string;
@@ -51,12 +51,30 @@ export default function ProfitLossPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const token = await auth.currentUser?.getIdToken();
-        const res = await fetch("/api/reports/profit-loss", {
-          headers: { Authorization: `Bearer ${token}` },
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
+        const filters = user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : [];
+        const invoicesData = getDocsFromCollection("invoices", filters);
+        const expensesData = getDocsFromCollection("expenses", filters);
+
+        const totalRevenue = invoicesData.reduce((sum: number, i: any) => sum + (i.total || 0), 0);
+        const totalExpenses = expensesData.reduce((sum: number, e: any) => sum + (e.amount || 0), 0);
+        const grossProfit = totalRevenue - totalExpenses;
+        const netProfit = grossProfit;
+        const profitMargin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
+
+        setData({
+          totalRevenue,
+          totalExpenses,
+          grossProfit,
+          netProfit,
+          profitMargin,
+          monthlyBreakdown: [],
+          expenseCategories: expensesData.reduce((acc: any[], e: any) => {
+            const existing = acc.find((a) => a.key === e.category);
+            if (existing) { existing.amount += e.amount || 0; } else { acc.push({ key: e.category || "other", label: e.category || "أخرى", amount: e.amount || 0, percentage: 0 }); }
+            return acc;
+          }, []),
         });
-        const json = await res.json();
-        setData(json);
       } catch {
       } finally {
         setLoading(false);

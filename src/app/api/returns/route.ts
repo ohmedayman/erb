@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyFirebaseToken } from "@/lib/auth";
-import { collections } from "@/lib/firestore";
+import { col } from "@/lib/firestore";
 
 export async function GET(request: NextRequest) {
   const user = await verifyFirebaseToken(request);
@@ -8,7 +8,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
   }
 
-  const snapshot = await collections.returns
+  const returnsCol = await col("returns");
+  const snapshot = await returnsCol
     .where("storeId", "==", user.storeId)
     .get();
 
@@ -49,7 +50,8 @@ export async function POST(request: NextRequest) {
   const timestamp = Date.now().toString(36).toUpperCase();
   const returnNumber = `RET-${timestamp}`;
 
-  const docRef = await collections.returns.add({
+  const returnsCol = await col("returns");
+  const docRef = await returnsCol.add({
     returnNumber,
     orderNumber,
     customerName,

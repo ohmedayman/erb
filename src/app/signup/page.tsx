@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Warehouse, Eye, EyeOff, Globe, CheckCircle } from "lucide-react";
+import { getDB, saveDB, findUserByUsername, addDocToCollection } from "@/lib/localdb";
 
 export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -18,40 +19,53 @@ export default function SignupPage() {
   const [error, setError] = useState("");
   const router = useRouter();
 
-  const handleSignup = async (e: React.FormEvent) => {
+  const handleSignup = (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
     try {
-      const res = await fetch("/api/auth/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: formData.username,
-          email: formData.email,
-          password: formData.password,
-          fullName: formData.name,
-          storeName: formData.storeName,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.error || "حدث خطأ");
+      if (findUserByUsername(formData.username)) {
+        setError("اسم المستخدم موجود بالفعل");
         setLoading(false);
         return;
       }
 
-      if (data.token) {
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("user", JSON.stringify(data.user));
-      }
+      const storeId = "store-" + Date.now().toString(36);
+      const userId = "user-" + Date.now().toString(36);
+
+      addDocToCollection("stores", {
+        id: storeId,
+        name: formData.storeName,
+        ownerName: formData.name,
+        ownerEmail: formData.email,
+      });
+
+      const db = getDB();
+      db.users.push({
+        id: userId,
+        username: formData.username,
+        password: formData.password,
+        fullName: formData.name,
+        email: formData.email,
+        role: "admin",
+        storeId,
+      });
+      saveDB(db);
+
+      localStorage.setItem("user", JSON.stringify({
+        id: userId,
+        username: formData.username,
+        fullName: formData.name,
+        email: formData.email,
+        role: "admin",
+        storeId,
+      }));
+      localStorage.setItem("isLoggedIn", "true");
 
       router.push("/dashboard");
     } catch (err: any) {
-      setError("حدث خطأ في الاتصال بالخادم");
+      setError("حدث خطأ: " + err.message);
       setLoading(false);
     }
   };

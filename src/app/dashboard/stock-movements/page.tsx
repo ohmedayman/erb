@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { ArrowDownCircle, ArrowUpCircle, ArrowLeftRight, Plus, X } from "lucide-react";
-import { auth } from "@/lib/firebase";
+import { getDocsFromCollection, addDocToCollection } from "@/lib/localdb";
 
 const typeConfig: Record<string, { bg: string; text: string; label: string; icon: any }> = {
   "إدخال": { bg: "bg-green-50", text: "text-green-600", label: "إدخال", icon: ArrowDownCircle },
@@ -28,11 +28,8 @@ export default function StockMovementsPage() {
 
   const fetchMovements = async () => {
     try {
-      const token = await auth.currentUser?.getIdToken();
-      const res = await fetch("/api/stock-movements", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      const data = getDocsFromCollection("stockMovements", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
       setMovements(data);
     } catch {
     } finally {
@@ -48,15 +45,8 @@ export default function StockMovementsPage() {
     e.preventDefault();
     setSubmitting(true);
     try {
-      const token = await auth.currentUser?.getIdToken();
-      await fetch("/api/stock-movements", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(form),
-      });
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      addDocToCollection("stockMovements", { ...form, storeId: user.storeId });
       setShowModal(false);
       setForm({
         productName: "",

@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { Search, Eye, ChevronDown } from "lucide-react";
-import { auth } from "@/lib/firebase";
+import { getDocsFromCollection } from "@/lib/localdb";
+
 
 const statusColors: Record<string, string> = {
   Pending: "bg-yellow-50 text-yellow-600",
@@ -41,12 +42,9 @@ export default function OrdersPage() {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const token = await auth.currentUser?.getIdToken();
-        const res = await fetch("/api/orders", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const data = await res.json();
-        setOrders(data);
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
+        const orders = getDocsFromCollection("orders", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
+        setOrders(orders);
       } catch {
       } finally {
         setLoading(false);

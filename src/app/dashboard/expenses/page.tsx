@@ -16,7 +16,7 @@ import {
   Tag,
   X,
 } from "lucide-react";
-import { auth } from "@/lib/firebase";
+import { getDocsFromCollection, addDocToCollection } from "@/lib/localdb";
 
 const categoryLabels: Record<string, string> = {
   rent: "إيجار",
@@ -62,12 +62,9 @@ export default function ExpensesPage() {
 
   const fetchExpenses = async () => {
     try {
-      const token = await auth.currentUser?.getIdToken();
-      const res = await fetch("/api/expenses", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      setExpenses(data);
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      const expenses = getDocsFromCollection("expenses", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
+      setExpenses(expenses);
     } catch {
     } finally {
       setLoading(false);
@@ -123,28 +120,19 @@ export default function ExpensesPage() {
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
-    const token = await auth.currentUser?.getIdToken();
-    const res = await fetch("/api/expenses", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(newExpense),
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    addDocToCollection("expenses", { ...newExpense, storeId: user.storeId });
+    setShowModal(false);
+    setNewExpense({
+      description: "",
+      amount: "",
+      category: "rent",
+      paymentMethod: "cash",
+      date: new Date().toISOString().split("T")[0],
+      notes: "",
+      receiptNumber: "",
     });
-    if (res.ok) {
-      setShowModal(false);
-      setNewExpense({
-        description: "",
-        amount: "",
-        category: "rent",
-        paymentMethod: "cash",
-        date: new Date().toISOString().split("T")[0],
-        notes: "",
-        receiptNumber: "",
-      });
-      fetchExpenses();
-    }
+    fetchExpenses();
   };
 
   const formatCurrency = (amount: number) => {

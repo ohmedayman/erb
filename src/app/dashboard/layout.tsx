@@ -10,8 +10,7 @@ import {
   Receipt, CreditCard, UserCircle, Wallet, BookOpen, NotebookPen, UserCog, PieChart,
   CalendarCheck, TrendingUp,
 } from "lucide-react";
-import { auth } from "@/lib/firebase";
-import { onAuthStateChanged, signOut } from "firebase/auth";
+
 
 const sidebarLinks = [
   { href: "/dashboard", label: "لوحة التحكم", icon: LayoutDashboard },
@@ -49,28 +48,21 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [username, setUsername] = useState("مستخدم");
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        router.push("/login");
-        return;
-      }
-      setUsername(user.displayName || user.email || "مستخدم");
-      const token = await user.getIdToken();
-      localStorage.setItem("firebaseToken", token);
-    });
-
-    return () => unsubscribe();
+    const isLoggedIn = localStorage.getItem("isLoggedIn");
+    const user = JSON.parse(localStorage.getItem("user") || "null");
+    if (!isLoggedIn || !user) {
+      router.push("/login");
+      return;
+    }
+    setUsername(user.fullName || user.username || "مستخدم");
   }, [router]);
 
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      localStorage.removeItem("firebaseToken");
-      router.push("/login");
-    } catch {
-      localStorage.removeItem("firebaseToken");
-      router.push("/login");
-    }
+  const handleLogout = () => {
+    localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    localStorage.removeItem("firebaseToken");
+    router.push("/login");
   };
 
   return (

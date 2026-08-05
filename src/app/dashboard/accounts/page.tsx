@@ -10,7 +10,7 @@ import {
   DollarSign,
   X,
 } from "lucide-react";
-import { auth } from "@/lib/firebase";
+import { getDocsFromCollection, addDocToCollection } from "@/lib/localdb";
 
 const typeLabels: Record<string, string> = {
   asset: "أصول",
@@ -50,12 +50,9 @@ export default function AccountsPage() {
 
   const fetchAccounts = async () => {
     try {
-      const token = await auth.currentUser?.getIdToken();
-      const res = await fetch("/api/accounts", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      setAccounts(data);
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      const accounts = getDocsFromCollection("accounts", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
+      setAccounts(accounts);
     } catch {
     } finally {
       setLoading(false);
@@ -84,26 +81,17 @@ export default function AccountsPage() {
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
-    const token = await auth.currentUser?.getIdToken();
-    const res = await fetch("/api/accounts", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(newAccount),
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    addDocToCollection("accounts", { ...newAccount, storeId: user.storeId });
+    setShowModal(false);
+    setNewAccount({
+      name: "",
+      type: "asset",
+      parentCode: "",
+      balance: "",
+      notes: "",
     });
-    if (res.ok) {
-      setShowModal(false);
-      setNewAccount({
-        name: "",
-        type: "asset",
-        parentCode: "",
-        balance: "",
-        notes: "",
-      });
-      fetchAccounts();
-    }
+    fetchAccounts();
   };
 
   const toggleType = (type: string) => {

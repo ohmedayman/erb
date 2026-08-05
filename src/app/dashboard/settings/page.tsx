@@ -5,7 +5,7 @@ import {
   Store, User, Bell, Shield, Save, Camera, MapPin, Phone,
   Mail, Globe, Building2, CheckCircle, AlertCircle,
 } from "lucide-react";
-import { auth } from "@/lib/firebase";
+import { getDocsFromCollection, updateDocInCollection } from "@/lib/localdb";
 
 const tabs = [
   { id: "store", label: "معلومات المتجر", icon: Store },
@@ -26,12 +26,10 @@ export default function SettingsPage() {
   useEffect(() => {
     const fetchStore = async () => {
       try {
-        const token = await auth.currentUser?.getIdToken();
-        const res = await fetch("/api/stores", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const data = await res.json();
-        setStoreData(data);
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
+        const filters = user.storeId ? [{ field: "id", op: "==", value: user.storeId }] : [];
+        const data = getDocsFromCollection("stores", filters);
+        setStoreData(data[0] || { name: "", phone: "", email: "" });
       } catch {
       } finally {
         setLoading(false);
@@ -41,21 +39,11 @@ export default function SettingsPage() {
   }, []);
 
   const handleSave = async () => {
-    const token = await auth.currentUser?.getIdToken();
-    const res = await fetch("/api/stores", {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(storeData),
-    });
-    if (res.ok) {
-      const updated = await res.json();
-      setStoreData(updated);
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
+    if (storeData?.id) {
+      updateDocInCollection("stores", storeData.id, storeData);
     }
+    setSaved(true);
+    setTimeout(() => setSaved(false), 3000);
   };
 
   const updateField = (field: string, value: any) => {

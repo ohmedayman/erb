@@ -11,7 +11,7 @@ import {
   Mail,
   Phone,
 } from "lucide-react";
-import { auth } from "@/lib/firebase";
+import { getDocsFromCollection, addDocToCollection, updateDocInCollection, deleteDocFromCollection } from "@/lib/localdb";
 
 export default function SuppliersPage() {
   const [suppliers, setSuppliers] = useState<any[]>([]);
@@ -32,12 +32,9 @@ export default function SuppliersPage() {
 
   const fetchSuppliers = async () => {
     try {
-      const token = await auth.currentUser?.getIdToken();
-      const res = await fetch("/api/suppliers", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      setSuppliers(data);
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      const suppliers = getDocsFromCollection("suppliers", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
+      setSuppliers(suppliers);
     } catch {
     } finally {
       setLoading(false);
@@ -56,62 +53,33 @@ export default function SuppliersPage() {
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
-    const token = await auth.currentUser?.getIdToken();
-    const res = await fetch("/api/suppliers", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        ...newSupplier,
-        rating: newSupplier.rating || 5,
-      }),
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    addDocToCollection("suppliers", { ...newSupplier, rating: newSupplier.rating || 5, storeId: user.storeId });
+    setShowModal(false);
+    setNewSupplier({
+      name: "",
+      code: "",
+      contactName: "",
+      email: "",
+      phone: "",
+      address: "",
+      category: "",
+      rating: 5,
     });
-    if (res.ok) {
-      setShowModal(false);
-      setNewSupplier({
-        name: "",
-        code: "",
-        contactName: "",
-        email: "",
-        phone: "",
-        address: "",
-        category: "",
-        rating: 5,
-      });
-      fetchSuppliers();
-    }
+    fetchSuppliers();
   };
 
   const handleEdit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const token = await auth.currentUser?.getIdToken();
-    const res = await fetch(`/api/suppliers/${editingSupplier.id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        ...editingSupplier,
-        rating: parseInt(editingSupplier.rating) || 0,
-      }),
-    });
-    if (res.ok) {
-      setEditingSupplier(null);
-      fetchSuppliers();
-    }
+    updateDocInCollection("suppliers", editingSupplier.id, { ...editingSupplier, rating: parseInt(editingSupplier.rating) || 0 });
+    setEditingSupplier(null);
+    fetchSuppliers();
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm("هل أنت متأكد من حذف هذا المورد؟")) return;
-    const token = await auth.currentUser?.getIdToken();
-    const res = await fetch(`/api/suppliers/${id}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (res.ok) fetchSuppliers();
+    deleteDocFromCollection("suppliers", id);
+    fetchSuppliers();
   };
 
   const openModal = (supplier?: any) => {

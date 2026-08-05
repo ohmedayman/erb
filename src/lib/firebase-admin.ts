@@ -1,11 +1,10 @@
-import { initializeApp, getApps, cert, App } from "firebase-admin/app";
-import { getFirestore } from "firebase-admin/firestore";
-import { getAuth } from "firebase-admin/auth";
+let adminApp: any = null;
 
-let adminApp: App | null = null;
-
-function getAdminApp(): App {
+async function getAdminApp(): Promise<any> {
   if (adminApp) return adminApp;
+
+  const { initializeApp, getApps, cert } = await import("firebase-admin/app");
+
   if (getApps().length > 0) {
     adminApp = getApps()[0];
     return adminApp;
@@ -61,10 +60,14 @@ epmXdZ0tvGwOWequxytIxw==
   return adminApp;
 }
 
-export function getAdminFirestore() {
-  return getFirestore(getAdminApp());
+export async function getAdminFirestore() {
+  const { getFirestore } = await import("firebase-admin/firestore");
+  const app = await getAdminApp();
+  return getFirestore(app);
 }
 
-export function getAdminAuth() {
-  return getAuth(getAdminApp());
+export async function getAdminAuth() {
+  const { getAuth } = await import("firebase-admin/auth");
+  const app = await getAdminApp();
+  return getAuth(app);
 }

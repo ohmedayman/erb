@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Search, Plus, X, Trash2, Printer, ChevronDown } from "lucide-react";
-import { auth } from "@/lib/firebase";
+import { getDocsFromCollection, addDocToCollection, deleteDocFromCollection } from "@/lib/localdb";
 
 interface InvoiceItem {
   name: string;
@@ -58,12 +58,9 @@ export default function InvoicesPage() {
 
   const fetchInvoices = async () => {
     try {
-      const token = await auth.currentUser?.getIdToken();
-      const res = await fetch("/api/invoices", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      setInvoices(data);
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      const invoices = getDocsFromCollection("invoices", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
+      setInvoices(invoices);
     } catch {
     } finally {
       setLoading(false);
@@ -112,21 +109,15 @@ export default function InvoicesPage() {
   const handleSubmit = async () => {
     if (!form.customerName || items.length === 0) return;
     try {
-      const token = await auth.currentUser?.getIdToken();
-      await fetch("/api/invoices", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ...form,
-          items,
-          subtotal,
-          tax,
-          total,
-          status: "unpaid",
-        }),
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      addDocToCollection("invoices", {
+        ...form,
+        items,
+        subtotal,
+        tax,
+        total,
+        status: "unpaid",
+        storeId: user.storeId,
       });
       setShowModal(false);
       setForm({ customerName: "", customerPhone: "", notes: "", paymentMethod: "cash" });

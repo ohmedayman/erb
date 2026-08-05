@@ -11,7 +11,7 @@ import {
   AlertCircle,
   Wallet,
 } from "lucide-react";
-import { auth } from "@/lib/firebase";
+import { getDocsFromCollection, addDocToCollection } from "@/lib/localdb";
 
 interface Installment {
   id: string;
@@ -53,11 +53,8 @@ export default function InstallmentsPage() {
 
   const fetchInstallments = async () => {
     try {
-      const token = await auth.currentUser?.getIdToken();
-      const res = await fetch("/api/installments", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      const data = getDocsFromCollection("installments", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
       setInstallments(data);
     } catch {
     } finally {
@@ -102,12 +99,10 @@ export default function InstallmentsPage() {
     const installmentAmount =
       numberOfInstallments > 0 ? totalAmount / numberOfInstallments : 0;
 
-    const token = await auth.currentUser?.getIdToken();
     const res = await fetch("/api/installments", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
         ...newInstallment,

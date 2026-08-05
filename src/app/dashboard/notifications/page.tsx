@@ -9,7 +9,7 @@ import {
   CheckCircle,
   ShoppingCart,
 } from "lucide-react";
-import { auth } from "@/lib/firebase";
+import { getDocsFromCollection, updateDocInCollection } from "@/lib/localdb";
 
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<any[]>([]);
@@ -17,12 +17,9 @@ export default function NotificationsPage() {
 
   const fetchNotifications = async () => {
     try {
-      const token = await auth.currentUser?.getIdToken();
-      const res = await fetch("/api/notifications", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      setNotifications(data.notifications || []);
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      const data = getDocsFromCollection("notifications", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
+      setNotifications(data || []);
     } catch {
     } finally {
       setLoading(false);
@@ -35,15 +32,7 @@ export default function NotificationsPage() {
 
   const markAllRead = async () => {
     const unreadIds = notifications.filter((n) => !n.read).map((n) => n.id);
-    const token = await auth.currentUser?.getIdToken();
-    await Promise.all(
-      unreadIds.map((id) =>
-        fetch(`/api/notifications/${id}`, {
-          method: "PATCH",
-          headers: { Authorization: `Bearer ${token}` },
-        })
-      )
-    );
+    unreadIds.forEach((id) => updateDocInCollection("notifications", id, { read: true }));
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
   };
 

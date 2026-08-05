@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Package, AlertTriangle } from "lucide-react";
-import { auth } from "@/lib/firebase";
+import { getDocsFromCollection } from "@/lib/localdb";
 
 export default function InventoryPage() {
   const [inventory, setInventory] = useState<any[]>([]);
@@ -11,12 +11,17 @@ export default function InventoryPage() {
   useEffect(() => {
     const fetchInventory = async () => {
       try {
-        const token = await auth.currentUser?.getIdToken();
-        const res = await fetch("/api/inventory", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const data = await res.json();
-        setInventory(data);
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
+        const products = getDocsFromCollection("products", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
+        const inventory = products.map((p: any) => ({
+          name: p.name,
+          sku: p.sku,
+          warehouse: p.warehouse || "المستودع الرئيسي",
+          stock: p.stock || 0,
+          min: p.minStock || 10,
+          status: (p.stock || 0) <= (p.minStock || 10) ? ((p.stock || 0) <= 5 ? "Critical" : "Low") : "Healthy",
+        }));
+        setInventory(inventory);
       } catch {
       } finally {
         setLoading(false);

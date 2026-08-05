@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Package, Plus, Search, Edit, Trash2, Printer, Minus, PlusIcon } from "lucide-react";
+import { Package, Plus, Search, Edit, Trash2, Printer, Minus, PlusIcon, Download } from "lucide-react";
 import { getDocsFromCollection, addDocToCollection, updateDocInCollection, deleteDocFromCollection } from "@/lib/localdb";
+import { exportToExcel } from "@/lib/excel";
 import { toast } from "@/components/Toast";
 import JsBarcode from "jsbarcode";
 
@@ -175,6 +176,9 @@ export default function ProductsPage() {
           </div>
           <button onClick={() => { setEditingProduct(null); setShowModal(true); }} className="flex items-center gap-2 bg-primary text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-primary-hover transition-colors">
             <Plus className="w-4 h-4" /> اضف منتج
+          </button>
+          <button onClick={() => exportToExcel(products.map(p => ({ name: p.name, sku: p.sku, category: p.category, price: p.price, stock: p.stock, minStock: p.minStock })), "products", "المنتجات")} className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-xl text-sm font-medium hover:bg-green-600 transition-colors">
+            <Download className="w-4 h-4" /> تصدير Excel
           </button>
         </div>
 

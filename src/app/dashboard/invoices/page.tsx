@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search, Plus, X, Trash2, Printer, ChevronDown } from "lucide-react";
+import { Search, Plus, X, Trash2, Printer, ChevronDown, Download } from "lucide-react";
 import { getDocsFromCollection, addDocToCollection } from "@/lib/localdb";
+import { exportToExcel } from "@/lib/excel";
 import { toast } from "@/components/Toast";
 
 interface InvoiceItem {
@@ -338,6 +339,9 @@ export default function InvoicesPage() {
           >
             <Plus className="w-4 h-4" />
             اضف فاتورة
+          </button>
+          <button onClick={() => exportToExcel(invoices.map(i => ({ invoiceNumber: i.invoiceNumber, customerName: i.customerName, total: i.total, status: i.status, paymentMethod: i.paymentMethod, createdAt: i.createdAt })), "invoices", "الفواتير")} className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-xl text-sm font-medium hover:bg-green-600 transition-colors">
+            <Download className="w-4 h-4" /> تصدير Excel
           </button>
         </div>
       </div>

@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search, Plus, X, Edit2 } from "lucide-react";
+import { Search, Plus, X, Edit2, Download } from "lucide-react";
 import { getDocsFromCollection, addDocToCollection, updateDocInCollection } from "@/lib/localdb";
+import { exportToExcel } from "@/lib/excel";
 import { toast } from "@/components/Toast";
 
 interface Customer {
@@ -143,6 +144,9 @@ export default function CustomersPage() {
           >
             <Plus className="w-4 h-4" />
             اضف زبون
+          </button>
+          <button onClick={() => exportToExcel(customers.map(c => ({ name: c.name, phone: c.phone, email: c.email, address: c.address, type: c.type, balance: c.balance, createdAt: c.createdAt })), "customers", "الزبائن")} className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-xl text-sm font-medium hover:bg-green-600 transition-colors">
+            <Download className="w-4 h-4" /> تصدير Excel
           </button>
         </div>
       </div>

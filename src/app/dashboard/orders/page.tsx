@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search, Eye, ChevronDown, Plus, X, Package } from "lucide-react";
+import { Search, Eye, ChevronDown, Plus, X, Package, Download } from "lucide-react";
 import { getDocsFromCollection, addDocToCollection } from "@/lib/localdb";
+import { exportToExcel } from "@/lib/excel";
 import { toast } from "@/components/Toast";
 
 const statusColors: Record<string, string> = {
@@ -147,6 +148,9 @@ export default function OrdersPage() {
         >
           <Plus className="w-4 h-4" />
           أوردر جديد
+        </button>
+        <button onClick={() => exportToExcel(orders.map(o => ({ orderNumber: o.orderNumber, customerName: o.customerName, items: o.items, total: o.total, status: o.status, payment: o.payment, date: o.date })), "orders", "الأوردرات")} className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-xl text-sm font-medium hover:bg-green-600 transition-colors">
+          <Download className="w-4 h-4" /> تصدير Excel
         </button>
       </div>
 

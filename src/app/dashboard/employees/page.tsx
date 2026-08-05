@@ -11,8 +11,10 @@ import {
   UserCheck,
   UserX,
   DollarSign,
+  Download,
 } from "lucide-react";
 import { getDocsFromCollection, addDocToCollection } from "@/lib/localdb";
+import { exportToExcel } from "@/lib/excel";
 
 const Skeleton = ({ className }: { className?: string }) => (
   <div className={`animate-pulse bg-muted rounded ${className}`} />
@@ -117,6 +119,9 @@ export default function EmployeesPage() {
           className="flex items-center gap-2 bg-primary text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-primary-hover transition-colors"
         >
           <Plus className="w-4 h-4" /> اضف موظف
+        </button>
+        <button onClick={() => exportToExcel(employees.map(e => ({ name: e.name, email: e.email, phone: e.phone, position: e.position, department: e.department, salary: e.salary, hireDate: e.hireDate, status: e.status })), "employees", "الموظفين")} className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-xl text-sm font-medium hover:bg-green-600 transition-colors">
+          <Download className="w-4 h-4" /> تصدير Excel
         </button>
       </div>
 

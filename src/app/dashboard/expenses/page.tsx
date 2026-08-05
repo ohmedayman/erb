@@ -15,8 +15,10 @@ import {
   Truck,
   Tag,
   X,
+  Download,
 } from "lucide-react";
 import { getDocsFromCollection, addDocToCollection } from "@/lib/localdb";
+import { exportToExcel } from "@/lib/excel";
 import { toast } from "@/components/Toast";
 
 const Skeleton = ({ className }: { className?: string }) => (
@@ -178,6 +180,9 @@ export default function ExpensesPage() {
           className="flex items-center gap-2 bg-primary text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-primary-hover transition-colors"
         >
           <Plus className="w-4 h-4" /> اضف مصروف
+        </button>
+        <button onClick={() => exportToExcel(expenses.map(e => ({ description: e.description, amount: e.amount, category: e.category, paymentMethod: e.paymentMethod, date: e.date, receiptNumber: e.receiptNumber, notes: e.notes })), "expenses", "المصروفات")} className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-xl text-sm font-medium hover:bg-green-600 transition-colors">
+          <Download className="w-4 h-4" /> تصدير Excel
         </button>
       </div>
 

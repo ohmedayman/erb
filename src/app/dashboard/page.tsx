@@ -1,288 +1,522 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
+import Link from "next/link";
 import {
-  Package,
-  ShoppingCart,
-  Truck,
-  Users,
-  ArrowUpRight,
-  ArrowDownRight,
-  FileText,
-  DollarSign,
-  TrendingUp,
-  CreditCard,
+  Package, ShoppingCart, Users, FileText, CreditCard, TrendingUp,
+  TrendingDown, ArrowUpRight, ArrowDownRight, AlertTriangle,
+  Plus, Eye, BarChart3, Wallet, Truck, RotateCcw, Clock,
+  CheckCircle, XCircle, ChevronLeft, Search, Bell, Star,
+  PackageCheck, Receipt, UserCog, CalendarDays, Zap,
 } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Area, AreaChart } from "recharts";
 import { getDocsFromCollection } from "@/lib/localdb";
-const statusMap: Record<string, string> = {
-  Delivered: "اتسلّم",
-  Shipped: "اتشحن",
-  Processing: "بيتعالج",
-  Pending: "معلّق",
+
+const STATUS_MAP: Record<string, string> = {
+  Delivered: "اتسلّم", Shipped: "اتشحن", Processing: "بيتعالج", Pending: "معلّق", Cancelled: "ملغي",
+};
+const STATUS_STYLE: Record<string, string> = {
+  Delivered: "bg-emerald-50 text-emerald-600 border border-emerald-200",
+  Shipped: "bg-blue-50 text-blue-600 border border-blue-200",
+  Processing: "bg-amber-50 text-amber-600 border border-amber-200",
+  Pending: "bg-slate-50 text-slate-600 border border-slate-200",
+  Cancelled: "bg-red-50 text-red-600 border border-red-200",
+};
+const INVOICE_STATUS: Record<string, { label: string; style: string }> = {
+  paid: { label: "مدفوعة", style: "bg-emerald-50 text-emerald-600 border border-emerald-200" },
+  partial: { label: "جزئي", style: "bg-amber-50 text-amber-600 border border-amber-200" },
+  unpaid: { label: "مش مدفوعة", style: "bg-red-50 text-red-600 border border-red-200" },
 };
 
+const CHART_COLORS = ["#f97316", "#3b82f6", "#10b981", "#8b5cf6", "#ec4899", "#06b6d4"];
+
 export default function DashboardPage() {
-  const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [prefs, setPrefs] = useState<any>(null);
   const [storeName, setStoreName] = useState("");
+  const [features, setFeatures] = useState<string[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
+  const [orders, setOrders] = useState<any[]>([]);
+  const [customers, setCustomers] = useState<any[]>([]);
+  const [invoices, setInvoices] = useState<any[]>([]);
+  const [expenses, setExpenses] = useState<any[]>([]);
+  const [employees, setEmployees] = useState<any[]>([]);
 
   useEffect(() => {
     const storedPrefs = JSON.parse(localStorage.getItem("user_prefs") || "null");
     const user = JSON.parse(localStorage.getItem("user") || "{}");
-    setPrefs(storedPrefs);
-    setStoreName(storedPrefs?.storeName || user.storeName || "");
+    const store = JSON.parse(localStorage.getItem("store") || "{}");
+    setStoreName(store.name || storedPrefs?.storeName || "");
+    setFeatures(storedPrefs?.features || ["products", "orders", "invoices", "customers", "inventory"]);
 
     const fetchData = async () => {
       try {
-        const features: string[] = storedPrefs?.features || [];
         const sid = user.storeId;
         const f = (field: string) => sid ? [{ field: "storeId", op: "==", value: sid }] : [];
+        const has = (feat: string) => (storedPrefs?.features || []).includes(feat);
 
-        const products = features.includes("products") ? await getDocsFromCollection("products", f("storeId")) : [];
-        const orders = features.includes("orders") ? await getDocsFromCollection("orders", f("storeId")) : [];
-        const customers = features.includes("customers") ? await getDocsFromCollection("customers", f("storeId")) : [];
-        const invoices = features.includes("invoices") ? await getDocsFromCollection("invoices", f("storeId")) : [];
-        const expenses = features.includes("expenses") ? await getDocsFromCollection("expenses", f("storeId")) : [];
-        
-        const totalProducts = products.length;
-        const pendingOrders = orders.filter((o: any) => o.status === "Pending").length;
-        const totalCustomers = customers.length;
-        const totalInvoices = invoices.length;
-        const totalExpenses = expenses.reduce((sum: number, e: any) => sum + (e.amount || 0), 0);
-        const totalRevenue = invoices.reduce((sum: number, i: any) => sum + (i.total || 0), 0);
-        const netProfit = totalRevenue - totalExpenses;
-        
-        const recentOrders = orders.slice(0, 5);
-        const recentInvoices = invoices.slice(0, 5);
-        const topProducts = products.slice(0, 5);
-        
-        const monthlyExpenses = expenses.slice(0, 6).map((e: any) => ({
-          month: new Date(e.date).toLocaleDateString("ar-SA", { month: "short" }),
-          amount: e.amount || 0,
-        }));
+        const [prods, ords, custs, invs, exps, emps] = await Promise.all([
+          has("products") ? getDocsFromCollection("products", f("storeId")) : [],
+          has("orders") ? getDocsFromCollection("orders", f("storeId")) : [],
+          has("customers") ? getDocsFromCollection("customers", f("storeId")) : [],
+          has("invoices") ? getDocsFromCollection("invoices", f("storeId")) : [],
+          has("expenses") ? getDocsFromCollection("expenses", f("storeId")) : [],
+          has("employees") ? getDocsFromCollection("employees", f("storeId")) : [],
+        ]);
 
-        setData({
-          stats: { totalProducts, pendingOrders },
-          totalInvoices,
-          totalExpenses,
-          netProfit,
-          totalCustomers,
-          recentOrders,
-          recentInvoices,
-          topProducts,
-          monthlyExpenses,
-        });
-      } catch {
-      } finally {
-        setLoading(false);
-      }
+        setProducts(prods); setOrders(ords); setCustomers(custs);
+        setInvoices(invs); setExpenses(exps); setEmployees(emps);
+      } catch (err) { console.error(err); }
+      setLoading(false);
     };
     fetchData();
   }, []);
 
-  const features: string[] = prefs?.features || [];
   const has = (f: string) => features.includes(f);
 
-  const allStats = [
-    has("products") && { label: "عدد المنتجات الكلي", value: data?.stats?.totalProducts ?? 0, icon: Package, color: "bg-blue-50 text-blue-600" },
-    has("orders") && { label: "الطلبات المعلّقة", value: data?.stats?.pendingOrders ?? 0, icon: ShoppingCart, color: "bg-orange-50 text-orange-600" },
-    has("invoices") && { label: "الفواتير", value: data?.totalInvoices ?? 0, icon: FileText, color: "bg-indigo-50 text-indigo-600" },
-    has("expenses") && { label: "المصروفات", value: data?.totalExpenses ?? 0, icon: CreditCard, color: "bg-red-50 text-red-600", isCurrency: true },
-    has("expenses") && { label: "الربح الصافي", value: data?.netProfit ?? 0, icon: TrendingUp, color: "bg-green-50 text-green-600", isCurrency: true },
-    has("customers") && { label: "الزبائن", value: data?.totalCustomers ?? 0, icon: Users, color: "bg-purple-50 text-purple-600" },
-  ].filter(Boolean);
+  // Stats
+  const stats = useMemo(() => {
+    const totalRevenue = invoices.reduce((s: number, i: any) => s + (i.total || 0), 0);
+    const totalExpenses = expenses.reduce((s: number, e: any) => s + (e.amount || 0), 0);
+    const netProfit = totalRevenue - totalExpenses;
+    const pendingOrders = orders.filter((o: any) => o.status === "Pending").length;
+    const deliveredOrders = orders.filter((o: any) => o.status === "Delivered").length;
+    const paidInvoices = invoices.filter((i: any) => i.status === "paid").length;
+    const unpaidInvoices = invoices.filter((i: any) => i.status === "unpaid").length;
+    const lowStockProducts = products.filter((p: any) => (p.stock || 0) <= (p.minStock || 10) && (p.stock || 0) > 0).length;
+    const outOfStock = products.filter((p: any) => (p.stock || 0) === 0).length;
+    return { totalRevenue, totalExpenses, netProfit, pendingOrders, deliveredOrders, paidInvoices, unpaidInvoices, lowStockProducts, outOfStock };
+  }, [invoices, expenses, orders, products]);
 
-  const getStatusStyle = (status: string) => {
-    switch (status) {
-      case "Delivered": return "bg-green-50 text-green-600";
-      case "Shipped": return "bg-blue-50 text-blue-600";
-      case "Processing": return "bg-yellow-50 text-yellow-600";
-      default: return "bg-gray-50 text-gray-600";
-    }
-  };
+  // Charts data
+  const revenueVsExpensesChart = useMemo(() => {
+    const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
+    const data = months.slice(0, 6).map((m, i) => {
+      const monthInvs = invoices.filter(inv => { const d = new Date(inv.created_at || inv.createdAt); return d.getMonth() === i; });
+      const monthExps = expenses.filter(exp => { const d = new Date(exp.date || exp.created_at); return d.getMonth() === i; });
+      return { name: m, الإيراد: monthInvs.reduce((s, inv) => s + (inv.total || 0), 0), المصروفات: monthExps.reduce((s, exp) => s + (exp.amount || 0), 0) };
+    });
+    return data;
+  }, [invoices, expenses]);
 
-  const formatCurrency = (amount: number) => {
-    return amount.toLocaleString("ar-SA", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  };
+  const orderStatusPie = useMemo(() => {
+    const counts: Record<string, number> = {};
+    orders.forEach(o => { counts[o.status || "Pending"] = (counts[o.status || "Pending"] || 0) + 1; });
+    return Object.entries(counts).map(([status, count]) => ({ name: STATUS_MAP[status] || status, value: count }));
+  }, [orders]);
+
+  const categoryPie = useMemo(() => {
+    const cats: Record<string, number> = {};
+    products.forEach(p => { const cat = p.category || "بدون فئة"; cats[cat] = (cats[cat] || 0) + 1; });
+    return Object.entries(cats).map(([name, value]) => ({ name, value }));
+  }, [products]);
+
+  const recentOrders = orders.slice(0, 6);
+  const recentInvoices = invoices.slice(0, 5);
+  const lowStockProducts = products.filter((p: any) => (p.stock || 0) <= (p.minStock || 10)).slice(0, 5);
+
+  const formatCurrency = (n: number) => n.toLocaleString("ar-EG", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+
+  const StatCard = ({ label, value, icon: Icon, color, trend, trendUp, link }: any) => (
+    <Link href={link || "#"} className="bg-white rounded-2xl p-5 border border-gray-100 hover:shadow-lg hover:border-gray-200 transition-all duration-300 group block">
+      <div className="flex items-start justify-between mb-4">
+        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${color} group-hover:scale-110 transition-transform`}>
+          <Icon className="w-6 h-6" />
+        </div>
+        {trend && (
+          <span className={`flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-lg ${trendUp ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-600"}`}>
+            {trendUp ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+            {trend}
+          </span>
+        )}
+      </div>
+      <p className="text-2xl font-bold text-gray-900 mb-1">{loading ? "..." : value}</p>
+      <p className="text-sm text-gray-500">{label}</p>
+      {link && (
+        <div className="flex items-center gap-1 mt-3 text-xs font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+          <span>عرض التفاصيل</span>
+          <ChevronLeft className="w-3 h-3" />
+        </div>
+      )}
+    </Link>
+  );
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground animate-fade-in-down">البورد{storeName ? ` — ${storeName}` : ""}</h1>
-        <p className="text-muted-foreground text-sm mt-1 animate-fade-in stagger-1">أهلاً بيك تاني! شوف شغلك من هنا.</p>
+    <div className="space-y-6" dir="rtl">
+      {/* Welcome Header */}
+      <div className="bg-gradient-to-l from-primary/10 via-orange-50 to-white rounded-2xl p-6 border border-primary/10">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">
+              {storeName ? `مرحباً بيك في ${storeName}` : "مرحباً بيك!"}
+            </h1>
+            <p className="text-gray-500 mt-1 flex items-center gap-2">
+              <CalendarDays className="w-4 h-4" />
+              {new Date().toLocaleDateString("ar-EG", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
+            </p>
+          </div>
+          <div className="hidden sm:flex items-center gap-2">
+            <Link href="/dashboard/products" className="flex items-center gap-2 bg-primary text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-primary/90 transition-colors">
+              <Plus className="w-4 h-4" /> منتج جديد
+            </Link>
+            <Link href="/dashboard/orders" className="flex items-center gap-2 bg-white text-gray-700 px-4 py-2.5 rounded-xl text-sm font-medium border border-gray-200 hover:bg-gray-50 transition-colors">
+              <ShoppingCart className="w-4 h-4" /> أوردر جديد
+            </Link>
+          </div>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4">
-        {allStats.map((stat: any, i: number) => (
-          <div key={i} className={`bg-card rounded-xl p-5 border border-border hover:shadow-md transition-shadow animate-fade-in-up stagger-${i + 1} hover-lift`}>
-            <div className="flex items-center justify-between">
-              <div className={`w-11 h-11 ${stat.color} rounded-xl flex items-center justify-center`}>
-                <stat.icon className="w-5 h-5" />
+      {/* Stats Grid */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {has("invoices") && (
+          <StatCard label="إجمالي الإيرادات" value={`${formatCurrency(stats.totalRevenue)} ج.م`} icon={TrendingUp} color="bg-emerald-50 text-emerald-600" link="/dashboard/invoices" />
+        )}
+        {has("orders") && (
+          <StatCard label="الأوردرات المعلّقة" value={stats.pendingOrders} icon={Clock} color="bg-amber-50 text-amber-600" link="/dashboard/orders" />
+        )}
+        {has("products") && (
+          <StatCard label="المنتجات" value={products.length} icon={Package} color="bg-blue-50 text-blue-600" link="/dashboard/products" />
+        )}
+        {has("customers") && (
+          <StatCard label="الزبائن" value={customers.length} icon={Users} color="bg-purple-50 text-purple-600" link="/dashboard/customers" />
+        )}
+        {has("expenses") && (
+          <StatCard label="المصروفات" value={`${formatCurrency(stats.totalExpenses)} ج.م`} icon={Wallet} color="bg-red-50 text-red-600" link="/dashboard/expenses" />
+        )}
+        {has("expenses") && (
+          <StatCard label="الربح الصافي" value={`${formatCurrency(stats.netProfit)} ج.م`} icon={stats.netProfit >= 0 ? TrendingUp : TrendingDown} color={stats.netProfit >= 0 ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-600"} />
+        )}
+        {has("invoices") && (
+          <StatCard label="فواتير مدفوعة" value={stats.paidInvoices} icon={CheckCircle} color="bg-emerald-50 text-emerald-600" link="/dashboard/invoices" />
+        )}
+        {has("products") && (
+          <StatCard label="مخزون قليل" value={stats.lowStockProducts + stats.outOfStock} icon={AlertTriangle} color={stats.lowStockProducts > 0 ? "bg-amber-50 text-amber-600" : "bg-gray-50 text-gray-400"} link="/dashboard/inventory" />
+        )}
+      </div>
+
+      {/* Charts Row */}
+      {(has("invoices") || has("expenses") || has("orders") || has("products")) && (
+        <div className="grid lg:grid-cols-3 gap-6">
+          {/* Revenue vs Expenses Chart */}
+          {has("invoices") && has("expenses") && (
+            <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 p-5">
+              <div className="flex items-center justify-between mb-5">
+                <div>
+                  <h3 className="font-bold text-gray-900">الإيرادات مقابل المصروفات</h3>
+                  <p className="text-xs text-gray-400 mt-0.5">آخر 6 شهور</p>
+                </div>
+                <div className="flex items-center gap-4 text-xs">
+                  <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-primary" /> الإيراد</span>
+                  <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-red-400" /> المصروفات</span>
+                </div>
               </div>
+              {loading ? (
+                <div className="h-[250px] flex items-center justify-center text-gray-400 text-sm">بيتحمّل...</div>
+              ) : (
+                <ResponsiveContainer width="100%" height={250}>
+                  <AreaChart data={revenueVsExpensesChart}>
+                    <defs>
+                      <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#f97316" stopOpacity={0.1} />
+                        <stop offset="95%" stopColor="#f97316" stopOpacity={0} />
+                      </linearGradient>
+                      <linearGradient id="colorExpenses" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#ef4444" stopOpacity={0.1} />
+                        <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                    <XAxis dataKey="name" tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
+                    <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid #e2e8f0", fontSize: 12 }} />
+                    <Area type="monotone" dataKey="الإيراد" stroke="#f97316" strokeWidth={2} fill="url(#colorRevenue)" />
+                    <Area type="monotone" dataKey="المصروفات" stroke="#ef4444" strokeWidth={2} fill="url(#colorExpenses)" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              )}
             </div>
-            <div className="mt-4">
-              <p className="text-2xl font-bold text-foreground">
-                {loading ? "..." : stat.isCurrency ? formatCurrency(stat.value) : stat.value}
-              </p>
-              <p className="text-sm text-muted-foreground mt-1">{stat.label}</p>
+          )}
+
+          {/* Order Status Pie */}
+          {has("orders") && (
+            <div className="bg-white rounded-2xl border border-gray-100 p-5">
+              <h3 className="font-bold text-gray-900 mb-5">حالة الأوردرات</h3>
+              {loading ? (
+                <div className="h-[220px] flex items-center justify-center text-gray-400 text-sm">بيتحمّل...</div>
+              ) : orderStatusPie.length === 0 ? (
+                <div className="h-[220px] flex flex-col items-center justify-center text-gray-400">
+                  <ShoppingCart className="w-10 h-10 mb-2" />
+                  <p className="text-sm">مفيش أوردرات لسه</p>
+                </div>
+              ) : (
+                <>
+                  <ResponsiveContainer width="100%" height={180}>
+                    <PieChart>
+                      <Pie data={orderStatusPie} cx="50%" cy="50%" innerRadius={50} outerRadius={75} paddingAngle={4} dataKey="value">
+                        {orderStatusPie.map((_, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
+                      </Pie>
+                      <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid #e2e8f0", fontSize: 12 }} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div className="flex flex-wrap gap-3 mt-2">
+                    {orderStatusPie.map((item, i) => (
+                      <span key={i} className="flex items-center gap-1.5 text-xs text-gray-600">
+                        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: CHART_COLORS[i % CHART_COLORS.length] }} />
+                        {item.name} ({item.value})
+                      </span>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+
+          {/* Category Pie */}
+          {has("products") && !has("orders") && (
+            <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 p-5">
+              <h3 className="font-bold text-gray-900 mb-5">المنتجات حسب الفئة</h3>
+              {loading ? (
+                <div className="h-[220px] flex items-center justify-center text-gray-400 text-sm">بيتحمّل...</div>
+              ) : categoryPie.length === 0 ? (
+                <div className="h-[220px] flex flex-col items-center justify-center text-gray-400">
+                  <Package className="w-10 h-10 mb-2" />
+                  <p className="text-sm">مفيش منتجات لسه</p>
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height={220}>
+                  <PieChart>
+                    <Pie data={categoryPie} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={4} dataKey="value">
+                      {categoryPie.map((_, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
+                    </Pie>
+                    <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid #e2e8f0", fontSize: 12 }} />
+                  </PieChart>
+                </ResponsiveContainer>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Tables Row */}
+      <div className="grid lg:grid-cols-3 gap-6">
+        {/* Recent Orders */}
+        {has("orders") && (
+          <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
+                  <ShoppingCart className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-gray-900">آخر الأوردرات</h3>
+                  <p className="text-xs text-gray-400">{orders.length} أوردر الكلي</p>
+                </div>
+              </div>
+              <Link href="/dashboard/orders" className="text-primary text-sm font-medium hover:text-primary/80 flex items-center gap-1">
+                عرض الكل <ChevronLeft className="w-4 h-4" />
+              </Link>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-100">
+                    <th className="text-right text-xs font-medium text-gray-400 px-5 py-3">رقم الطلب</th>
+                    <th className="text-right text-xs font-medium text-gray-400 px-5 py-3">العميل</th>
+                    <th className="text-right text-xs font-medium text-gray-400 px-5 py-3">الحالة</th>
+                    <th className="text-right text-xs font-medium text-gray-400 px-5 py-3">المجموع</th>
+                    <th className="text-right text-xs font-medium text-gray-400 px-5 py-3">التاريخ</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {loading ? (
+                    <tr><td colSpan={5} className="px-5 py-10 text-center text-gray-400 text-sm">بيتحمّل...</td></tr>
+                  ) : recentOrders.length === 0 ? (
+                    <tr><td colSpan={5} className="px-5 py-10 text-center text-gray-400 text-sm">مفيش أوردرات لسه — ابدأ بإضافة أوردر جديد</td></tr>
+                  ) : recentOrders.map((order: any, i: number) => (
+                    <tr key={order.id || i} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors">
+                      <td className="px-5 py-3 text-sm font-semibold text-gray-900">{order.orderNumber || order.id?.slice(0, 8)}</td>
+                      <td className="px-5 py-3 text-sm text-gray-600">{order.customerName || "—"}</td>
+                      <td className="px-5 py-3">
+                        <span className={`inline-flex px-2.5 py-1 rounded-lg text-xs font-medium ${STATUS_STYLE[order.status] || STATUS_STYLE.Pending}`}>
+                          {STATUS_MAP[order.status] || order.status || "معلّق"}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3 text-sm font-bold text-gray-900">{(order.total || 0).toLocaleString("ar-EG")} ج.م</td>
+                      <td className="px-5 py-3 text-xs text-gray-400">{order.date || new Date(order.created_at).toLocaleDateString("ar-EG")}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
-        ))}
+        )}
+
+        {/* Low Stock Alert */}
+        {has("products") && (
+          <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center">
+                  <AlertTriangle className="w-5 h-5 text-amber-500" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-gray-900">مخزون قليل</h3>
+                  <p className="text-xs text-gray-400">{lowStockProducts.length} منتج محتاج تعبئة</p>
+                </div>
+              </div>
+              <Link href="/dashboard/inventory" className="text-primary text-sm font-medium hover:text-primary/80 flex items-center gap-1">
+                عرض الكل <ChevronLeft className="w-4 h-4" />
+              </Link>
+            </div>
+            <div className="p-3">
+              {loading ? (
+                <p className="text-center text-gray-400 text-sm py-6">بيتحمّل...</p>
+              ) : lowStockProducts.length === 0 ? (
+                <div className="text-center py-8">
+                  <PackageCheck className="w-10 h-10 text-emerald-300 mx-auto mb-2" />
+                  <p className="text-sm text-gray-500">المخزون كله تمام!</p>
+                </div>
+              ) : lowStockProducts.map((product: any, i: number) => (
+                <div key={product.id || i} className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${(product.stock || 0) === 0 ? "bg-red-50" : "bg-amber-50"}`}>
+                    <Package className={`w-5 h-5 ${(product.stock || 0) === 0 ? "text-red-500" : "text-amber-500"}`} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 truncate">{product.name}</p>
+                    <p className="text-xs text-gray-400">{product.sku}</p>
+                  </div>
+                  <div className="text-left">
+                    <span className={`text-sm font-bold ${(product.stock || 0) === 0 ? "text-red-500" : "text-amber-600"}`}>
+                      {product.stock || 0}
+                    </span>
+                    <p className="text-[10px] text-gray-400">المتبقي</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
-      {(has("orders") || has("products")) && (
-        <div className="grid lg:grid-cols-3 gap-6">
-          {has("orders") && (
-            <div className="lg:col-span-2 bg-card rounded-xl border border-border animate-fade-in hover-lift">
-              <div className="px-5 py-4 border-b border-border">
-                <h2 className="font-semibold text-foreground">آخر الطلبات</h2>
+      {/* Bottom Row */}
+      <div className="grid lg:grid-cols-2 gap-6">
+        {/* Recent Invoices */}
+        {has("invoices") && (
+          <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center">
+                  <Receipt className="w-5 h-5 text-indigo-500" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-gray-900">آخر الفواتير</h3>
+                  <p className="text-xs text-gray-400">{invoices.length} فاتورة الكلي</p>
+                </div>
               </div>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-border">
-                      <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">رقم الطلب</th>
-                      <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">العميل</th>
-                      <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">الحالة</th>
-                      <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">المجموع</th>
+              <Link href="/dashboard/invoices" className="text-primary text-sm font-medium hover:text-primary/80 flex items-center gap-1">
+                عرض الكل <ChevronLeft className="w-4 h-4" />
+              </Link>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-100">
+                    <th className="text-right text-xs font-medium text-gray-400 px-5 py-3">رقم الفاتورة</th>
+                    <th className="text-right text-xs font-medium text-gray-400 px-5 py-3">العميل</th>
+                    <th className="text-right text-xs font-medium text-gray-400 px-5 py-3">الحالة</th>
+                    <th className="text-right text-xs font-medium text-gray-400 px-5 py-3">المجموع</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {loading ? (
+                    <tr><td colSpan={4} className="px-5 py-8 text-center text-gray-400 text-sm">بيتحمّل...</td></tr>
+                  ) : recentInvoices.length === 0 ? (
+                    <tr><td colSpan={4} className="px-5 py-8 text-center text-gray-400 text-sm">مفيش فواتير لسه</td></tr>
+                  ) : recentInvoices.map((inv: any, i: number) => (
+                    <tr key={inv.id || i} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors">
+                      <td className="px-5 py-3 text-sm font-semibold text-gray-900">{inv.invoiceNumber || inv.id?.slice(0, 8)}</td>
+                      <td className="px-5 py-3 text-sm text-gray-600">{inv.customerName || "—"}</td>
+                      <td className="px-5 py-3">
+                        <span className={`inline-flex px-2.5 py-1 rounded-lg text-xs font-medium ${INVOICE_STATUS[inv.status]?.style || INVOICE_STATUS.unpaid.style}`}>
+                          {INVOICE_STATUS[inv.status]?.label || inv.status}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3 text-sm font-bold text-gray-900">{(inv.total || 0).toLocaleString("ar-EG")} ج.م</td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {loading ? (
-                      <tr><td colSpan={4} className="px-5 py-8 text-center text-muted-foreground text-sm">بيتحمّل...</td></tr>
-                    ) : data?.recentOrders?.length === 0 ? (
-                      <tr><td colSpan={4} className="px-5 py-8 text-center text-muted-foreground text-sm">مفيش طلبات لسه</td></tr>
-                    ) : (
-                      data?.recentOrders?.map((order: any, i: number) => (
-                        <tr key={i} className={`border-b border-border last:border-0 hover:bg-muted/50 transition-colors table-row-enter stagger-${i + 1}`}>
-                          <td className="px-5 py-3 text-sm font-medium text-foreground">{order.orderNumber || order.id}</td>
-                          <td className="px-5 py-3 text-sm text-muted-foreground">{order.customerName}</td>
-                          <td className="px-5 py-3">
-                            <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusStyle(order.status)}`}>
-                              {statusMap[order.status] || order.status}
-                            </span>
-                          </td>
-                          <td className="px-5 py-3 text-sm font-medium text-foreground">{order.total}</td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
+                  ))}
+                </tbody>
+              </table>
             </div>
-          )}
+          </div>
+        )}
 
-          {has("products") && (
-            <div className="bg-card rounded-xl border border-border animate-fade-in hover-lift">
-              <div className="px-5 py-4 border-b border-border">
-                <h2 className="font-semibold text-foreground">أحسن المنتجات</h2>
+        {/* Top Products */}
+        {has("products") && (
+          <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
+                  <Star className="w-5 h-5 text-blue-500" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-gray-900">المنتجات</h3>
+                  <p className="text-xs text-gray-400">{products.length} منتج الكلي</p>
+                </div>
               </div>
-              <div className="p-5 space-y-4">
-                {loading ? (
-                  <p className="text-sm text-muted-foreground text-center">بيتحمّل...</p>
-                ) : data?.topProducts?.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center">مفيش منتجات لسه</p>
-                ) : (
-                  data?.topProducts?.map((product: any, i: number) => (
-                    <div key={i} className={`flex items-center gap-3 animate-fade-in-right stagger-${i + 1}`}>
-                      <div className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center shrink-0">
-                        <Package className="w-5 h-5 text-muted-foreground" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-foreground truncate">{product.name}</p>
-                        <p className="text-xs text-muted-foreground">{product.sku}</p>
-                      </div>
-                      <div className="text-left">
-                        <p className="text-sm font-medium text-foreground">{product.stock}</p>
-                        <p className="text-xs text-muted-foreground">في المخزون</p>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
+              <Link href="/dashboard/products" className="text-primary text-sm font-medium hover:text-primary/80 flex items-center gap-1">
+                عرض الكل <ChevronLeft className="w-4 h-4" />
+              </Link>
             </div>
-          )}
-        </div>
-      )}
-
-      {(has("invoices") || has("expenses")) && (
-        <div className="grid lg:grid-cols-2 gap-6">
-          {has("invoices") && (
-            <div className="bg-card rounded-xl border border-border animate-fade-in hover-lift">
-              <div className="px-5 py-4 border-b border-border flex items-center justify-between">
-                <h2 className="font-semibold text-foreground">آخر الفواتير</h2>
-                <span className="text-xs text-muted-foreground">توتال: {data?.totalInvoices ?? 0}</span>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-border">
-                      <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">رقم الفاتورة</th>
-                      <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">العميل</th>
-                      <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">الحالة</th>
-                      <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">المجموع</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {loading ? (
-                      <tr><td colSpan={4} className="px-5 py-8 text-center text-muted-foreground text-sm">بيتحمّل...</td></tr>
-                    ) : data?.recentInvoices?.length === 0 ? (
-                      <tr><td colSpan={4} className="px-5 py-8 text-center text-muted-foreground text-sm">مفيش فواتير لسه</td></tr>
-                    ) : (
-                      data?.recentInvoices?.map((invoice: any, i: number) => (
-                        <tr key={i} className={`border-b border-border last:border-0 hover:bg-muted/50 transition-colors table-row-enter stagger-${i + 1}`}>
-                          <td className="px-5 py-3 text-sm font-medium text-foreground">{invoice.invoiceNumber}</td>
-                          <td className="px-5 py-3 text-sm text-muted-foreground">{invoice.customerName}</td>
-                          <td className="px-5 py-3">
-                            <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                              invoice.status === "paid" ? "bg-green-50 text-green-600" : invoice.status === "partial" ? "bg-yellow-50 text-yellow-600" : "bg-red-50 text-red-600"
-                            }`}>
-                              {invoice.status === "paid" ? "اتدفعت" : invoice.status === "partial" ? "جزئي" : "مش مدفوعة"}
-                            </span>
-                          </td>
-                          <td className="px-5 py-3 text-sm font-medium text-foreground">{invoice.total?.toLocaleString("ar-SA")}</td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {has("expenses") && (
-            <div className="bg-card rounded-xl border border-border animate-fade-in hover-lift">
-              <div className="px-5 py-4 border-b border-border flex items-center justify-between">
-                <h2 className="font-semibold text-foreground">ملخص المصروفات الشهري</h2>
-                <span className="text-xs text-muted-foreground">الإجمالي: {formatCurrency(data?.totalExpenses ?? 0)}</span>
-              </div>
-              <div className="p-5">
-                {loading ? (
-                  <p className="text-sm text-muted-foreground text-center py-4">بيتحمّل...</p>
-                ) : !data?.monthlyExpenses?.length ? (
-                  <p className="text-sm text-muted-foreground text-center py-4">مفيش مصروفات لسه</p>
-                ) : (
-                  <div className="space-y-3">
-                    {data.monthlyExpenses.map((item: any, i: number) => {
-                      const maxAmount = Math.max(...data.monthlyExpenses.map((e: any) => e.amount), 1);
-                      return (
-                        <div key={i} className={`flex items-center gap-3 animate-fade-in-right stagger-${i + 1}`}>
-                          <span className="text-xs text-muted-foreground w-20 text-left shrink-0">{item.month}</span>
-                          <div className="flex-1 bg-muted rounded-full h-5 overflow-hidden">
-                            <div className="bg-red-400 h-full rounded-full transition-all duration-500" style={{ width: `${Math.max((item.amount / maxAmount) * 100, item.amount > 0 ? 4 : 0)}%` }} />
-                          </div>
-                          <span className="text-xs font-medium text-foreground w-24 text-left shrink-0">{item.amount.toLocaleString("ar-SA")}</span>
-                        </div>
-                      );
-                    })}
+            <div className="p-3">
+              {loading ? (
+                <p className="text-center text-gray-400 text-sm py-6">بيتحمّل...</p>
+              ) : products.length === 0 ? (
+                <div className="text-center py-8">
+                  <Package className="w-10 h-10 text-gray-200 mx-auto mb-2" />
+                  <p className="text-sm text-gray-500">مفيش منتجات لسه</p>
+                  <Link href="/dashboard/products" className="text-primary text-sm font-medium hover:underline mt-2 inline-block">إضافة منتج</Link>
+                </div>
+              ) : products.slice(0, 6).map((product: any, i: number) => (
+                <div key={product.id || i} className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors">
+                  <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center">
+                    <Package className="w-5 h-5 text-gray-400" />
                   </div>
-                )}
-              </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 truncate">{product.name}</p>
+                    <p className="text-xs text-gray-400">{product.category || product.sku}</p>
+                  </div>
+                  <div className="text-left">
+                    <p className="text-sm font-bold text-primary">{(product.price || 0).toLocaleString("ar-EG")} ج.م</p>
+                    <p className="text-[10px] text-gray-400">مخزون: {product.stock || 0}</p>
+                  </div>
+                </div>
+              ))}
             </div>
-          )}
+          </div>
+        )}
+      </div>
+
+      {/* Quick Actions */}
+      <div className="bg-gradient-to-l from-gray-50 to-white rounded-2xl border border-gray-100 p-5">
+        <h3 className="font-bold text-gray-900 mb-4">إجراءات سريعة</h3>
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
+          {[
+            { label: "نقطة البيع", icon: CreditCard, href: "/dashboard/pos", color: "bg-primary/10 text-primary" },
+            { label: "إضافة منتج", icon: Package, href: "/dashboard/products", color: "bg-blue-50 text-blue-600" },
+            { label: "أوردر جديد", icon: ShoppingCart, href: "/dashboard/orders", color: "bg-emerald-50 text-emerald-600" },
+            { label: "فاتورة جديدة", icon: FileText, href: "/dashboard/invoices", color: "bg-indigo-50 text-indigo-600" },
+            { label: "إضافة زبون", icon: Users, href: "/dashboard/customers", color: "bg-purple-50 text-purple-600" },
+            { label: "تسجيل مصروف", icon: Wallet, href: "/dashboard/expenses", color: "bg-red-50 text-red-600" },
+          ].map((action) => (
+            <Link key={action.href} href={action.href}
+              className="flex flex-col items-center gap-2 p-4 rounded-xl bg-white border border-gray-100 hover:shadow-md hover:border-gray-200 transition-all group">
+              <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${action.color} group-hover:scale-110 transition-transform`}>
+                <action.icon className="w-5 h-5" />
+              </div>
+              <span className="text-xs font-medium text-gray-700">{action.label}</span>
+            </Link>
+          ))}
         </div>
-      )}
+      </div>
     </div>
   );
 }

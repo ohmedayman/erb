@@ -111,8 +111,8 @@ export default function InvoicePrintPage() {
                   <p className="text-sm text-gray-500">Stock Flow Store</p>
                 </div>
               </div>
-              <p className="text-sm text-gray-600 mt-1">{invoice.companyAddress || "المملكة العربية السعودية"}</p>
-              <p className="text-sm text-gray-600">{invoice.companyPhone || "966-XXXXXXXXX"}</p>
+              <p className="text-sm text-gray-600 mt-1">{invoice.companyAddress || "مصر"}</p>
+              <p className="text-sm text-gray-600">{invoice.companyPhone || "010-XXXXXXXX"}</p>
             </div>
             <div className="text-left">
               <h2 className="text-xl font-bold text-gray-900">فاتورة</h2>

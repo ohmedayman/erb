@@ -52,7 +52,7 @@ export default function InvoicesManager({ invoices, stores, onEdit, onDelete }: 
       label: "الحالة",
       render: (item: any) => (
         <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[item.payment_status || item.status] || "bg-slate-500/20 text-slate-400"}`}>
-          {item.payment_status === "paid" ? "مدفوعة" : item.payment_status === "partial" ? "جزئي" : item.payment_status === "overdue" ? "متاخرة" : "غير مدفوعة"}
+          {item.payment_status === "paid" ? "مدفوعة" : item.payment_status === "partial" ? "جزئي" : item.payment_status === "overdue" ? "متأخرة" : "غير مدفوعة"}
         </span>
       ),
     },

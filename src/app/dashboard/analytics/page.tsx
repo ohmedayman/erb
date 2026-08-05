@@ -167,7 +167,7 @@ export default function AnalyticsPage() {
       color: "bg-green-50 text-green-600",
     },
     {
-      label: "توتال الأوردرات",
+      label: "إجمالي الأوردرات",
       value: stats?.totalOrders || orders.length || 0,
       icon: ShoppingCart,
       color: "bg-blue-50 text-blue-600",

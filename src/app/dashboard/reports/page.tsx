@@ -673,7 +673,7 @@ export default function ReportsPage() {
                         }`}
                       >
                         {invoice.status === "unpaid"
-                          ? "مدفوعش"
+                          ? "مدفوعة"
                           : invoice.status === "partial"
                           ? "جزئي"
                           : "معلق"}

@@ -30,8 +30,8 @@ interface Invoice {
 }
 
 const statusConfig: Record<string, { label: string; class: string }> = {
-  paid: { label: "اتدفعت", class: "bg-green-100 text-green-700 border border-green-200" },
-  unpaid: { label: "م مدفوعة", class: "bg-red-100 text-red-700 border border-red-200" },
+  paid: { label: "مدفوعة", class: "bg-green-100 text-green-700 border border-green-200" },
+  unpaid: { label: "غير مدفوعة", class: "bg-red-100 text-red-700 border border-red-200" },
   partial: { label: "جزئي", class: "bg-yellow-100 text-yellow-700 border border-yellow-200" },
 };
 
@@ -186,10 +186,10 @@ export default function InvoicesPage() {
 
     const statusLabel =
       invoice.status === "paid"
-        ? "اتدفعت"
+        ? "مدفوعة"
         : invoice.status === "partial"
         ? "جزئي"
-        : "م مدفوعة";
+        : "غير مدفوعة";
     const statusColor =
       invoice.status === "paid"
         ? "#16a34a"
@@ -303,8 +303,8 @@ export default function InvoicesPage() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
           { label: "كل الفواتير", value: summary.total, color: "text-foreground", icon: "📄" },
-          { label: "اتدفعت", value: summary.paid, color: "text-green-600", icon: "✅" },
-          { label: "م مدفوعة", value: summary.unpaid, color: "text-red-600", icon: "❌" },
+          { label: "مدفوعة", value: summary.paid, color: "text-green-600", icon: "✅" },
+          { label: "غير مدفوعة", value: summary.unpaid, color: "text-red-600", icon: "❌" },
           { label: "جزئي", value: summary.partial, color: "text-yellow-600", icon: "⏳" },
         ].map((s, i) => (
           <div

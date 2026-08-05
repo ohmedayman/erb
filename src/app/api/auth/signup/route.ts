@@ -1,12 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
-import { hashPassword, createToken } from "@/lib/auth";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export async function POST(request: NextRequest) {
   try {
-    const { username, email, password, fullName, storeName } =
-      await request.json();
+    // Rate limiting
+    const ip = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
+    const rateLimit = checkRateLimit(`signup:${ip}`);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: `تم تجاوز حد المحاولات. حاول تاني بعد ${rateLimit.retryAfter} ثانية` },
+        { status: 429 }
+      );
+    }
 
-    if (!username || !email || !password || !fullName || !storeName) {
+    const { email, password, fullName } = await request.json();
+
+    if (!email || !password || !fullName) {
       return NextResponse.json(
         { error: "جميع الحقول مطلوبة" },
         { status: 400 }
@@ -20,27 +29,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const token = await createToken({
-      userId: "user-" + Date.now(),
-      username,
-      email,
-      role: "admin",
-      storeId: "store-" + Date.now(),
-    });
-
-    return NextResponse.json({
-      token,
-      user: {
-        id: "user-" + Date.now(),
-        username,
-        fullName,
-        role: "admin",
-      },
-    });
+    // Signup is handled by Supabase Auth on the client side
+    // This endpoint is kept for backward compatibility
+    return NextResponse.json(
+      { error: "التسجيل يتم من الصفحة الرئيسية" },
+      { status: 400 }
+    );
   } catch (error: any) {
     console.error("Signup error:", error);
     return NextResponse.json(
-      { error: error.message || "حدث خطأ داخلي" },
+      { error: "حدث خطأ داخلي" },
       { status: 500 }
     );
   }

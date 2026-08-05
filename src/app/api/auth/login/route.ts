@@ -1,55 +1,37 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ADMIN_USER, comparePassword, createToken } from "@/lib/auth";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export async function POST(request: NextRequest) {
   try {
-    const { username, password } = await request.json();
-
-    if (!username || !password) {
+    // Rate limiting
+    const ip = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
+    const rateLimit = checkRateLimit(`login:${ip}`);
+    if (!rateLimit.allowed) {
       return NextResponse.json(
-        { error: "اسم المستخدم وكلمة المرور مطلوبين" },
+        { error: `تم تجاوز حد المحاولات. حاول تاني بعد ${rateLimit.retryAfter} ثانية` },
+        { status: 429 }
+      );
+    }
+
+    const { email, password } = await request.json();
+
+    if (!email || !password) {
+      return NextResponse.json(
+        { error: "البريد الإلكتروني وكلمة المرور مطلوبين" },
         { status: 400 }
       );
     }
 
-    if (username === ADMIN_USER.username) {
-      const valid = await comparePassword(password, ADMIN_USER.password);
-      if (!valid) {
-        return NextResponse.json(
-          { error: "كلمة المرور غير صحيحة" },
-          { status: 401 }
-        );
-      }
-
-      const token = await createToken({
-        userId: ADMIN_USER.id,
-        username: ADMIN_USER.username,
-        email: ADMIN_USER.email,
-        role: ADMIN_USER.role,
-        storeId: ADMIN_USER.storeId,
-      });
-
-      return NextResponse.json({
-        token,
-        user: {
-          id: ADMIN_USER.id,
-          username: ADMIN_USER.username,
-          email: ADMIN_USER.email,
-          fullName: ADMIN_USER.fullName,
-          role: ADMIN_USER.role,
-          storeId: ADMIN_USER.storeId,
-        },
-      });
-    }
-
+    // Login is handled by Supabase Auth on the client side
+    // This endpoint is kept for backward compatibility
     return NextResponse.json(
-      { error: "بيانات الدخول غير صحيحة" },
-      { status: 401 }
+      { error: "تسجيل الدخول يتم من الصفحة الرئيسية" },
+      { status: 400 }
     );
   } catch (error: any) {
     console.error("Login error:", error);
     return NextResponse.json(
-      { error: error.message || "حدث خطأ داخلي" },
+      { error: "حدث خطأ داخلي" },
       { status: 500 }
     );
   }

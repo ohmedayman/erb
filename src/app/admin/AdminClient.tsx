@@ -109,7 +109,7 @@ export default function AdminClient() {
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user") || "{}");
     if (!user.email) { router.push("/login"); return; }
-    const admin = user.role === "admin" || ADMIN_EMAILS.includes(user.email) || user.email.includes("admin");
+    const admin = user.role === "admin" || ADMIN_EMAILS.includes(user.email);
     setIsAdmin(admin);
     setChecked(true);
     if (!admin) return;

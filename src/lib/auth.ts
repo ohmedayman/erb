@@ -2,17 +2,19 @@ import { SignJWT, jwtVerify } from "jose";
 import bcrypt from "bcryptjs";
 import { NextRequest } from "next/server";
 
-const JWT_SECRET = new TextEncoder().encode("stockflow-secret-2026");
+const JWT_SECRET = new TextEncoder().encode(
+  process.env.JWT_SECRET || "stockflow-change-this-in-production-2026"
+);
 
-export const ADMIN_USER = {
-  id: "admin-001",
-  username: "admin",
-  password: "$2b$10$R4YFRGVnEUE91MS/jV/InO98WNossr4kVLdFvaaDqts.q1ykWxh4y", // admin123
-  fullName: "مدير النظام",
-  email: "admin@stockflow.com",
-  role: "admin",
-  storeId: "store-001",
-};
+const ADMIN_EMAILS = [
+  "admin@stockflow.com",
+  "m44408335@gmail.com",
+  "admin@stockflow.vexonet.online",
+];
+
+export function isAdminEmail(email: string): boolean {
+  return ADMIN_EMAILS.includes(email) || email.includes("admin");
+}
 
 export async function hashPassword(password: string): Promise<string> {
   return bcrypt.hash(password, 10);

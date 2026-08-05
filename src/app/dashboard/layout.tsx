@@ -93,7 +93,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
 
     const email = (user.email || "").toLowerCase();
-    const isAdmin = email.includes("admin") || ["admin@stockflow.com", "m44408335@gmail.com", "admin@stockflow.vexonet.online"].includes(email);
+    const ADMIN_EMAILS = ["admin@stockflow.com", "m44408335@gmail.com", "admin@stockflow.vexonet.online"];
+    const isAdmin = ADMIN_EMAILS.includes(email);
 
     if (isAdmin) {
       router.push("/admin");

@@ -1,3 +1,5 @@
+"use client";
+
 import { openDB, IDBPDatabase } from "idb";
 
 const DB_NAME = "stockflow-offline";

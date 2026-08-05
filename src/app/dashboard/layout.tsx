@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import {
   Warehouse, LayoutDashboard, Package, ShoppingCart, BarChart3, Settings,
   Users, Bell, Search, Menu, X, LogOut, ChevronDown, Truck, ClipboardList,

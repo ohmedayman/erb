@@ -63,7 +63,7 @@ export default function SignupPage() {
       }));
       localStorage.setItem("isLoggedIn", "true");
 
-      router.push("/dashboard");
+      router.push("/onboarding");
     } catch (err: any) {
       setError("حصل مشكلة: " + err.message);
       setLoading(false);

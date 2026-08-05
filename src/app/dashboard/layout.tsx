@@ -11,34 +11,51 @@ import {
   CalendarCheck, TrendingUp,
 } from "lucide-react";
 
+const allSidebarLinks: Record<string, { href: string; label: string; icon: any }> = {
+  dashboard: { href: "/dashboard", label: "البورد", icon: LayoutDashboard },
+  pos: { href: "/dashboard/pos", label: "نقطة البيع", icon: CreditCard },
+  products: { href: "/dashboard/products", label: "المنتجات", icon: Package },
+  orders: { href: "/dashboard/orders", label: "الأوردرات", icon: ShoppingCart },
+  invoices: { href: "/dashboard/invoices", label: "الفواتير", icon: Receipt },
+  customers: { href: "/dashboard/customers", label: "الزبائن", icon: UserCircle },
+  inventory: { href: "/dashboard/inventory", label: "المخزون", icon: ClipboardList },
+  expenses: { href: "/dashboard/expenses", label: "المصروفات", icon: Wallet },
+  employees: { href: "/dashboard/employees", label: "الموظفين", icon: UserCog },
+  shipping: { href: "/dashboard/shipping", label: "الشحن", icon: Truck },
+  installments: { href: "/dashboard/installments", label: "الأقساط", icon: CalendarCheck },
+  accounts: { href: "/dashboard/accounts", label: "الحسابات العامة", icon: BookOpen },
+  journal: { href: "/dashboard/journal", label: "القيود اليومية", icon: NotebookPen },
+  purchaseOrders: { href: "/dashboard/purchase-orders", label: "أوردرات الشراء", icon: FileText },
+  warehouses: { href: "/dashboard/warehouses", label: "المستودعات", icon: Building2 },
+  suppliers: { href: "/dashboard/suppliers", label: "الموردين", icon: TruckIcon },
+  stockMovements: { href: "/dashboard/stock-movements", label: "حركات المخزون", icon: ArrowLeftRight },
+  returns: { href: "/dashboard/returns", label: "المرتجعات", icon: RotateCcw },
+  analytics: { href: "/dashboard/analytics", label: "التحليلات", icon: BarChart3 },
+  reports: { href: "/dashboard/reports", label: "التقارير", icon: PieChart },
+  reportsPL: { href: "/dashboard/reports/profit-loss", label: "الأرباح والخسائر", icon: TrendingUp },
+  activityLog: { href: "/dashboard/activity-log", label: "سجل النشاطات", icon: Activity },
+  notifications: { href: "/dashboard/notifications", label: "الإشعارات", icon: BellRing },
+  team: { href: "/dashboard/team", label: "الفريق", icon: Users },
+  settings: { href: "/dashboard/settings", label: "الإعدادات", icon: Settings },
+};
 
-const sidebarLinks = [
-  { href: "/dashboard", label: "البورد", icon: LayoutDashboard },
-  { href: "/dashboard/pos", label: "نقطة البيع", icon: CreditCard },
-  { href: "/dashboard/invoices", label: "الفواتير", icon: Receipt },
-  { href: "/dashboard/installments", label: "الأقساط", icon: CalendarCheck },
-  { href: "/dashboard/customers", label: "الزبائن", icon: UserCircle },
-  { href: "/dashboard/products", label: "المنتجات", icon: Package },
-  { href: "/dashboard/orders", label: "الطلبات", icon: ShoppingCart },
-  { href: "/dashboard/inventory", label: "المخزون", icon: ClipboardList },
-  { href: "/dashboard/expenses", label: "المصروفات", icon: Wallet },
-  { href: "/dashboard/accounts", label: "الحسابات العامة", icon: BookOpen },
-  { href: "/dashboard/journal", label: "القيود اليومية", icon: NotebookPen },
-  { href: "/dashboard/employees", label: "الموظفون", icon: UserCog },
-  { href: "/dashboard/shipping", label: "الشحن", icon: Truck },
-  { href: "/dashboard/analytics", label: "التحليلات", icon: BarChart3 },
-  { href: "/dashboard/reports", label: "التقارير", icon: PieChart },
-  { href: "/dashboard/reports/profit-loss", label: "الأرباح والخسائر", icon: TrendingUp },
-  { href: "/dashboard/purchase-orders", label: "طلبات الشراء", icon: FileText },
-  { href: "/dashboard/warehouses", label: "المستودعات", icon: Building2 },
-  { href: "/dashboard/suppliers", label: "الموردون", icon: TruckIcon },
-  { href: "/dashboard/stock-movements", label: "حركات المخزون", icon: ArrowLeftRight },
-  { href: "/dashboard/returns", label: "المرتجعات", icon: RotateCcw },
-  { href: "/dashboard/activity-log", label: "سجل النشاطات", icon: Activity },
-  { href: "/dashboard/notifications", label: "الإشعارات", icon: BellRing },
-  { href: "/dashboard/team", label: "الفريق", icon: Users },
-  { href: "/dashboard/settings", label: "الإعدادات", icon: Settings },
-];
+const featureToLinks: Record<string, string[]> = {
+  products: ["products"],
+  orders: ["orders"],
+  invoices: ["invoices", "installments"],
+  customers: ["customers"],
+  inventory: ["inventory", "stockMovements"],
+  expenses: ["expenses", "accounts", "journal"],
+  employees: ["employees", "team"],
+  shipping: ["shipping"],
+  installments: ["installments"],
+  accounts: ["accounts", "journal"],
+  purchaseOrders: ["purchaseOrders", "suppliers"],
+  warehouses: ["warehouses"],
+  suppliers: ["suppliers"],
+  returns: ["returns"],
+  analytics: ["analytics", "reports", "reportsPL"],
+};
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -46,6 +63,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [username, setUsername] = useState("مستخدم");
+  const [visibleLinks, setVisibleLinks] = useState<typeof allSidebarLinks>({});
 
   useEffect(() => {
     const isLoggedIn = localStorage.getItem("isLoggedIn");
@@ -54,16 +72,43 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       router.push("/login");
       return;
     }
+
+    const prefs = JSON.parse(localStorage.getItem("user_prefs") || "null");
+    if (!prefs || !prefs.onboardingDone) {
+      router.push("/onboarding");
+      return;
+    }
+
     setUsername(user.fullName || user.username || "مستخدم");
+
+    const enabledFeatures: string[] = prefs.features || [];
+    const links: typeof allSidebarLinks = { dashboard: allSidebarLinks.dashboard };
+
+    for (const feature of enabledFeatures) {
+      const linkKeys = featureToLinks[feature] || [];
+      for (const key of linkKeys) {
+        if (allSidebarLinks[key]) {
+          links[key] = allSidebarLinks[key];
+        }
+      }
+    }
+
+    if (prefs.shipping) links.shipping = allSidebarLinks.shipping;
+    if (prefs.installments) links.installments = allSidebarLinks.installments;
+
+    links.settings = allSidebarLinks.settings;
+
+    setVisibleLinks(links);
   }, [router]);
 
   const handleLogout = () => {
     localStorage.removeItem("isLoggedIn");
     localStorage.removeItem("user");
     localStorage.removeItem("token");
-    localStorage.removeItem("firebaseToken");
     router.push("/login");
   };
+
+  const linkList = Object.values(visibleLinks);
 
   return (
     <div className="min-h-screen flex bg-background">
@@ -82,7 +127,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
 
           <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-            {sidebarLinks.map((link) => {
+            {linkList.map((link) => {
               const isActive = pathname === link.href;
               return (
                 <Link key={link.href} href={link.href} onClick={() => setSidebarOpen(false)}

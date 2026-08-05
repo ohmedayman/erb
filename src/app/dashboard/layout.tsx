@@ -117,10 +117,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <aside className={`fixed lg:static inset-y-0 right-0 left-auto z-50 w-64 bg-sidebar-bg transform transition-transform duration-200 ease-in-out lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "translate-x-full"}`}>
         <div className="flex flex-col h-full">
           <div className="flex items-center gap-2 px-5 h-16 border-b border-white/10">
-            <div className="w-9 h-9 bg-primary rounded-lg flex items-center justify-center">
-              <Warehouse className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-lg font-bold text-white">Stock<span className="text-primary">Flow</span></span>
+            <Link href="/dashboard" className="flex items-center gap-2.5">
+              <div className="w-9 h-9 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/25">
+                <Warehouse className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-lg font-bold text-white">Stock<span className="text-orange-400">Flow</span></span>
+            </Link>
             <button onClick={() => setSidebarOpen(false)} className="mr-auto lg:hidden text-sidebar-text hover:text-white">
               <X className="w-5 h-5" />
             </button>
@@ -160,6 +162,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <button onClick={() => setSidebarOpen(true)} className="lg:hidden text-muted-foreground hover:text-foreground">
             <Menu className="w-6 h-6" />
           </button>
+
+          <Link href="/dashboard" className="flex items-center gap-2 shrink-0">
+            <div className="w-9 h-9 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/25">
+              <Warehouse className="w-5 h-5 text-white" />
+            </div>
+          </Link>
 
           <div className="flex-1 max-w-md">
             <div className="relative">

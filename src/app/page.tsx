@@ -94,32 +94,36 @@ const testimonials = [
   { name: "محمد حسن", role: "صاحب سوبر ماركت", company: "سوبر ماركت هاني", rating: 5, text: "أكتر حاجة عجبتني إن التقارير بتاعته واضحة وبتبينلي إيه اللي بيتباع وإيه اللي واقف. بقى عندي رؤية كاملة على الشغل." },
 ];
 
-const pricingPlans = [
-  {
-    name: "الأساسي",
-    price: "299",
-    desc: "مثالي للمحلات الصغيرة اللي بتبدأ",
-    features: ["مخزن واحد", "حتى 1,000 منتج", "5 أوردرات يومياً", "تقارير أساسية", "دعم عبر الشات", "تحديثات مجانية"],
-    cta: "ابدأ مجاناً",
-    primary: false,
-  },
-  {
-    name: "المحترف",
-    price: "799",
-    desc: "لل businesses اللي عايزة تكبر",
-    features: ["5 مخازن", "حتى 10,000 منتج", "أوردرات غير محدودة", "تحليلات متقدمة", "دعم أولوي 24/7", "10 مستخدمين", "وصول API", "تكامل مع شركات الشحن"],
-    cta: "ابدأ تجربة مجانية",
-    primary: true,
-  },
-  {
-    name: "المؤسسات",
-    price: "1,999",
-    desc: "للعمليات الكبيرة والمعقدة",
-    features: ["مخازن غير محدودة", "منتجات غير محدودة", "أوردرات غير محدودة", "تقارير مخصصة", "دعم على مدار الساعة", "مستخدمون غير محدودون", "تكاملات مخصصة", "مدير حساب مخصص", "SLA مخصص"],
-    cta: "تواصل مع المبيعات",
-    primary: false,
-  },
-];
+const pricingPlan = {
+  name: "StockFlow Pro",
+  monthlyPrice: "250",
+  yearlyPrice: "3,000",
+  yearlyPriceRaw: 3000,
+  monthlyPriceRaw: 250,
+  desc: "الباقة الكاملة لإدارة مخزنك — كل اللي محتاجه في مكان واحد",
+  features: [
+    "مخازن غير محدودة",
+    "منتجات غير محدودة",
+    "أوردرات غير محدودة",
+    "فاتور وإيصالات احترافية",
+    "نقطة بيع (POS)",
+    "إدارة الزبائن والموردين",
+    "تقارير أرباح وخسائر",
+    "إدارة الموظفين والرواتب",
+    "حسابات تكاليف الشحن",
+    "Installments (أقساط)",
+    "طباعة باركود",
+    "تصدير تقارير PDF",
+    "دعم فني على مدار الساعة",
+  ],
+  monthlyFeatures: [
+    "مخزن واحد",
+    "حتى 5,000 منتج",
+    "أوردرات شهرية غير محدودة",
+    "تقارير أساسية",
+    "دعم عبر الشات",
+  ],
+};
 
 export default function HomePage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -761,13 +765,13 @@ export default function HomePage() {
           >
             <motion.div variants={fadeInUp} className="inline-flex items-center gap-2 bg-orange-50 text-orange-600 px-4 py-2 rounded-full text-sm font-semibold mb-4 border border-orange-100">
               <CreditCard className="w-4 h-4" />
-              أسعار واضحة
+              سعر واحد بسيط
             </motion.div>
             <motion.h2 variants={fadeInUp} className="text-3xl sm:text-4xl font-bold text-gray-900">
-              اختار الخطة اللي تناسبك
+              خطة واحدة — كل اللي محتاجه
             </motion.h2>
             <motion.p variants={fadeInUp} className="mt-4 text-lg text-gray-600">
-              ابدأ مجاناً وتوسع مع نموك — من غير أي رسوم خفية
+              ادفع سنوي ووفر — السعر الشهري أقل بكتير
             </motion.p>
           </motion.div>
 
@@ -776,50 +780,102 @@ export default function HomePage() {
             whileInView="visible"
             viewport={{ once: true, margin: "-50px" }}
             variants={staggerContainer}
-            className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto"
+            className="max-w-2xl mx-auto"
           >
-            {pricingPlans.map((plan, i) => (
-              <motion.div
-                key={i}
-                variants={scaleIn}
-                whileHover={{ y: -5 }}
-                className={`rounded-3xl p-8 border-2 transition-all relative ${
-                  plan.primary
-                    ? "border-orange-500 bg-white shadow-2xl shadow-orange-500/10 scale-105"
-                    : "border-gray-200 bg-white hover:border-orange-300 hover:shadow-lg"
-                }`}
-              >
-                {plan.primary && (
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-4 py-1.5 rounded-full text-xs font-bold shadow-lg shadow-orange-500/25">
-                    الأكثر شعبية
+            <motion.div
+              variants={scaleIn}
+              whileHover={{ y: -5 }}
+              className="rounded-3xl border-2 border-orange-500 bg-white shadow-2xl shadow-orange-500/10 relative overflow-hidden"
+            >
+              <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-orange-500 to-orange-600 py-2 text-center">
+                <span className="text-white text-sm font-bold">الباقة الشاملة</span>
+              </div>
+
+              <div className="pt-12 px-8 pb-8">
+                <h3 className="text-2xl font-bold text-gray-900">{pricingPlan.name}</h3>
+                <p className="text-sm text-gray-500 mt-1">{pricingPlan.desc}</p>
+
+                {/* Yearly Price */}
+                <div className="mt-6 bg-orange-50 rounded-2xl p-6 border border-orange-100">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-sm font-medium text-orange-700">الاشتراك السنوي</span>
+                    <span className="bg-green-100 text-green-700 text-xs font-bold px-2.5 py-1 rounded-full">وفر 250 ج.م</span>
                   </div>
-                )}
-                <h3 className="text-xl font-bold text-gray-900">{plan.name}</h3>
-                <p className="text-sm text-gray-500 mt-1">{plan.desc}</p>
-                <div className="mt-6 flex items-baseline gap-2">
-                  <span className="text-5xl font-bold text-gray-900">{plan.price}</span>
-                  <span className="text-lg text-gray-500 font-medium">ج.م/شهر</span>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-5xl font-bold text-gray-900">{pricingPlan.yearlyPrice}</span>
+                    <span className="text-lg text-gray-500 font-medium">ج.م / سنة</span>
+                  </div>
+                  <p className="text-sm text-orange-600 mt-2 font-medium">= {pricingPlan.monthlyPrice} ج.م / شهرياً</p>
                 </div>
-                <ul className="mt-8 space-y-4">
-                  {plan.features.map((f, j) => (
-                    <li key={j} className="flex items-center gap-3 text-sm text-gray-700">
-                      <CheckCircle className="w-5 h-5 text-orange-500 shrink-0" />
-                      {f}
-                    </li>
-                  ))}
-                </ul>
+
+                {/* Monthly Alternative */}
+                <div className="mt-4 bg-gray-50 rounded-xl p-4 border border-gray-200">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-sm font-medium text-gray-700">الاشتراك الشهري</span>
+                      <p className="text-xs text-gray-500 mt-0.5">ادفع كل شهر</p>
+                    </div>
+                    <div className="text-left">
+                      <span className="text-2xl font-bold text-gray-900">500</span>
+                      <span className="text-sm text-gray-500 font-medium"> ج.م/شهر</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Features */}
+                <div className="mt-8">
+                  <h4 className="text-sm font-bold text-gray-900 mb-4">الباقة تشمل:</h4>
+                  <ul className="space-y-3">
+                    {pricingPlan.features.map((f, j) => (
+                      <li key={j} className="flex items-center gap-3 text-sm text-gray-700">
+                        <CheckCircle className="w-5 h-5 text-orange-500 shrink-0" />
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
                 <Link
                   href="/signup"
-                  className={`mt-8 block text-center py-3.5 rounded-xl font-semibold transition-all ${
-                    plan.primary
-                      ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:from-orange-600 hover:to-orange-700 shadow-lg shadow-orange-500/25"
-                      : "bg-gray-100 text-gray-900 hover:bg-gray-200"
-                  }`}
+                  className="mt-8 block text-center py-4 rounded-xl font-bold text-lg bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:from-orange-600 hover:to-orange-700 shadow-lg shadow-orange-500/25 transition-all"
                 >
-                  {plan.cta}
+                  ابدأ الآن — مجاناً
                 </Link>
-              </motion.div>
-            ))}
+                <p className="text-center text-xs text-gray-400 mt-3">تجربة مجانية 14 يوم — بدون بطاقة ائتمان</p>
+              </div>
+            </motion.div>
+          </motion.div>
+
+          {/* Comparison */}
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-50px" }}
+            variants={staggerContainer}
+            className="mt-16 max-w-3xl mx-auto"
+          >
+            <motion.h3 variants={fadeInUp} className="text-xl font-bold text-gray-900 text-center mb-8">
+              ليه الاشتراك السنوي أحسن؟
+            </motion.h3>
+            <div className="grid sm:grid-cols-3 gap-6">
+              {[
+                { monthly: "500 ج.م", yearly: "250 ج.م", save: "250 ج.م/شهر", title: "وفر 250 جنيه كل شهر" },
+                { monthly: "6,000 ج.م", yearly: "3,000 ج.م", save: "3,000 ج.م/سنة", title: "وفّر 3,000 جنيه في السنة" },
+                { monthly: "كل شهر", yearly: "مرة واحدة", save: "مرة واحدة", title: "ادفع مرة واحدة وارتاح" },
+              ].map((item, i) => (
+                <motion.div key={i} variants={fadeInUp} className="bg-white rounded-2xl p-6 border border-gray-200 text-center">
+                  <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mx-auto mb-3">
+                    <CheckCircle className="w-6 h-6 text-orange-500" />
+                  </div>
+                  <h4 className="font-bold text-gray-900 mb-2">{item.title}</h4>
+                  <p className="text-sm text-gray-500">
+                    <span className="line-through text-gray-400">{item.monthly}</span>
+                    {" → "}
+                    <span className="text-orange-600 font-bold">{item.yearly}</span>
+                  </p>
+                </motion.div>
+              ))}
+            </div>
           </motion.div>
         </div>
       </section>

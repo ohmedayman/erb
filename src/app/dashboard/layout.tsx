@@ -75,37 +75,55 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       return;
     }
 
-    const checkSubscription = async () => {
-      const prefs = JSON.parse(localStorage.getItem("user_prefs") || "null");
-      if (!prefs || !prefs.onboardingDone) {
-        router.push("/onboarding");
-        return;
-      }
+    const email = (user.email || "").toLowerCase();
+    const isAdmin = email.includes("admin") || ["admin@stockflow.com", "m44408335@gmail.com", "admin@stockflow.vexonet.online"].includes(email);
 
-      setUsername(user.fullName || user.username || "مستخدم");
+    if (isAdmin) {
+      router.push("/admin");
+      return;
+    }
 
-      const enabledFeatures: string[] = prefs.features || [];
-      const links: typeof allSidebarLinks = { dashboard: allSidebarLinks.dashboard };
+    setUsername(user.fullName || user.username || user.name || "مستخدم");
 
-      for (const feature of enabledFeatures) {
-        const linkKeys = featureToLinks[feature] || [];
-        for (const key of linkKeys) {
-          if (allSidebarLinks[key]) {
-            links[key] = allSidebarLinks[key];
-          }
+    const links: typeof allSidebarLinks = { dashboard: allSidebarLinks.dashboard };
+
+    const allFeatures = ["products", "orders", "invoices", "customers", "inventory", "expenses", "employees", "shipping", "installments", "accounts", "purchaseOrders", "warehouses", "suppliers", "returns", "analytics"];
+    for (const feature of allFeatures) {
+      const linkKeys = featureToLinks[feature] || [];
+      for (const key of linkKeys) {
+        if (allSidebarLinks[key]) {
+          links[key] = allSidebarLinks[key];
         }
       }
+    }
 
-      if (prefs.shipping) links.shipping = allSidebarLinks.shipping;
-      if (prefs.installments) links.installments = allSidebarLinks.installments;
-
-      links.settings = allSidebarLinks.settings;
+    links.settings = allSidebarLinks.settings;
+    if (isAdmin) {
       links.adminOrders = allSidebarLinks.adminOrders;
+    }
 
-      setVisibleLinks(links);
-    };
+    setVisibleLinks(links);
 
-    checkSubscription();
+    if (!isAdmin) {
+      const checkSubscription = async () => {
+        try {
+          const { supabase } = await import("@/lib/supabase");
+          const { data } = await supabase
+            .from("subscription_orders")
+            .select("id")
+            .eq("user_id", user.id)
+            .eq("status", "approved")
+            .limit(1);
+
+          if (!data || data.length === 0) {
+            router.push("/checkout");
+          }
+        } catch {
+          // Allow access on error
+        }
+      };
+      checkSubscription();
+    }
   }, [router]);
 
   const handleLogout = () => {

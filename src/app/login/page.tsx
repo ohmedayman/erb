@@ -70,15 +70,36 @@ export default function LoginPage() {
       }
 
       if (data.user) {
+        const email = (data.user.email || "").toLowerCase();
+        const isAdmin = email.includes("admin") || ["admin@stockflow.com", "m44408335@gmail.com", "admin@stockflow.vexonet.online"].includes(email);
+
         localStorage.setItem("user", JSON.stringify({
           id: data.user.id,
           email: data.user.email,
           fullName: data.user.user_metadata?.full_name || data.user.email,
+          name: data.user.user_metadata?.full_name || data.user.email,
           role: "admin",
           storeId: data.user.user_metadata?.store_id || "store-001",
         }));
         localStorage.setItem("isLoggedIn", "true");
-        router.push("/dashboard");
+
+        if (isAdmin) {
+          router.push("/admin");
+          return;
+        }
+
+        const { data: orders } = await supabase
+          .from("subscription_orders")
+          .select("id")
+          .eq("user_id", data.user.id)
+          .eq("status", "approved")
+          .limit(1);
+
+        if (orders && orders.length > 0) {
+          router.push("/dashboard");
+        } else {
+          router.push("/checkout");
+        }
       }
     } catch {
       setServerError("فيه مشكلة حصلت — حاول تاني");

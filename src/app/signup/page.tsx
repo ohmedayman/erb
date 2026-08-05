@@ -58,12 +58,15 @@ export default function SignupPage() {
           data: {
             full_name: formData.name.trim(),
           },
+          emailRedirectTo: typeof window !== "undefined" ? window.location.origin + "/dashboard" : undefined,
         },
       });
 
       if (error) {
         if (error.message.includes("already")) {
           setServerError("البريد الإلكتروني متسجل قبل كده");
+        } else if (error.message.includes("rate") || error.message.includes("limit") || error.message.includes("email")) {
+          setServerError("تم تجاوز حد الإرسال. حاول تاني بعد شوية أو تواصل مع الدعم على 01028707543");
         } else {
           setServerError("حصل مشكلة: " + error.message);
         }
@@ -95,7 +98,12 @@ export default function SignupPage() {
           role: "user",
         }));
 
-        router.push("/checkout");
+        if (data.session) {
+          router.push("/checkout");
+        } else {
+          setServerError("تم التسجيل بنجاح! لو مش لاقي إيميل تأكيد، تواصل معنا على 01028707543 ونهدّك على طول.");
+          setTimeout(() => router.push("/checkout"), 3000);
+        }
       }
     } catch (err: any) {
       setServerError("حصل مشكلة: " + err.message);

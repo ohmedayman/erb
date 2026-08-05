@@ -28,14 +28,14 @@ interface Invoice {
 }
 
 const statusConfig: Record<string, { label: string; class: string }> = {
-  paid: { label: "مدفوعة", class: "bg-green-100 text-green-700" },
-  unpaid: { label: "غير مدفوعة", class: "bg-red-100 text-red-700" },
+  paid: { label: "اتدفعت", class: "bg-green-100 text-green-700" },
+  unpaid: { label: "م اتددفعش", class: "bg-red-100 text-red-700" },
   partial: { label: "جزئي", class: "bg-yellow-100 text-yellow-700" },
 };
 
 const paymentLabels: Record<string, string> = {
-  cash: "نقدي",
-  card: "بطاقة",
+  cash: "كاش",
+  card: "كارت",
   transfer: "تحويل",
 };
 
@@ -178,7 +178,7 @@ export default function InvoicesPage() {
             <div className="text-left space-y-1 text-sm border-t-2 border-gray-800 pt-4">
               <p>المجموع الفرعي: {printInvoice.subtotal.toFixed(2)} ر.س</p>
               <p>الضريبة (15%): {printInvoice.tax.toFixed(2)} ر.س</p>
-              <p className="text-lg font-bold">الإجمالي: {printInvoice.total.toFixed(2)} ر.س</p>
+              <p className="text-lg font-bold">توتال: {printInvoice.total.toFixed(2)} ر.س</p>
             </div>
             {printInvoice.notes && (
               <div className="mt-4 text-sm text-gray-600 border-t pt-4">
@@ -197,10 +197,10 @@ export default function InvoicesPage() {
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
-          { label: "إجمالي الفواتير", value: summary.total, color: "text-foreground" },
-          { label: "مدفوعة", value: summary.paid, color: "text-green-600" },
+          { label: "توتال الفواتير", value: summary.total, color: "text-foreground" },
+          { label: "اتدفعت", value: summary.paid, color: "text-green-600" },
           { label: "معلقة", value: summary.unpaid, color: "text-red-600" },
-          { label: "إجمالي المبالغ", value: `${summary.totalAmount.toFixed(2)} ر.س`, color: "text-primary" },
+          { label: "توتال المبالغ", value: `${summary.totalAmount.toFixed(2)} ر.س`, color: "text-primary" },
         ].map((s, i) => (
           <div key={i} className="bg-card rounded-xl border border-border p-4">
             <p className="text-sm text-muted-foreground">{s.label}</p>
@@ -226,7 +226,7 @@ export default function InvoicesPage() {
             className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-hover transition-colors"
           >
             <Plus className="w-4 h-4" />
-            إضافة فاتورة
+            اضف فاتورة
           </button>
         </div>
       </div>
@@ -249,13 +249,13 @@ export default function InvoicesPage() {
               {loading ? (
                 <tr>
                   <td colSpan={7} className="px-5 py-8 text-center text-muted-foreground text-sm">
-                    جاري التحميل...
+                    بيتحمّل...
                   </td>
                 </tr>
               ) : filtered.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="px-5 py-8 text-center text-muted-foreground text-sm">
-                    لم يتم العثور على فواتير
+                    مفيش فواتير
                   </td>
                 </tr>
               ) : (
@@ -309,7 +309,7 @@ export default function InvoicesPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="bg-card rounded-2xl shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-5 border-b border-border">
-              <h2 className="text-lg font-bold">إضافة فاتورة جديدة</h2>
+              <h2 className="text-lg font-bold">اضف فاتورة جديدة</h2>
               <button
                 onClick={() => setShowModal(false)}
                 className="p-2 hover:bg-muted rounded-lg transition-colors"
@@ -353,7 +353,7 @@ export default function InvoicesPage() {
                     className="flex items-center gap-1 text-xs text-primary hover:text-primary-hover"
                   >
                     <Plus className="w-3 h-3" />
-                    إضافة منتج
+                    اضف منتج
                   </button>
                 </div>
                 <div className="space-y-2">
@@ -413,7 +413,7 @@ export default function InvoicesPage() {
                   <span className="font-medium">{tax.toFixed(2)} ر.س</span>
                 </div>
                 <div className="flex justify-between text-base font-bold border-t border-border pt-2">
-                  <span>الإجمالي:</span>
+                  <span>توتال:</span>
                   <span className="text-primary">{total.toFixed(2)} ر.س</span>
                 </div>
               </div>
@@ -429,8 +429,8 @@ export default function InvoicesPage() {
                       onChange={(e) => setForm({ ...form, paymentMethod: e.target.value })}
                       className="w-full appearance-none px-4 py-2 pl-8 bg-muted rounded-lg text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
                     >
-                      <option value="cash">نقدي</option>
-                      <option value="card">بطاقة</option>
+                      <option value="cash">كاش</option>
+                      <option value="card">كارت</option>
                       <option value="transfer">تحويل</option>
                     </select>
                     <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
@@ -455,13 +455,13 @@ export default function InvoicesPage() {
                   onClick={handleSubmit}
                   className="flex-1 bg-primary text-white py-2.5 rounded-lg text-sm font-medium hover:bg-primary-hover transition-colors"
                 >
-                  إنشاء الفاتورة
+                  عمل الفاتورة
                 </button>
                 <button
                   onClick={() => setShowModal(false)}
                   className="px-6 py-2.5 bg-muted text-foreground rounded-lg text-sm font-medium hover:bg-muted/80 transition-colors"
                 >
-                  إلغاء
+                  الغاء
                 </button>
               </div>
             </div>

@@ -8,8 +8,8 @@ import {
 import { getDocsFromCollection, updateDocInCollection } from "@/lib/localdb";
 
 const tabs = [
-  { id: "store", label: "معلومات المتجر", icon: Store },
-  { id: "owner", label: "بيانات المالك", icon: User },
+  { id: "store", label: "معلومات المحل", icon: Store },
+  { id: "owner", label: "معلومات صاحب المحل", icon: User },
   { id: "address", label: "العنوان", icon: MapPin },
   { id: "business", label: "الأعمال", icon: Building2 },
   { id: "notifications", label: "الإشعارات", icon: Bell },
@@ -53,7 +53,7 @@ export default function SettingsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <p className="text-muted-foreground">جاري تحميل الإعدادات...</p>
+        <p className="text-muted-foreground">بيتحمّل الإعدادات...</p>
       </div>
     );
   }
@@ -63,7 +63,7 @@ export default function SettingsPage() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-foreground">الإعدادات</h1>
-          <p className="text-muted-foreground text-sm mt-1">إدارة إعدادات وتفضيلات متجرك</p>
+          <p className="text-muted-foreground text-sm mt-1">إعدادات وتفضيلات محلّك</p>
         </div>
         <button onClick={handleSave} className="flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-primary-hover transition-colors">
           <Save className="w-4 h-4" /> حفظ التغييرات
@@ -72,7 +72,7 @@ export default function SettingsPage() {
 
       {saved && (
         <div className="flex items-center gap-2 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm">
-          <CheckCircle className="w-4 h-4" /> تم حفظ الإعدادات بنجاح!
+          <CheckCircle className="w-4 h-4" /> اتعمل بنجاح!
         </div>
       )}
 
@@ -92,13 +92,13 @@ export default function SettingsPage() {
           {activeTab === "store" && (
             <div className="bg-card rounded-xl border border-border">
               <div className="px-6 py-4 border-b border-border">
-                <h2 className="font-semibold text-foreground">معلومات المتجر</h2>
-                <p className="text-sm text-muted-foreground mt-1">تحديث تفاصيل متجرك وعلامتك التجارية</p>
+                <h2 className="font-semibold text-foreground">معلومات المحل</h2>
+                <p className="text-sm text-muted-foreground mt-1">تحديث تفاصيل محلّك وعلامتك التجارية</p>
               </div>
               <div className="p-6 space-y-6">
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div className="sm:col-span-2">
-                    <label className="block text-sm font-medium text-foreground mb-1.5">اسم المتجر</label>
+                    <label className="block text-sm font-medium text-foreground mb-1.5">اسم المحل</label>
                     <input type="text" value={storeData?.name || ""} onChange={(e) => updateField("name", e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" />
                   </div>
                   <div className="sm:col-span-2">
@@ -113,7 +113,7 @@ export default function SettingsPage() {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-1.5">الفئة</label>
+                    <label className="block text-sm font-medium text-foreground mb-1.5">الصنف</label>
                     <select value={storeData?.category || "Electronics"} onChange={(e) => updateField("category", e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50">
                       <option>إلكترونيات</option><option>أثاث</option><option>ملابس</option><option>أغذية ومشروبات</option><option>صناعي</option><option>أخرى</option>
                     </select>
@@ -126,7 +126,7 @@ export default function SettingsPage() {
           {activeTab === "owner" && (
             <div className="bg-card rounded-xl border border-border">
               <div className="px-6 py-4 border-b border-border">
-                <h2 className="font-semibold text-foreground">بيانات المالك</h2>
+                <h2 className="font-semibold text-foreground">معلومات صاحب المحل</h2>
                 <p className="text-sm text-muted-foreground mt-1">معلومات حسابك الشخصي</p>
               </div>
               <div className="p-6 space-y-4">
@@ -156,7 +156,7 @@ export default function SettingsPage() {
             <div className="bg-card rounded-xl border border-border">
               <div className="px-6 py-4 border-b border-border">
                 <h2 className="font-semibold text-foreground">العنوان</h2>
-                <p className="text-sm text-muted-foreground mt-1">الموقع الفعلي لمتجرك</p>
+                <p className="text-sm text-muted-foreground mt-1">الموقع الفعلي لمحلّك</p>
               </div>
               <div className="p-6 space-y-4">
                 <div>
@@ -222,14 +222,14 @@ export default function SettingsPage() {
             <div className="bg-card rounded-xl border border-border">
               <div className="px-6 py-4 border-b border-border">
                 <h2 className="font-semibold text-foreground">الإشعارات</h2>
-                <p className="text-sm text-muted-foreground mt-1">اختر الإشعارات التي تريد استلامها</p>
+                <p className="text-sm text-muted-foreground mt-1">اختار الإشعارات اللي عايز تستلمها</p>
               </div>
               <div className="p-6 space-y-4">
                 {[
-                  { key: "emailNotifs", label: "إشعارات البريد الإلكتروني", desc: "استلام تحديثات عبر البريد الإلكتروني حول نشاط متجرك" },
-                  { key: "orderAlerts", label: "تنبيهات الطلبات", desc: "استلام إشعار عند تقديم طلبات جديدة" },
-                  { key: "lowStockAlerts", label: "تنبيهات المخزون المنخفض", desc: "تنبيه عند انخفاض المنتجات عن الحد الأدنى" },
-                  { key: "weeklyReports", label: "التقارير الأسبوعية", desc: "استلام ملخص أسبوعي لأداء متجرك" },
+                  { key: "emailNotifs", label: "إشعارات البريد الإلكتروني", desc: "استلام تحديثات عبر البريد الإلكتروني حول نشاط محلّك" },
+                  { key: "orderAlerts", label: "تنبيهات الأوردرات", desc: "استلام إشعار عند تقديم أوردرات جديدة" },
+                  { key: "lowStockAlerts", label: "تنبيهات المخزون القليل", desc: "تنبيه عند انخفاض المنتجات عن الحد الأدنى" },
+                  { key: "weeklyReports", label: "التقارير الأسبوعية", desc: "استلام ملخص أسبوعي لأداء محلّك" },
                 ].map((item) => (
                   <div key={item.key} className="flex items-center justify-between py-3 border-b border-border last:border-0">
                     <div>
@@ -250,25 +250,25 @@ export default function SettingsPage() {
             <div className="bg-card rounded-xl border border-border">
               <div className="px-6 py-4 border-b border-border">
                 <h2 className="font-semibold text-foreground">الأمان</h2>
-                <p className="text-sm text-muted-foreground mt-1">إدارة كلمة المرور وإعدادات الأمان</p>
+                <p className="text-sm text-muted-foreground mt-1">إدارة كلمة السر وإعدادات الأمان</p>
               </div>
               <div className="p-6 space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-1.5">كلمة المرور الحالية</label>
-                  <input type="password" value={passwords.current} onChange={(e) => setPasswords({ ...passwords, current: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="أدخل كلمة المرور الحالية" />
+                  <label className="block text-sm font-medium text-foreground mb-1.5">كلمة السر الحالية</label>
+                  <input type="password" value={passwords.current} onChange={(e) => setPasswords({ ...passwords, current: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="أدخل كلمة السر الحالية" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-1.5">كلمة المرور الجديدة</label>
+                  <label className="block text-sm font-medium text-foreground mb-1.5">كلمة السر الجديدة</label>
                   <input type="password" value={passwords.new} onChange={(e) => setPasswords({ ...passwords, new: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="8 أحرف على الأقل" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-1.5">تأكيد كلمة المرور الجديدة</label>
-                  <input type="password" value={passwords.confirm} onChange={(e) => setPasswords({ ...passwords, confirm: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="أكد كلمة المرور الجديدة" />
+                  <label className="block text-sm font-medium text-foreground mb-1.5">تأكيد كلمة السر الجديدة</label>
+                  <input type="password" value={passwords.confirm} onChange={(e) => setPasswords({ ...passwords, confirm: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="أكد كلمة السر الجديدة" />
                 </div>
                 {passwords.new && passwords.confirm && passwords.new !== passwords.confirm && (
-                  <div className="flex items-center gap-2 text-red-500 text-sm"><AlertCircle className="w-4 h-4" /> كلمتا المرور غير متطابقتين</div>
+                  <div className="flex items-center gap-2 text-red-500 text-sm"><AlertCircle className="w-4 h-4" /> كلمتين السر مش متطابقين</div>
                 )}
-                <button className="px-5 py-2.5 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary-hover transition-colors">تحديث كلمة المرور</button>
+                <button className="px-5 py-2.5 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary-hover transition-colors">تحديث كلمة السر</button>
                 <div className="pt-4 border-t border-border">
                   <h3 className="text-sm font-medium text-foreground mb-2">المصادقة الثنائية</h3>
                   <p className="text-xs text-muted-foreground mb-3">أضف طبقة أمان إضافية لحسابك</p>

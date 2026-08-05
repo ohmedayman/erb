@@ -26,7 +26,7 @@ export default function SignupPage() {
 
     try {
       if (findUserByUsername(formData.username)) {
-        setError("اسم المستخدم موجود بالفعل");
+        setError("اسم المستخدم موجود خالص");
         setLoading(false);
         return;
       }
@@ -65,7 +65,7 @@ export default function SignupPage() {
 
       router.push("/dashboard");
     } catch (err: any) {
-      setError("حدث خطأ: " + err.message);
+      setError("حصل مشكلة: " + err.message);
       setLoading(false);
     }
   };
@@ -117,8 +117,8 @@ export default function SignupPage() {
         <div className="flex-1 flex items-center justify-center px-8 py-6">
           <div className="w-full max-w-md">
             <div className="bg-card rounded-2xl shadow-xl border border-border p-8">
-              <h1 className="text-2xl font-bold text-foreground">إنشاء حساب</h1>
-              <p className="mt-2 text-sm text-muted-foreground">قم بإعداد نظام إدارة المخازن الخاص بك</p>
+              <h1 className="text-2xl font-bold text-foreground">اعمل حساب</h1>
+              <p className="mt-2 text-sm text-muted-foreground">جهّز نظام إدارة المخازن بتاعك</p>
 
               {error && (
                 <div className="mt-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
@@ -128,29 +128,29 @@ export default function SignupPage() {
 
               <form onSubmit={handleSignup} className="mt-8 space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-1.5">الاسم الكامل</label>
-                  <input type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-foreground text-right focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm" placeholder="أدخل اسمك الكامل" required />
+                  <label className="block text-sm font-medium text-foreground mb-1.5">اسمك الكامل</label>
+                  <input type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-foreground text-right focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm" placeholder="اكتب اسمك الكامل" required />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-1.5">البريد الإلكتروني</label>
+                  <label className="block text-sm font-medium text-foreground mb-1.5">الإيميل</label>
                   <input type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-foreground text-right focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm" placeholder="example@company.com" required />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-1.5">اسم المتجر</label>
-                  <input type="text" value={formData.storeName} onChange={(e) => setFormData({ ...formData, storeName: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-foreground text-right focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm" placeholder="متجري" required />
+                  <label className="block text-sm font-medium text-foreground mb-1.5">اسم المحل</label>
+                  <input type="text" value={formData.storeName} onChange={(e) => setFormData({ ...formData, storeName: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-foreground text-right focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm" placeholder="محلّي" required />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-1.5">اسم المستخدم</label>
-                  <input type="text" value={formData.username} onChange={(e) => setFormData({ ...formData, username: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-foreground text-right focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm" placeholder="اسم المستخدم" required />
+                  <input type="text" value={formData.username} onChange={(e) => setFormData({ ...formData, username: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-foreground text-right focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm" placeholder="اسمك" required />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-1.5">كلمة المرور</label>
+                  <label className="block text-sm font-medium text-foreground mb-1.5">الباسوورد</label>
                   <div className="relative">
-                    <input type={showPassword ? "text" : "password"} value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-foreground text-right focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm pl-12" placeholder="8 أحرف على الأقل" required minLength={8} />
+                    <input type={showPassword ? "text" : "password"} value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-foreground text-right focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm pl-12" placeholder="8 حروف على الأقل" required minLength={8} />
                     <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
@@ -159,7 +159,7 @@ export default function SignupPage() {
 
                 <div className="flex items-start gap-2 pt-1">
                   <CheckCircle className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                  <p className="text-xs text-muted-foreground">بإنشاء حساب، أنت توافق على شروط الخدمة وسياسة الخصوصية</p>
+                  <p className="text-xs text-muted-foreground">بالتسجيل أنت موافق على شروط الخدمة وسياسة الخصوصية</p>
                 </div>
 
                 <button type="submit" disabled={loading} className="w-full bg-primary text-white py-3 rounded-lg font-medium hover:bg-primary-hover transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary/25 mt-2">
@@ -169,16 +169,16 @@ export default function SignupPage() {
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                       </svg>
-                      جاري إنشاء الحساب...
+                      البيتعمل الحساب...
                     </span>
-                  ) : "إنشاء حساب"}
+                    ) : "اعمل حساب"}
                 </button>
               </form>
 
               <div className="mt-6 text-center">
                 <p className="text-sm text-muted-foreground">
-                  لديك حساب بالفعل؟{" "}
-                  <Link href="/login" className="text-primary hover:text-primary-hover font-medium transition-colors">تسجيل الدخول</Link>
+                   عندك حساب خالص؟{" "}
+                   <Link href="/login" className="text-primary hover:text-primary-hover font-medium transition-colors">ادخل</Link>
                 </p>
               </div>
             </div>

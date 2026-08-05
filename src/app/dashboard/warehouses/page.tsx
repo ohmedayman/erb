@@ -74,7 +74,7 @@ export default function WarehousesPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("هل أنت متأكد من حذف هذا المستودع؟")) return;
+    if (!confirm("متأكد من حذف المستودع ده؟")) return;
     deleteDocFromCollection("warehouses", id);
     fetchWarehouses();
   };
@@ -119,7 +119,7 @@ export default function WarehousesPage() {
           onClick={() => openModal()}
           className="flex items-center gap-2 bg-primary text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-primary-hover transition-colors"
         >
-          <Plus className="w-4 h-4" /> إضافة مستودع
+          <Plus className="w-4 h-4" /> اضف مستودع
         </button>
       </div>
 
@@ -129,7 +129,7 @@ export default function WarehousesPage() {
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               type="text"
-              placeholder="البحث عن مستودعات..."
+              placeholder="ابحث عن مستودعات..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-4 pr-10 py-2 bg-muted rounded-lg text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
@@ -173,7 +173,7 @@ export default function WarehousesPage() {
                     colSpan={7}
                     className="px-5 py-8 text-center text-muted-foreground text-sm"
                   >
-                    جاري التحميل...
+                    بيتحمّل...
                   </td>
                 </tr>
               ) : filtered.length === 0 ? (
@@ -182,7 +182,7 @@ export default function WarehousesPage() {
                     colSpan={7}
                     className="px-5 py-8 text-center text-muted-foreground text-sm"
                   >
-                    لم يتم العثور على مستودعات
+                    مفيش مستودعات
                   </td>
                 </tr>
               ) : (
@@ -320,7 +320,7 @@ export default function WarehousesPage() {
           <div className="bg-card rounded-2xl shadow-xl w-full max-w-lg border border-border">
             <div className="px-6 py-4 border-b border-border flex items-center justify-between">
               <h2 className="text-lg font-semibold text-foreground">
-                {editingWarehouse ? "تعديل المستودع" : "إضافة مستودع"}
+                {editingWarehouse ? "تعديل المستودع" : "اضف مستودع"}
               </h2>
               <button
                 onClick={closeModal}
@@ -519,7 +519,7 @@ export default function WarehousesPage() {
                   type="submit"
                   className="flex-1 py-2.5 rounded-lg bg-primary text-white text-sm font-medium hover:bg-primary-hover transition-colors"
                 >
-                  {editingWarehouse ? "حفظ التغييرات" : "إضافة مستودع"}
+                   {editingWarehouse ? "حفظ التغييرات" : "اضف مستودع"}
                 </button>
               </div>
             </form>

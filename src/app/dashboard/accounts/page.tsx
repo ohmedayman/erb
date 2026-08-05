@@ -111,14 +111,14 @@ export default function AccountsPage() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">دليل الحسابات</h1>
           <p className="text-muted-foreground text-sm mt-1">
-            إدارة الحسابات المالية وشجرة الحسابات
+            ادارة الحسابات المالية وشجرة الحسابات
           </p>
         </div>
         <button
           onClick={() => setShowModal(true)}
           className="flex items-center gap-2 bg-primary text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-primary-hover transition-colors"
         >
-          <Plus className="w-4 h-4" /> إضافة حساب
+          <Plus className="w-4 h-4" /> اضف حساب
         </button>
       </div>
 
@@ -128,7 +128,7 @@ export default function AccountsPage() {
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               type="text"
-              placeholder="البحث في الحسابات..."
+              placeholder="بحث في الحسابات..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-4 pr-10 py-2 bg-muted rounded-lg text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
@@ -140,11 +140,11 @@ export default function AccountsPage() {
       <div className="bg-card rounded-xl border border-border overflow-hidden">
         {loading ? (
           <div className="px-5 py-8 text-center text-muted-foreground text-sm">
-            جاري التحميل...
+            بيتحمّل...
           </div>
         ) : Object.keys(grouped).length === 0 ? (
           <div className="px-5 py-8 text-center text-muted-foreground text-sm">
-            لم يتم العثور على حسابات
+            مفيش حسابات
           </div>
         ) : (
           Object.keys(typeLabels).map((type) => {
@@ -255,7 +255,7 @@ export default function AccountsPage() {
               <DollarSign className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <p className="text-xs text-muted-foreground">إجمالي الأرصدة</p>
+              <p className="text-xs text-muted-foreground">اجمالي الارصدة</p>
               <p className="text-lg font-bold text-foreground">
                 {formatCurrency(totalBalance)}
               </p>
@@ -269,7 +269,7 @@ export default function AccountsPage() {
           <div className="bg-card rounded-2xl shadow-xl w-full max-w-lg border border-border">
             <div className="px-6 py-4 border-b border-border flex items-center justify-between">
               <h2 className="text-lg font-semibold text-foreground">
-                إضافة حساب
+                اضف حساب
               </h2>
               <button
                 onClick={() => setShowModal(false)}
@@ -374,13 +374,13 @@ export default function AccountsPage() {
                   onClick={() => setShowModal(false)}
                   className="flex-1 py-2.5 rounded-lg border border-border text-sm font-medium hover:bg-muted transition-colors"
                 >
-                  إلغاء
+                  الغاء
                 </button>
                 <button
                   type="submit"
                   className="flex-1 py-2.5 rounded-lg bg-primary text-white text-sm font-medium hover:bg-primary-hover transition-colors"
                 >
-                  إضافة حساب
+                  اضف حساب
                 </button>
               </div>
             </form>

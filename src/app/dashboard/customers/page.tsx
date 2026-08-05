@@ -103,13 +103,13 @@ export default function CustomersPage() {
   return (
     <div className="space-y-6" dir="rtl">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">العملاء</h1>
-        <p className="text-muted-foreground text-sm mt-1">إدارة بيانات العملاء وأرصدتهم</p>
+        <h1 className="text-2xl font-bold text-foreground">الزبائن</h1>
+        <p className="text-muted-foreground text-sm mt-1">إدارة بيانات الزبائن وأرصدتهم</p>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
         {[
-          { label: "إجمالي العملاء", value: customers.length, color: "text-foreground" },
+          { label: "إجمالي الزبائن", value: customers.length, color: "text-foreground" },
           { label: "أفراد", value: customers.filter((c) => c.type === "individual").length, color: "text-blue-600" },
           { label: "شركات", value: customers.filter((c) => c.type === "company").length, color: "text-purple-600" },
         ].map((s, i) => (
@@ -126,7 +126,7 @@ export default function CustomersPage() {
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               type="text"
-              placeholder="البحث بالاسم أو رقم الهاتف..."
+              placeholder="البحث بالاسم أو رقم التليفون..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-4 pr-10 py-2 bg-muted rounded-lg text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
@@ -137,7 +137,7 @@ export default function CustomersPage() {
             className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-hover transition-colors"
           >
             <Plus className="w-4 h-4" />
-            إضافة عميل
+            اضف زبون
           </button>
         </div>
       </div>
@@ -148,8 +148,8 @@ export default function CustomersPage() {
             <thead>
               <tr className="border-b border-border bg-muted/50">
                 <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">الاسم</th>
-                <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">الهاتف</th>
-                <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">البريد</th>
+                <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">التليفون</th>
+                <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">الإيميل</th>
                 <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">النوع</th>
                 <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">الرصيد</th>
                 <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">التاريخ</th>
@@ -160,13 +160,13 @@ export default function CustomersPage() {
               {loading ? (
                 <tr>
                   <td colSpan={7} className="px-5 py-8 text-center text-muted-foreground text-sm">
-                    جاري التحميل...
+                    بيتحمّل...
                   </td>
                 </tr>
               ) : filtered.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="px-5 py-8 text-center text-muted-foreground text-sm">
-                    لم يتم العثور على عملاء
+                    مفيش زبائن
                   </td>
                 </tr>
               ) : (
@@ -203,7 +203,7 @@ export default function CustomersPage() {
                       <button
                         onClick={() => openModal(customer)}
                         className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
-                        title="تعديل"
+                        title="عدّل"
                       >
                         <Edit2 className="w-4 h-4" />
                       </button>
@@ -221,7 +221,7 @@ export default function CustomersPage() {
           <div className="bg-card rounded-2xl shadow-xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-5 border-b border-border">
               <h2 className="text-lg font-bold">
-                {editingCustomer ? "تعديل بيانات العميل" : "إضافة عميل جديد"}
+                {editingCustomer ? "عدّل بيانات الزبون" : "اضف زبون جديد"}
               </h2>
               <button
                 onClick={() => setShowModal(false)}
@@ -233,40 +233,40 @@ export default function CustomersPage() {
             <div className="p-5 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">
-                  اسم العميل *
+                  اسم الزبون *
                 </label>
                 <input
                   type="text"
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   className="w-full px-3 py-2 bg-muted rounded-lg text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
-                  placeholder="اسم العميل"
+                  placeholder="اسم الزبون"
                 />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-1">
-                    رقم الهاتف
+                    رقم التليفون
                   </label>
                   <input
                     type="text"
                     value={form.phone}
                     onChange={(e) => setForm({ ...form, phone: e.target.value })}
                     className="w-full px-3 py-2 bg-muted rounded-lg text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
-                    placeholder="رقم الهاتف"
+                    placeholder="رقم التليفون"
                     dir="ltr"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-1">
-                    البريد الإلكتروني
+                    الإيميل
                   </label>
                   <input
                     type="email"
                     value={form.email}
                     onChange={(e) => setForm({ ...form, email: e.target.value })}
                     className="w-full px-3 py-2 bg-muted rounded-lg text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
-                    placeholder="البريد الإلكتروني"
+                    placeholder="الإيميل"
                     dir="ltr"
                   />
                 </div>
@@ -331,7 +331,7 @@ export default function CustomersPage() {
                   onClick={handleSubmit}
                   className="flex-1 bg-primary text-white py-2.5 rounded-lg text-sm font-medium hover:bg-primary-hover transition-colors"
                 >
-                  {editingCustomer ? "تحديث البيانات" : "إضافة العميل"}
+                  {editingCustomer ? "تحديث البيانات" : "اضف الزبون"}
                 </button>
                 <button
                   onClick={() => setShowModal(false)}

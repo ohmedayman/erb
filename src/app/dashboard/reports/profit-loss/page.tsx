@@ -92,21 +92,21 @@ export default function ProfitLossPage() {
 
   const summaryCards = [
     {
-      label: "إجمالي الإيرادات",
+      label: "توتال الإيرادات",
       value: data?.totalRevenue ?? 0,
       icon: TrendingUp,
       color: "bg-green-50 text-green-600 border-green-200",
       iconBg: "bg-green-100",
     },
     {
-      label: "إجمالي المصروفات",
+      label: "توتال المصروفات",
       value: data?.totalExpenses ?? 0,
       icon: TrendingDown,
       color: "bg-red-50 text-red-600 border-red-200",
       iconBg: "bg-red-100",
     },
     {
-      label: "صافي الربح",
+      label: "الربح الصافي",
       value: data?.netProfit ?? 0,
       icon: DollarSign,
       color: "bg-blue-50 text-blue-600 border-blue-200",
@@ -179,7 +179,7 @@ export default function ProfitLossPage() {
           <div className="px-5 py-4 border-b border-border">
             <h2 className="font-semibold text-foreground flex items-center gap-2">
               <FileText className="w-4 h-4" />
-              التفصيل الشهري (آخر 6 أشهر)
+              التفصيل الشهري (آخر 6 شهور)
             </h2>
           </div>
           <div className="overflow-x-auto">
@@ -207,7 +207,7 @@ export default function ProfitLossPage() {
                       colSpan={4}
                       className="px-5 py-8 text-center text-muted-foreground text-sm"
                     >
-                      جاري التحميل...
+                      بيتحمّل...
                     </td>
                   </tr>
                 ) : !data?.monthlyBreakdown?.length ? (
@@ -216,7 +216,7 @@ export default function ProfitLossPage() {
                       colSpan={4}
                       className="px-5 py-8 text-center text-muted-foreground text-sm"
                     >
-                      لا توجد بيانات بعد
+                      مفيش بيانات لسه
                     </td>
                   </tr>
                 ) : (
@@ -258,17 +258,17 @@ export default function ProfitLossPage() {
           <div className="px-5 py-4 border-b border-border">
             <h2 className="font-semibold text-foreground flex items-center gap-2">
               <DollarSign className="w-4 h-4" />
-              توزيع المصروفات حسب الفئة
+              توزيع المصروفات حسب الصنف
             </h2>
           </div>
           <div className="p-5">
             {loading ? (
               <p className="text-sm text-muted-foreground text-center py-8">
-                جاري التحميل...
+                بيتحمّل...
               </p>
             ) : !data?.expenseCategories?.length ? (
               <p className="text-sm text-muted-foreground text-center py-8">
-                لا توجد مصروفات بعد
+                مفيش مصروفات لسه
               </p>
             ) : (
               <div className="space-y-4">

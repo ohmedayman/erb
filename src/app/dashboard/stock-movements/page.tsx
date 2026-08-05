@@ -70,13 +70,13 @@ export default function StockMovementsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">حركات المخزون</h1>
-          <p className="text-muted-foreground text-sm mt-1">تتبع حركات الإدخال والإخراج والنقل</p>
+          <p className="text-muted-foreground text-sm mt-1">تتبع حركات الإدخال و الإخراج و النقل</p>
         </div>
         <button
           onClick={() => setShowModal(true)}
           className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
         >
-          <Plus className="w-4 h-4" /> إضافة حركة
+          <Plus className="w-4 h-4" /> اضف حركة
         </button>
       </div>
 
@@ -110,9 +110,9 @@ export default function StockMovementsPage() {
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={8} className="px-5 py-8 text-center text-muted-foreground text-sm">جاري التحميل...</td></tr>
+                <tr><td colSpan={8} className="px-5 py-8 text-center text-muted-foreground text-sm">بيتحمّل...</td></tr>
               ) : movements.length === 0 ? (
-                <tr><td colSpan={8} className="px-5 py-8 text-center text-muted-foreground text-sm">لا توجد حركات مخزون بعد</td></tr>
+                <tr><td colSpan={8} className="px-5 py-8 text-center text-muted-foreground text-sm">مفيش حركات مخزون</td></tr>
               ) : (
                 movements.map((m, i) => {
                   const cfg = typeConfig[m.type] || typeConfig["إدخال"];
@@ -144,7 +144,7 @@ export default function StockMovementsPage() {
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-card rounded-2xl border border-border w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-5 border-b border-border">
-              <h2 className="text-lg font-bold text-foreground">إضافة حركة مخزون</h2>
+              <h2 className="text-lg font-bold text-foreground">اضف حركة مخزون</h2>
               <button onClick={() => setShowModal(false)} className="text-muted-foreground hover:text-foreground">
                 <X className="w-5 h-5" />
               </button>
@@ -239,7 +239,7 @@ export default function StockMovementsPage() {
                   disabled={submitting}
                   className="flex-1 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
                 >
-                  {submitting ? "جاري الحفظ..." : "حفظ"}
+                   {submitting ? "بيتحمّل..." : "حفظ"}
                 </button>
                 <button
                   type="button"

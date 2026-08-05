@@ -103,7 +103,7 @@ export default function EmployeesPage() {
     <div className="space-y-6" dir="rtl">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">الموظفون</h1>
+          <h1 className="text-2xl font-bold text-foreground">الموظفين</h1>
           <p className="text-muted-foreground text-sm mt-1">
             إدارة بيانات الموظفين والرواتب
           </p>
@@ -112,7 +112,7 @@ export default function EmployeesPage() {
           onClick={() => setShowModal(true)}
           className="flex items-center gap-2 bg-primary text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-primary-hover transition-colors"
         >
-          <Plus className="w-4 h-4" /> إضافة موظف
+          <Plus className="w-4 h-4" /> اضف موظف
         </button>
       </div>
 
@@ -123,7 +123,7 @@ export default function EmployeesPage() {
               <Users className="w-5 h-5 text-blue-600" />
             </div>
             <div>
-              <p className="text-xs text-muted-foreground">إجمالي الموظفين</p>
+              <p className="text-xs text-muted-foreground">توتال الموظفين</p>
               <p className="text-lg font-bold text-foreground">
                 {totalEmployees}
               </p>
@@ -149,7 +149,7 @@ export default function EmployeesPage() {
               <DollarSign className="w-5 h-5 text-purple-600" />
             </div>
             <div>
-              <p className="text-xs text-muted-foreground">إجمالي الرواتب</p>
+              <p className="text-xs text-muted-foreground">توتال الرواتب</p>
               <p className="text-lg font-bold text-foreground">
                 {formatCurrency(totalSalaries)}
               </p>
@@ -205,7 +205,7 @@ export default function EmployeesPage() {
                     colSpan={6}
                     className="px-5 py-8 text-center text-muted-foreground text-sm"
                   >
-                    جاري التحميل...
+                    بيتحمّل...
                   </td>
                 </tr>
               ) : filtered.length === 0 ? (
@@ -214,7 +214,7 @@ export default function EmployeesPage() {
                     colSpan={6}
                     className="px-5 py-8 text-center text-muted-foreground text-sm"
                   >
-                    لم يتم العثور على موظفين
+                    مفيش موظفين
                   </td>
                 </tr>
               ) : (
@@ -290,7 +290,7 @@ export default function EmployeesPage() {
           <div className="bg-card rounded-2xl shadow-xl w-full max-w-lg border border-border max-h-[90vh] overflow-y-auto">
             <div className="px-6 py-4 border-b border-border flex items-center justify-between">
               <h2 className="text-lg font-semibold text-foreground">
-                إضافة موظف
+                اضف موظف
               </h2>
               <button
                 onClick={() => setShowModal(false)}
@@ -475,13 +475,13 @@ export default function EmployeesPage() {
                   onClick={() => setShowModal(false)}
                   className="flex-1 py-2.5 rounded-lg border border-border text-sm font-medium hover:bg-muted transition-colors"
                 >
-                  إلغاء
+                  الغاء
                 </button>
                 <button
                   type="submit"
                   className="flex-1 py-2.5 rounded-lg bg-primary text-white text-sm font-medium hover:bg-primary-hover transition-colors"
                 >
-                  إضافة موظف
+                  اضف موظف
                 </button>
               </div>
             </form>

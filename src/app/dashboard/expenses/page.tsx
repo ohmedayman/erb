@@ -24,7 +24,7 @@ const categoryLabels: Record<string, string> = {
   salaries: "رواتب",
   marketing: "تسويق",
   transport: "نقل",
-  other: "أخرى",
+  other: "تانية",
 };
 
 const categoryColors: Record<string, string> = {
@@ -37,8 +37,8 @@ const categoryColors: Record<string, string> = {
 };
 
 const paymentMethodLabels: Record<string, string> = {
-  cash: "نقدي",
-  card: "بطاقة",
+  cash: "كاش",
+  card: "كارت",
   transfer: "تحويل",
 };
 
@@ -167,7 +167,7 @@ export default function ExpensesPage() {
           onClick={() => setShowModal(true)}
           className="flex items-center gap-2 bg-primary text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-primary-hover transition-colors"
         >
-          <Plus className="w-4 h-4" /> إضافة مصروف
+          <Plus className="w-4 h-4" /> اضف مصروف
         </button>
       </div>
 
@@ -178,7 +178,7 @@ export default function ExpensesPage() {
               <DollarSign className="w-5 h-5 text-blue-600" />
             </div>
             <div>
-              <p className="text-xs text-muted-foreground">إجمالي المصروفات</p>
+              <p className="text-xs text-muted-foreground">توتال المصروفات</p>
               <p className="text-lg font-bold text-foreground">
                 {formatCurrency(totalExpenses)}
               </p>
@@ -288,7 +288,7 @@ export default function ExpensesPage() {
                     colSpan={6}
                     className="px-5 py-8 text-center text-muted-foreground text-sm"
                   >
-                    جاري التحميل...
+                    بيتحمّل...
                   </td>
                 </tr>
               ) : filtered.length === 0 ? (
@@ -297,7 +297,7 @@ export default function ExpensesPage() {
                     colSpan={6}
                     className="px-5 py-8 text-center text-muted-foreground text-sm"
                   >
-                    لم يتم العثور على مصروفات
+                    مفيش مصروفات
                   </td>
                 </tr>
               ) : (
@@ -379,7 +379,7 @@ export default function ExpensesPage() {
           <div className="bg-card rounded-2xl shadow-xl w-full max-w-lg border border-border">
             <div className="px-6 py-4 border-b border-border flex items-center justify-between">
               <h2 className="text-lg font-semibold text-foreground">
-                إضافة مصروف
+                اضف مصروف
               </h2>
               <button
                 onClick={() => setShowModal(false)}
@@ -437,7 +437,7 @@ export default function ExpensesPage() {
                     <option value="salaries">رواتب</option>
                     <option value="marketing">تسويق</option>
                     <option value="transport">نقل</option>
-                    <option value="other">أخرى</option>
+                    <option value="other">تانية</option>
                   </select>
                 </div>
               </div>
@@ -457,8 +457,8 @@ export default function ExpensesPage() {
                     }
                     className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
                   >
-                    <option value="cash">نقدي</option>
-                    <option value="card">بطاقة</option>
+                    <option value="cash">كاش</option>
+                    <option value="card">كارت</option>
                     <option value="transfer">تحويل</option>
                   </select>
                 </div>
@@ -515,13 +515,13 @@ export default function ExpensesPage() {
                   onClick={() => setShowModal(false)}
                   className="flex-1 py-2.5 rounded-lg border border-border text-sm font-medium hover:bg-muted transition-colors"
                 >
-                  إلغاء
+                  الغاء
                 </button>
                 <button
                   type="submit"
                   className="flex-1 py-2.5 rounded-lg bg-primary text-white text-sm font-medium hover:bg-primary-hover transition-colors"
                 >
-                  إضافة مصروف
+                  اضف مصروف
                 </button>
               </div>
             </form>

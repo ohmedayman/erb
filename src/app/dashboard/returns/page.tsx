@@ -68,13 +68,13 @@ export default function ReturnsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">المرتجعات</h1>
-          <p className="text-muted-foreground text-sm mt-1">إدارة مرتجعات الطلبات</p>
+          <p className="text-muted-foreground text-sm mt-1">إدارة مرتجعات الأوردرات</p>
         </div>
         <button
           onClick={() => setShowModal(true)}
           className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
         >
-          <Plus className="w-4 h-4" /> إضافة مرتجع
+          <Plus className="w-4 h-4" /> اضف مرتجع
         </button>
       </div>
 
@@ -108,9 +108,9 @@ export default function ReturnsPage() {
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={8} className="px-5 py-8 text-center text-muted-foreground text-sm">جاري التحميل...</td></tr>
+                <tr><td colSpan={8} className="px-5 py-8 text-center text-muted-foreground text-sm">بيتحمّل...</td></tr>
               ) : returns.length === 0 ? (
-                <tr><td colSpan={8} className="px-5 py-8 text-center text-muted-foreground text-sm">لا توجد مرتجعات بعد</td></tr>
+                <tr><td colSpan={8} className="px-5 py-8 text-center text-muted-foreground text-sm">مفيش مرتجعات</td></tr>
               ) : (
                 returns.map((r, i) => {
                   const cfg = statusConfig[r.status] || statusConfig.Pending;
@@ -141,7 +141,7 @@ export default function ReturnsPage() {
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-card rounded-2xl border border-border w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-5 border-b border-border">
-              <h2 className="text-lg font-bold text-foreground">إضافة مرتجع</h2>
+              <h2 className="text-lg font-bold text-foreground">اضف مرتجع</h2>
               <button onClick={() => setShowModal(false)} className="text-muted-foreground hover:text-foreground">
                 <X className="w-5 h-5" />
               </button>
@@ -170,7 +170,7 @@ export default function ReturnsPage() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-foreground mb-1">سبب الإرجاع</label>
+                <label className="block text-sm font-medium text-foreground mb-1">سبب الاسترداد</label>
                 <input
                   type="text"
                   required
@@ -230,7 +230,7 @@ export default function ReturnsPage() {
                   disabled={submitting}
                   className="flex-1 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
                 >
-                  {submitting ? "جاري الحفظ..." : "حفظ"}
+                   {submitting ? "بيتحمّل..." : "حفظ"}
                 </button>
                 <button
                   type="button"

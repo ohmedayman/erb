@@ -35,28 +35,28 @@ export default function InventoryPage() {
 
   const statusConfig: Record<string, { bg: string; text: string; label: string }> = {
     Healthy: { bg: "bg-green-50", text: "text-green-600", label: "سليم" },
-    Low: { bg: "bg-yellow-50", text: "text-yellow-600", label: "منخفض" },
-    Critical: { bg: "bg-red-50", text: "text-red-600", label: "حرج" },
+    Low: { bg: "bg-yellow-50", text: "text-yellow-600", label: "قليل" },
+    Critical: { bg: "bg-red-50", text: "text-red-600", label: "خطر" },
   };
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-foreground">المخزون</h1>
-        <p className="text-muted-foreground text-sm mt-1">مستويات المخزون لحظياً عبر جميع المخازن</p>
+        <p className="text-muted-foreground text-sm mt-1">مستويات المخزون على طول في كل المخازن</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-card rounded-xl border border-border p-5">
-          <p className="text-sm text-muted-foreground">إجمالي وحدات المخزون</p>
+          <p className="text-sm text-muted-foreground">اجمالي وحدات المخزون</p>
           <p className="text-2xl font-bold text-foreground mt-1">{loading ? "..." : totalStock.toLocaleString("ar-SA")}</p>
         </div>
         <div className="bg-card rounded-xl border border-border p-5">
-          <p className="text-sm text-muted-foreground">تنبيهات المخزون المنخفض</p>
+          <p className="text-sm text-muted-foreground">تنبيهات المخزون القليل</p>
           <p className="text-2xl font-bold text-yellow-600 mt-1">{loading ? "..." : lowItems}</p>
         </div>
         <div className="bg-card rounded-xl border border-border p-5">
-          <p className="text-sm text-muted-foreground">إجمالي المنتجات</p>
+          <p className="text-sm text-muted-foreground">اجمالي المنتجات</p>
           <p className="text-2xl font-bold text-foreground mt-1">{loading ? "..." : inventory.length}</p>
         </div>
       </div>
@@ -70,7 +70,7 @@ export default function InventoryPage() {
             <thead>
               <tr className="border-b border-border bg-muted/50">
                 <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">المنتج</th>
-                <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">الرمز</th>
+                <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">الكود</th>
                 <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">المخزن</th>
                 <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">المخزون</th>
                 <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">الحد الأدنى</th>
@@ -79,9 +79,9 @@ export default function InventoryPage() {
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={6} className="px-5 py-8 text-center text-muted-foreground text-sm">جاري التحميل...</td></tr>
+                <tr><td colSpan={6} className="px-5 py-8 text-center text-muted-foreground text-sm">بيتحمّل...</td></tr>
               ) : inventory.length === 0 ? (
-                <tr><td colSpan={6} className="px-5 py-8 text-center text-muted-foreground text-sm">لا توجد بيانات مخزون</td></tr>
+                <tr><td colSpan={6} className="px-5 py-8 text-center text-muted-foreground text-sm">مفيش بيانات مخزون</td></tr>
               ) : (
                 inventory.map((item, i) => {
                   const cfg = statusConfig[item.status] || statusConfig.Healthy;

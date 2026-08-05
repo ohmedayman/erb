@@ -83,7 +83,7 @@ export default function NotificationsPage() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">الإشعارات</h1>
           <p className="text-muted-foreground text-sm mt-1">
-            عرض وإدارة الإشعارات
+            عرض و إدارة الإشعارات
           </p>
         </div>
         <button
@@ -91,19 +91,19 @@ export default function NotificationsPage() {
           disabled={notifications.every((n) => n.read)}
           className="flex items-center gap-2 bg-primary text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-primary-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <CheckCheck className="w-4 h-4" /> تعيين الكل كمقروء
+          <CheckCheck className="w-4 h-4" /> عمل الكل مقروء
         </button>
       </div>
 
       <div className="space-y-3">
         {loading ? (
           <div className="bg-card rounded-xl border border-border p-8 text-center text-muted-foreground text-sm">
-            جاري التحميل...
+            بيتحمّل...
           </div>
         ) : notifications.length === 0 ? (
           <div className="bg-card rounded-xl border border-border p-8 text-center">
             <Bell className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-50" />
-            <p className="text-muted-foreground text-sm">لا توجد إشعارات</p>
+            <p className="text-muted-foreground text-sm">مفيش إشعارات</p>
           </div>
         ) : (
           notifications.map((notification) => {

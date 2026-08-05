@@ -133,14 +133,14 @@ export default function InstallmentsPage() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">الأقساط</h1>
           <p className="text-muted-foreground text-sm mt-1">
-            متابعة أقساط الفواتير
+            متابعة الأقساط و الفواتير
           </p>
         </div>
         <button
           onClick={() => setShowModal(true)}
           className="flex items-center gap-2 bg-primary text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-primary-hover transition-colors"
         >
-          <Plus className="w-4 h-4" /> إضافة قسط
+          <Plus className="w-4 h-4" /> اضف قسط
         </button>
       </div>
 
@@ -254,7 +254,7 @@ export default function InstallmentsPage() {
                     colSpan={8}
                     className="px-5 py-8 text-center text-muted-foreground text-sm"
                   >
-                    جاري التحميل...
+                    بيتحمّل...
                   </td>
                 </tr>
               ) : filtered.length === 0 ? (
@@ -263,7 +263,7 @@ export default function InstallmentsPage() {
                     colSpan={8}
                     className="px-5 py-8 text-center text-muted-foreground text-sm"
                   >
-                    لم يتم العثور على أقساط
+                    مفيش أقساط
                   </td>
                 </tr>
               ) : (
@@ -319,7 +319,7 @@ export default function InstallmentsPage() {
           <div className="bg-card rounded-2xl shadow-xl w-full max-w-lg border border-border">
             <div className="px-6 py-4 border-b border-border flex items-center justify-between">
               <h2 className="text-lg font-semibold text-foreground">
-                إضافة قسط جديد
+                اضف قسط جديد
               </h2>
               <button
                 onClick={() => setShowModal(false)}
@@ -492,7 +492,7 @@ export default function InstallmentsPage() {
                   type="submit"
                   className="flex-1 py-2.5 rounded-lg bg-primary text-white text-sm font-medium hover:bg-primary-hover transition-colors"
                 >
-                  إضافة قسط
+                   اضف قسط
                 </button>
               </div>
             </form>

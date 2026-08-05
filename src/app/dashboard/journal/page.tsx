@@ -184,7 +184,7 @@ export default function JournalPage() {
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               type="text"
-              placeholder="البحث في القيود..."
+              placeholder="بحث في القيود..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-4 pr-10 py-2 bg-muted rounded-lg text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
@@ -222,7 +222,7 @@ export default function JournalPage() {
                     colSpan={5}
                     className="px-5 py-8 text-center text-muted-foreground text-sm"
                   >
-                    جاري التحميل...
+                    بيتحمّل...
                   </td>
                 </tr>
               ) : filtered.length === 0 ? (
@@ -231,7 +231,7 @@ export default function JournalPage() {
                     colSpan={5}
                     className="px-5 py-8 text-center text-muted-foreground text-sm"
                   >
-                    لم يتم العثور على قيود
+                    مفيش قيود
                   </td>
                 </tr>
               ) : (
@@ -333,7 +333,7 @@ export default function JournalPage() {
                     onClick={addLine}
                     className="flex items-center gap-1 text-primary text-xs font-medium hover:underline"
                   >
-                    <PlusCircle className="w-4 h-4" /> إضافة سطر
+                    <PlusCircle className="w-4 h-4" /> اضف سطر
                   </button>
                 </div>
 
@@ -423,7 +423,7 @@ export default function JournalPage() {
                 <div className="flex items-center gap-6">
                   <div>
                     <span className="text-xs text-muted-foreground block">
-                      إجمالي المدين
+                      اجمالي المدين
                     </span>
                     <span className="text-sm font-bold text-red-600">
                       {formatCurrency(totalDebit)}
@@ -431,7 +431,7 @@ export default function JournalPage() {
                   </div>
                   <div>
                     <span className="text-xs text-muted-foreground block">
-                      إجمالي الدائن
+                      اجمالي الدائن
                     </span>
                     <span className="text-sm font-bold text-green-600">
                       {formatCurrency(totalCredit)}
@@ -457,7 +457,7 @@ export default function JournalPage() {
                   onClick={() => setShowModal(false)}
                   className="flex-1 py-2.5 rounded-lg border border-border text-sm font-medium hover:bg-muted transition-colors"
                 >
-                  إلغاء
+                  الغاء
                 </button>
                 <button
                   type="submit"

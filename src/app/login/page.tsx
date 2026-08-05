@@ -33,7 +33,7 @@ export default function LoginPage() {
         localStorage.setItem("isLoggedIn", "true");
         router.push("/dashboard");
       } else {
-        setError("بيانات الدخول غير صحيحة");
+        setError("البيانات غلط");
         setLoading(false);
       }
     }, 300);
@@ -92,8 +92,8 @@ export default function LoginPage() {
         <div className="flex-1 flex items-center justify-center px-8">
           <div className="w-full max-w-md">
             <div className="bg-card rounded-2xl shadow-xl border border-border p-8">
-              <h1 className="text-2xl font-bold text-foreground">مرحباً بعودتك!</h1>
-              <p className="mt-2 text-sm text-muted-foreground">يرجى تسجيل الدخول باستخدام اسم المستخدم وكلمة المرور</p>
+              <h1 className="text-2xl font-bold text-foreground">أهلاً بيك تاني!</h1>
+              <p className="mt-2 text-sm text-muted-foreground">ادخل بياناتك عشان تدخل</p>
 
               {error && (
                 <div className="mt-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
@@ -109,20 +109,20 @@ export default function LoginPage() {
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     className="w-full px-4 py-3 rounded-lg border border-border bg-white text-foreground text-right focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
-                    placeholder="أدخل اسم المستخدم"
+                    placeholder="اكتب اسمك"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">كلمة المرور</label>
+                  <label className="block text-sm font-medium text-foreground mb-2">الباسوورد</label>
                   <div className="relative">
                     <input
                       type={showPassword ? "text" : "password"}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       className="w-full px-4 py-3 rounded-lg border border-border bg-white text-foreground text-right focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all pl-12"
-                      placeholder="أدخل كلمة المرور"
+                      placeholder="اكتب الباسوورد"
                       required
                     />
                     <button
@@ -135,7 +135,7 @@ export default function LoginPage() {
                   </div>
                   <div className="mt-2 text-right">
                     <button type="button" className="text-sm text-primary hover:text-primary-hover transition-colors">
-                      نسيت كلمة المرور؟
+                      نسيت الباسوورد؟
                     </button>
                   </div>
                 </div>
@@ -151,17 +151,17 @@ export default function LoginPage() {
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                       </svg>
-                      جاري تسجيل الدخول...
+                      بيتم الدخول...
                     </span>
-                  ) : "تسجيل الدخول"}
+                    ) : "ادخل"}
                 </button>
               </form>
 
               <div className="mt-6 text-center">
                 <p className="text-sm text-muted-foreground">
-                  ليس لديك حساب؟{" "}
-                  <Link href="/signup" className="text-primary hover:text-primary-hover font-medium transition-colors">
-                    إنشاء حساب
+                  م عندك حساب؟{" "}
+                   <Link href="/signup" className="text-primary hover:text-primary-hover font-medium transition-colors">
+                     اعمل حساب
                   </Link>
                 </p>
               </div>

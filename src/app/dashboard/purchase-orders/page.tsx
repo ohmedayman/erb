@@ -56,11 +56,11 @@ export default function PurchaseOrdersPage() {
   const statusLabel = (status: string) => {
     switch (status) {
       case "Pending":
-        return "معلق";
+        return "معلّق";
       case "Approved":
-        return "تمت الموافقة";
+        return "اتوافق عليه";
       case "Delivered":
-        return "تم التوصيل";
+        return "اتوصّل";
       default:
         return status;
     }
@@ -83,16 +83,16 @@ export default function PurchaseOrdersPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">طلبات الشراء</h1>
+          <h1 className="text-2xl font-bold text-foreground">أوردرات الشراء</h1>
           <p className="text-muted-foreground text-sm mt-1">
-            إدارة طلبات الشراء من الموردين
+            إدارة أوردرات الشراء من الموردين
           </p>
         </div>
         <button
           onClick={() => setShowModal(true)}
           className="flex items-center gap-2 bg-primary text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-primary-hover transition-colors"
         >
-          <Plus className="w-4 h-4" /> إضافة طلب شراء
+          <Plus className="w-4 h-4" /> اضف أوردر شراء
         </button>
       </div>
 
@@ -102,7 +102,7 @@ export default function PurchaseOrdersPage() {
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               type="text"
-              placeholder="البحث في طلبات الشراء..."
+              placeholder="ابحث في أوردرات الشراء..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-4 pr-10 py-2 bg-muted rounded-lg text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
@@ -143,7 +143,7 @@ export default function PurchaseOrdersPage() {
                     colSpan={6}
                     className="px-5 py-8 text-center text-muted-foreground text-sm"
                   >
-                    جاري التحميل...
+                    بيتحمّل...
                   </td>
                 </tr>
               ) : filtered.length === 0 ? (
@@ -152,7 +152,7 @@ export default function PurchaseOrdersPage() {
                     colSpan={6}
                     className="px-5 py-8 text-center text-muted-foreground text-sm"
                   >
-                    لم يتم العثور على طلبات شراء
+                    مفيش أوردرات شراء
                   </td>
                 </tr>
               ) : (
@@ -203,7 +203,7 @@ export default function PurchaseOrdersPage() {
           <div className="bg-card rounded-2xl shadow-xl w-full max-w-md border border-border">
             <div className="px-6 py-4 border-b border-border flex items-center justify-between">
               <h2 className="text-lg font-semibold text-foreground">
-                إضافة طلب شراء
+                اضف أوردر شراء
               </h2>
               <button
                 onClick={() => setShowModal(false)}
@@ -244,7 +244,7 @@ export default function PurchaseOrdersPage() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-1.5">
-                    المبلغ الإجمالي
+                    المبلغ الكلي
                   </label>
                   <input
                     type="number"
@@ -283,7 +283,7 @@ export default function PurchaseOrdersPage() {
                   type="submit"
                   className="flex-1 py-2.5 rounded-lg bg-primary text-white text-sm font-medium hover:bg-primary-hover transition-colors"
                 >
-                  إضافة
+                   اضف
                 </button>
               </div>
             </form>

@@ -15,10 +15,10 @@ import {
 } from "lucide-react";
 import { getDocsFromCollection } from "@/lib/localdb";
 const statusMap: Record<string, string> = {
-  Delivered: "تم التوصيل",
-  Shipped: "تم الشحن",
-  Processing: "قيد المعالجة",
-  Pending: "معلق",
+  Delivered: "اتسلّم",
+  Shipped: "اتشحن",
+  Processing: "بيتعالج",
+  Pending: "معلّق",
 };
 
 export default function DashboardPage() {
@@ -75,7 +75,7 @@ export default function DashboardPage() {
 
   const stats = [
     {
-      label: "إجمالي المنتجات",
+      label: "عدد المنتجات الكلي",
       value: data?.stats?.totalProducts ?? 0,
       icon: Package,
       color: "bg-blue-50 text-blue-600",
@@ -83,7 +83,7 @@ export default function DashboardPage() {
       trend: "up" as const,
     },
     {
-      label: "الطلبات المعلقة",
+      label: "الطلبات المعلّقة",
       value: data?.stats?.pendingOrders ?? 0,
       icon: ShoppingCart,
       color: "bg-orange-50 text-orange-600",
@@ -108,7 +108,7 @@ export default function DashboardPage() {
       trend: "down" as const,
     },
     {
-      label: "صافي الربح",
+      label: "الربح الصافي",
       value: data?.netProfit ?? 0,
       icon: TrendingUp,
       color: "bg-green-50 text-green-600",
@@ -117,7 +117,7 @@ export default function DashboardPage() {
       trend: "up" as const,
     },
     {
-      label: "العملاء",
+      label: "الزبائن",
       value: data?.totalCustomers ?? 0,
       icon: Users,
       color: "bg-purple-50 text-purple-600",
@@ -149,9 +149,9 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">لوحة التحكم</h1>
+        <h1 className="text-2xl font-bold text-foreground">البورد</h1>
         <p className="text-muted-foreground text-sm mt-1">
-          مرحباً بعودتك! إليك نظرة عامة على مخزنك.
+          أهلاً بيك تاني! شوف مخزنك من هنا.
         </p>
       </div>
 
@@ -197,7 +197,7 @@ export default function DashboardPage() {
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 bg-card rounded-xl border border-border">
           <div className="px-5 py-4 border-b border-border flex items-center justify-between">
-            <h2 className="font-semibold text-foreground">الطلبات الأخيرة</h2>
+            <h2 className="font-semibold text-foreground">آخر الطلبات</h2>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -224,7 +224,7 @@ export default function DashboardPage() {
                       colSpan={4}
                       className="px-5 py-8 text-center text-muted-foreground text-sm"
                     >
-                      جاري التحميل...
+                      بيتحمّل...
                     </td>
                   </tr>
                 ) : data?.recentOrders?.length === 0 ? (
@@ -233,7 +233,7 @@ export default function DashboardPage() {
                       colSpan={4}
                       className="px-5 py-8 text-center text-muted-foreground text-sm"
                     >
-                      لا توجد طلبات بعد
+                      مفيش طلبات لسه
                     </td>
                   </tr>
                 ) : (
@@ -268,16 +268,16 @@ export default function DashboardPage() {
 
         <div className="bg-card rounded-xl border border-border">
           <div className="px-5 py-4 border-b border-border">
-            <h2 className="font-semibold text-foreground">أفضل المنتجات</h2>
+            <h2 className="font-semibold text-foreground">أحسن المنتجات</h2>
           </div>
           <div className="p-5 space-y-4">
             {loading ? (
               <p className="text-sm text-muted-foreground text-center">
-                جاري التحميل...
+                بيتحمّل...
               </p>
             ) : data?.topProducts?.length === 0 ? (
               <p className="text-sm text-muted-foreground text-center">
-                لا توجد منتجات بعد
+                مفيش منتجات لسه
               </p>
             ) : (
               data?.topProducts?.map((product: any, i: number) => (
@@ -308,9 +308,9 @@ export default function DashboardPage() {
         {/* Recent Invoices */}
         <div className="bg-card rounded-xl border border-border">
           <div className="px-5 py-4 border-b border-border flex items-center justify-between">
-            <h2 className="font-semibold text-foreground">الفواتير الأخيرة</h2>
+            <h2 className="font-semibold text-foreground">آخر الفواتير</h2>
             <span className="text-xs text-muted-foreground">
-              إجمالي الفواتير: {data?.totalInvoices ?? 0}
+              توتال الفواتير: {data?.totalInvoices ?? 0}
             </span>
           </div>
           <div className="overflow-x-auto">
@@ -338,7 +338,7 @@ export default function DashboardPage() {
                       colSpan={4}
                       className="px-5 py-8 text-center text-muted-foreground text-sm"
                     >
-                      جاري التحميل...
+                      بيتحمّل...
                     </td>
                   </tr>
                 ) : data?.recentInvoices?.length === 0 ? (
@@ -347,7 +347,7 @@ export default function DashboardPage() {
                       colSpan={4}
                       className="px-5 py-8 text-center text-muted-foreground text-sm"
                     >
-                      لا توجد فواتير بعد
+                      مفيش فواتير لسه
                     </td>
                   </tr>
                 ) : (
@@ -376,7 +376,7 @@ export default function DashboardPage() {
                             ? "مدفوعة"
                             : invoice.status === "partial"
                               ? "جزئي"
-                              : "غير مدفوعة"}
+                              : "مش مدفوعة"}
                         </span>
                       </td>
                       <td className="px-5 py-3 text-sm font-medium text-foreground">
@@ -394,20 +394,20 @@ export default function DashboardPage() {
         <div className="bg-card rounded-xl border border-border">
           <div className="px-5 py-4 border-b border-border flex items-center justify-between">
             <h2 className="font-semibold text-foreground">
-              ملخص المصروفات الشهرية
+              ملخص المصروفات الشهري
             </h2>
             <span className="text-xs text-muted-foreground">
-              إجمالي: {formatCurrency(data?.totalExpenses ?? 0)}
+              الإجمالي: {formatCurrency(data?.totalExpenses ?? 0)}
             </span>
           </div>
           <div className="p-5">
             {loading ? (
               <p className="text-sm text-muted-foreground text-center py-4">
-                جاري التحميل...
+                بيتحمّل...
               </p>
             ) : !data?.monthlyExpenses?.length ? (
               <p className="text-sm text-muted-foreground text-center py-4">
-                لا توجد مصروفات بعد
+                مفيش مصروفات لسه
               </p>
             ) : (
               <div className="space-y-3">

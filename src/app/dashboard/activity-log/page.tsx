@@ -44,7 +44,7 @@ export default function ActivityLogPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-foreground">سجل النشاطات</h1>
-        <p className="text-muted-foreground text-sm mt-1">تتبع جميع العمليات والتعديلات</p>
+        <p className="text-muted-foreground text-sm mt-1">تتبع كل العمليات و التعديلات</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -62,11 +62,11 @@ export default function ActivityLogPage() {
 
       <div className="space-y-3">
         {loading ? (
-          <div className="bg-card rounded-xl border border-border p-8 text-center text-muted-foreground text-sm">جاري التحميل...</div>
+          <div className="bg-card rounded-xl border border-border p-8 text-center text-muted-foreground text-sm">بيتحمّل...</div>
         ) : logs.length === 0 ? (
           <div className="bg-card rounded-xl border border-border p-12 text-center">
             <CircleDot className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
-            <p className="text-muted-foreground text-sm">لا توجد نشاطات بعد</p>
+            <p className="text-muted-foreground text-sm">مفيش نشاطات</p>
           </div>
         ) : (
           logs.map((log, i) => {

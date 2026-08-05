@@ -53,10 +53,10 @@ export default function TeamPage() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-foreground">الفريق</h1>
-          <p className="text-muted-foreground text-sm mt-1">إدارة أعضاء الفريق وأدوارهم</p>
+          <p className="text-muted-foreground text-sm mt-1">إدارة أعضاء الفريق و أدوارهم</p>
         </div>
         <button onClick={() => setShowModal(true)} className="flex items-center gap-2 bg-primary text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-primary-hover transition-colors">
-          <UserPlus className="w-4 h-4" /> دعوة عضو
+          <UserPlus className="w-4 h-4" /> اضف عضو
         </button>
       </div>
 
@@ -73,9 +73,9 @@ export default function TeamPage() {
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={4} className="px-5 py-8 text-center text-muted-foreground text-sm">جاري التحميل...</td></tr>
+                <tr><td colSpan={4} className="px-5 py-8 text-center text-muted-foreground text-sm">بيتحمّل...</td></tr>
               ) : members.length === 0 ? (
-                <tr><td colSpan={4} className="px-5 py-8 text-center text-muted-foreground text-sm">لا يوجد أعضاء في الفريق</td></tr>
+                <tr><td colSpan={4} className="px-5 py-8 text-center text-muted-foreground text-sm">مفيش أعضاء في الفريق</td></tr>
               ) : (
                 members.map((member, i) => (
                   <tr key={i} className="border-b border-border last:border-0 hover:bg-muted/50 transition-colors">
@@ -109,7 +109,7 @@ export default function TeamPage() {
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-card rounded-2xl shadow-xl w-full max-w-md border border-border">
             <div className="px-6 py-4 border-b border-border flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-foreground">دعوة عضو</h2>
+              <h2 className="text-lg font-semibold text-foreground">اضف عضو</h2>
               <button onClick={() => setShowModal(false)} className="text-muted-foreground hover:text-foreground">✕</button>
             </div>
             <form onSubmit={handleAdd} className="p-6 space-y-4">
@@ -129,7 +129,7 @@ export default function TeamPage() {
               </div>
               <div className="flex gap-3 pt-2">
                 <button type="button" onClick={() => setShowModal(false)} className="flex-1 py-2.5 rounded-lg border border-border text-sm font-medium hover:bg-muted transition-colors">إلغاء</button>
-                <button type="submit" className="flex-1 py-2.5 rounded-lg bg-primary text-white text-sm font-medium hover:bg-primary-hover transition-colors">إرسال الدعوة</button>
+                 <button type="submit" className="flex-1 py-2.5 rounded-lg bg-primary text-white text-sm font-medium hover:bg-primary-hover transition-colors">اضف العضو</button>
               </div>
             </form>
           </div>

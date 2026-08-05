@@ -13,11 +13,11 @@ import {
 
 
 const sidebarLinks = [
-  { href: "/dashboard", label: "لوحة التحكم", icon: LayoutDashboard },
+  { href: "/dashboard", label: "البورد", icon: LayoutDashboard },
   { href: "/dashboard/pos", label: "نقطة البيع", icon: CreditCard },
   { href: "/dashboard/invoices", label: "الفواتير", icon: Receipt },
   { href: "/dashboard/installments", label: "الأقساط", icon: CalendarCheck },
-  { href: "/dashboard/customers", label: "العملاء", icon: UserCircle },
+  { href: "/dashboard/customers", label: "الزبائن", icon: UserCircle },
   { href: "/dashboard/products", label: "المنتجات", icon: Package },
   { href: "/dashboard/orders", label: "الطلبات", icon: ShoppingCart },
   { href: "/dashboard/inventory", label: "المخزون", icon: ClipboardList },
@@ -119,7 +119,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div className="flex-1 max-w-md">
             <div className="relative">
               <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <input type="text" placeholder="البحث عن منتجات، طلبات..." className="w-full pr-10 pl-4 py-2 bg-muted rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" />
+              <input type="text" placeholder="دور على منتجات، طلبات..." className="w-full pr-10 pl-4 py-2 bg-muted rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" />
             </div>
           </div>
 

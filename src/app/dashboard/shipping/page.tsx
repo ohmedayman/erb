@@ -40,7 +40,7 @@ export default function ShippingPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-foreground">الشحن</h1>
-        <p className="text-muted-foreground text-sm mt-1">تتبع الشحنات وإدارة التوصيلات</p>
+        <p className="text-muted-foreground text-sm mt-1">تتبع الشحنات و إدارة التوصيلات</p>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -59,7 +59,7 @@ export default function ShippingPage() {
       </div>
 
       <div className="bg-card rounded-xl border border-border overflow-hidden">
-        <div className="px-5 py-4 border-b border-border"><h2 className="font-semibold text-foreground">الشحنات الأخيرة</h2></div>
+        <div className="px-5 py-4 border-b border-border"><h2 className="font-semibold text-foreground">ملخص الشحن</h2></div>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -74,9 +74,9 @@ export default function ShippingPage() {
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={6} className="px-5 py-8 text-center text-muted-foreground text-sm">جاري التحميل...</td></tr>
+                <tr><td colSpan={6} className="px-5 py-8 text-center text-muted-foreground text-sm">بيتحمّل...</td></tr>
               ) : shipments.length === 0 ? (
-                <tr><td colSpan={6} className="px-5 py-8 text-center text-muted-foreground text-sm">لا توجد شحنات بعد</td></tr>
+                <tr><td colSpan={6} className="px-5 py-8 text-center text-muted-foreground text-sm">مفيش شحنات</td></tr>
               ) : (
                 shipments.map((s, i) => (
                   <tr key={i} className="border-b border-border last:border-0 hover:bg-muted/50 transition-colors">

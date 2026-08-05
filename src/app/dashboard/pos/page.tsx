@@ -233,7 +233,7 @@ export default function POSPage() {
       }
 
       const customerDisplayName =
-        selectedCustomer?.name || newCustomerName || "عميل نقدي";
+        selectedCustomer?.name || newCustomerName || "عميل كاش";
       const customerPhone =
         selectedCustomer?.phone || newCustomerPhone || "";
 
@@ -252,7 +252,7 @@ export default function POSPage() {
         total,
         status: "paid",
         paymentMethod,
-        notes: "تم البيع من نقطة البيع",
+        notes: "اتباع من الكاشير",
         storeId: user.storeId,
       });
 
@@ -326,7 +326,7 @@ export default function POSPage() {
           <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
             type="text"
-            placeholder="البحث بالاسم أو الباركود..."
+            placeholder="بحث بالاسم أو الباركود..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-4 pr-10 py-2.5 bg-muted rounded-lg text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
@@ -336,12 +336,12 @@ export default function POSPage() {
         <div className="flex-1 overflow-y-auto">
           {loading ? (
             <div className="flex items-center justify-center h-40 text-muted-foreground text-sm">
-              جاري التحميل...
+              بيتحمّل...
             </div>
           ) : filteredProducts.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-40 text-muted-foreground">
               <Package className="w-12 h-12 mb-2 opacity-50" />
-              <p className="text-sm">لا توجد منتجات</p>
+              <p className="text-sm">مفيش منتجات</p>
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
@@ -377,7 +377,7 @@ export default function POSPage() {
         <div className="p-4 border-b border-border">
           <div className="flex items-center gap-2 mb-3">
             <ShoppingCart className="w-5 h-5 text-primary" />
-            <h2 className="font-bold text-foreground">سلة المشتريات</h2>
+            <h2 className="font-bold text-foreground">السلّة</h2>
             <span className="mr-auto bg-primary/10 text-primary text-xs font-bold px-2 py-0.5 rounded-full">
               {cart.reduce((sum, item) => sum + item.quantity, 0)}
             </span>
@@ -405,7 +405,7 @@ export default function POSPage() {
                 }}
                 className="flex-1 px-3 py-2 bg-muted rounded-lg text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
               >
-                <option value="">عميل نقدي</option>
+                <option value="">عميل كاش</option>
                 {customers.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.name}
@@ -456,7 +456,7 @@ export default function POSPage() {
               className="flex-1 flex items-center justify-center gap-1.5 bg-red-500/10 text-red-500 py-2 rounded-lg text-xs font-medium hover:bg-red-500/20 transition-colors"
             >
               <Trash2 className="w-3.5 h-3.5" />
-              مسح السلة
+              مسح السلّة
             </button>
           </div>
         </div>
@@ -465,7 +465,7 @@ export default function POSPage() {
           {cart.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
               <ShoppingCart className="w-10 h-10 mb-2 opacity-50" />
-              <p className="text-sm">السلة فارغة</p>
+              <p className="text-sm">السلّة فاضية</p>
               <p className="text-xs mt-1 opacity-70">امسح المنتج أو اضغط بيع سريع</p>
             </div>
           ) : (
@@ -532,7 +532,7 @@ export default function POSPage() {
               <span>{tax.toFixed(2)} ر.س</span>
             </div>
             <div className="flex justify-between text-lg font-bold border-t border-border pt-2">
-              <span>الإجمالي:</span>
+              <span>التوتال:</span>
               <span className="text-primary">{total.toFixed(2)} ر.س</span>
             </div>
           </div>
@@ -563,14 +563,14 @@ export default function POSPage() {
                 disabled={processing}
                 className="bg-green-600 text-white py-2.5 rounded-lg text-xs font-medium hover:bg-green-700 transition-colors disabled:opacity-50"
               >
-                نقدي
+                كاش
               </button>
               <button
                 onClick={() => completeSale("card")}
                 disabled={processing}
                 className="bg-blue-600 text-white py-2.5 rounded-lg text-xs font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
               >
-                ائتمان
+                بالكارت
               </button>
               <button
                 onClick={() => completeSale("transfer")}
@@ -607,7 +607,7 @@ export default function POSPage() {
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-bold flex items-center gap-2">
                 <Receipt className="w-5 h-5 text-primary" />
-                إتمام البيع
+                خلّص البيع
               </h2>
               <button
                 onClick={() => setShowPayment(false)}
@@ -639,7 +639,7 @@ export default function POSPage() {
                   <span>{tax.toFixed(2)} ر.س</span>
                 </div>
                 <div className="flex justify-between text-xl font-bold border-t border-border pt-2">
-                  <span>الإجمالي:</span>
+                  <span>التوتال:</span>
                   <span className="text-primary">{total.toFixed(2)} ر.س</span>
                 </div>
               </div>
@@ -651,14 +651,14 @@ export default function POSPage() {
                 disabled={processing}
                 className="w-full bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 transition-colors"
               >
-                الدفع نقدي
+                الدفع كاش
               </button>
               <button
                 onClick={() => completeSale("card")}
                 disabled={processing}
                 className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
               >
-                الدفع بالبطاقة
+                الدفع بالكارت
               </button>
               <button
                 onClick={() => completeSale("transfer")}

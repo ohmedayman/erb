@@ -30,7 +30,7 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 const STATUS_LABELS: Record<string, string> = {
-  Pending: "معلق",
+  Pending: "معلّق",
   Processing: "قيد المعالجة",
   Shipped: "تم الشحن",
   Delivered: "تم التوصيل",
@@ -98,7 +98,7 @@ export default function AnalyticsPage() {
 
   const categoryCounts = products.reduce(
     (acc: Record<string, number>, product: any) => {
-      const cat = product.category || "غير مصنف";
+      const cat = product.category || "مش مصنّف";
       acc[cat] = (acc[cat] || 0) + 1;
       return acc;
     },
@@ -167,7 +167,7 @@ export default function AnalyticsPage() {
       color: "bg-green-50 text-green-600",
     },
     {
-      label: "إجمالي الطلبات",
+      label: "توتال الأوردرات",
       value: stats?.totalOrders || orders.length || 0,
       icon: ShoppingCart,
       color: "bg-blue-50 text-blue-600",
@@ -227,14 +227,14 @@ export default function AnalyticsPage() {
           </h2>
           {loading ? (
             <div className="h-64 flex items-center justify-center">
-              <p className="text-sm text-muted-foreground">جاري التحميل...</p>
+              <p className="text-sm text-muted-foreground">بيتحمّل...</p>
             </div>
           ) : revenueData.length === 0 ? (
             <div className="h-64 flex items-center justify-center">
               <div className="text-center">
                 <TrendingUp className="w-12 h-12 text-muted-foreground/30 mx-auto" />
                 <p className="text-sm text-muted-foreground mt-2">
-                  لا توجد بيانات إيرادات بعد
+                  مفيش بيانات إيرادات لسه
                 </p>
               </div>
             </div>
@@ -274,18 +274,18 @@ export default function AnalyticsPage() {
 
         <div className="bg-card rounded-xl border border-border p-5">
           <h2 className="font-semibold text-foreground mb-4">
-            توزيع حالات الطلبات
+            توزيع حالات الأوردرات
           </h2>
           {loading ? (
             <div className="h-64 flex items-center justify-center">
-              <p className="text-sm text-muted-foreground">جاري التحميل...</p>
+              <p className="text-sm text-muted-foreground">بيتحمّل...</p>
             </div>
           ) : pieData.length === 0 ? (
             <div className="h-64 flex items-center justify-center">
               <div className="text-center">
                 <BarChart3 className="w-12 h-12 text-muted-foreground/30 mx-auto" />
                 <p className="text-sm text-muted-foreground mt-2">
-                  لا توجد بيانات طلبات بعد
+                  مفيش بيانات أوردرات لسه
                 </p>
               </div>
             </div>
@@ -326,18 +326,18 @@ export default function AnalyticsPage() {
       <div className="grid lg:grid-cols-2 gap-6">
         <div className="bg-card rounded-xl border border-border p-5">
           <h2 className="font-semibold text-foreground mb-4">
-            المنتجات حسب الفئة
+            المنتجات حسب الصنف
           </h2>
           {loading ? (
             <div className="h-64 flex items-center justify-center">
-              <p className="text-sm text-muted-foreground">جاري التحميل...</p>
+              <p className="text-sm text-muted-foreground">بيتحمّل...</p>
             </div>
           ) : categoryData.length === 0 ? (
             <div className="h-64 flex items-center justify-center">
               <div className="text-center">
                 <BarChart3 className="w-12 h-12 text-muted-foreground/30 mx-auto" />
                 <p className="text-sm text-muted-foreground mt-2">
-                  لا توجد منتجات بعد
+                  مفيش منتجات لسه
                 </p>
               </div>
             </div>
@@ -370,14 +370,14 @@ export default function AnalyticsPage() {
           </h2>
           {loading ? (
             <div className="h-64 flex items-center justify-center">
-              <p className="text-sm text-muted-foreground">جاري التحميل...</p>
+              <p className="text-sm text-muted-foreground">بيتحمّل...</p>
             </div>
           ) : stockData.length === 0 ? (
             <div className="h-64 flex items-center justify-center">
               <div className="text-center">
                 <BarChart3 className="w-12 h-12 text-muted-foreground/30 mx-auto" />
                 <p className="text-sm text-muted-foreground mt-2">
-                  لا توجد بيانات مخزون بعد
+                  مفيش بيانات مخزون لسه
                 </p>
               </div>
             </div>
@@ -414,15 +414,15 @@ export default function AnalyticsPage() {
 
       {/* Top Products List */}
       <div className="bg-card rounded-xl border border-border p-5">
-        <h2 className="font-semibold text-foreground mb-4">أفضل المنتجات</h2>
+        <h2 className="font-semibold text-foreground mb-4">أكتر المنتجات</h2>
         <div className="space-y-4">
           {loading ? (
             <p className="text-sm text-muted-foreground text-center">
-              جاري التحميل...
+              بيتحمّل...
             </p>
           ) : products.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center">
-              لا توجد منتجات بعد
+              مفيش منتجات لسه
             </p>
           ) : (
             [...products]
@@ -439,7 +439,7 @@ export default function AnalyticsPage() {
                         {product.name}
                       </span>
                       <span className="text-sm text-muted-foreground">
-                        {product.category || "غير مصنف"}
+                        {product.category || "مش مصنّف"}
                       </span>
                     </div>
                     <div className="w-full bg-muted rounded-full h-2">

@@ -60,13 +60,13 @@ export default function OrdersPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">الطلبات</h1>
-        <p className="text-muted-foreground text-sm mt-1">تتبع وإدارة جميع طلبات العملاء</p>
+        <h1 className="text-2xl font-bold text-foreground">الأوردرات</h1>
+        <p className="text-muted-foreground text-sm mt-1">تتبع وإدارة جميع أوردرات الزبائن</p>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
-          { label: "إجمالي الطلبات", value: orders.length, color: "text-foreground" },
+          { label: "إجمالي الأوردرات", value: orders.length, color: "text-foreground" },
           { label: "معلق", value: orders.filter((o) => o.status === "Pending").length, color: "text-yellow-600" },
           { label: "تم الشحن", value: orders.filter((o) => o.status === "Shipped").length, color: "text-purple-600" },
           { label: "تم التوصيل", value: orders.filter((o) => o.status === "Delivered").length, color: "text-green-600" },
@@ -82,7 +82,7 @@ export default function OrdersPage() {
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <input type="text" placeholder="البحث في الطلبات..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full pl-4 pr-10 py-2 bg-muted rounded-lg text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" />
+            <input type="text" placeholder="البحث في الأوردرات..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full pl-4 pr-10 py-2 bg-muted rounded-lg text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" />
           </div>
           <div className="relative">
             <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="appearance-none px-4 py-2 pl-8 bg-muted rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50">
@@ -98,8 +98,8 @@ export default function OrdersPage() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-border bg-muted/50">
-                <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">رقم الطلب</th>
-                <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">العميل</th>
+                <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">رقم الأوردر</th>
+                <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">الزبون</th>
                 <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">العناصر</th>
                 <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">المجموع</th>
                 <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">الحالة</th>
@@ -109,9 +109,9 @@ export default function OrdersPage() {
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={7} className="px-5 py-8 text-center text-muted-foreground text-sm">جاري التحميل...</td></tr>
+                <tr><td colSpan={7} className="px-5 py-8 text-center text-muted-foreground text-sm">بيتحمّل...</td></tr>
               ) : filtered.length === 0 ? (
-                <tr><td colSpan={7} className="px-5 py-8 text-center text-muted-foreground text-sm">لم يتم العثور على طلبات</td></tr>
+                <tr><td colSpan={7} className="px-5 py-8 text-center text-muted-foreground text-sm">مفيش أوردرات</td></tr>
               ) : (
                 filtered.map((order, i) => (
                   <tr key={i} className="border-b border-border last:border-0 hover:bg-muted/50 transition-colors">

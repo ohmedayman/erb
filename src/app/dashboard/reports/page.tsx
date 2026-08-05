@@ -99,28 +99,28 @@ export default function ReportsPage() {
 
   const summaryCards = [
     {
-      label: "إجمالي الإيرادات",
+      label: "توتال الإيرادات",
       value: data?.totalRevenue ?? 0,
       icon: TrendingUp,
       color: "bg-green-50 text-green-600 border-green-200",
       iconBg: "bg-green-100",
     },
     {
-      label: "إجمالي المصروفات",
+      label: "توتال المصروفات",
       value: data?.totalExpenses ?? 0,
       icon: TrendingDown,
       color: "bg-red-50 text-red-600 border-red-200",
       iconBg: "bg-red-100",
     },
     {
-      label: "صافي الربح",
+      label: "الربح الصافي",
       value: data?.netProfit ?? 0,
       icon: DollarSign,
       color: "bg-blue-50 text-blue-600 border-blue-200",
       iconBg: "bg-blue-100",
     },
     {
-      label: "الفواتير المعلقة",
+      label: "الفواتير اللي لسه مش مدفوعة",
       value: data?.unpaidInvoices ?? 0,
       icon: AlertCircle,
       color: "bg-orange-50 text-orange-600 border-orange-200",
@@ -173,11 +173,11 @@ export default function ReportsPage() {
           <div className="p-5">
             {loading ? (
               <p className="text-sm text-muted-foreground text-center py-8">
-                جاري التحميل...
+                بيتحمّل...
               </p>
             ) : !data?.monthlyRevenue?.length ? (
               <p className="text-sm text-muted-foreground text-center py-8">
-                لا توجد بيانات بعد
+                مفيش بيانات لسه
               </p>
             ) : (
               <div className="space-y-3">
@@ -212,17 +212,17 @@ export default function ReportsPage() {
           <div className="px-5 py-4 border-b border-border">
             <h2 className="font-semibold text-foreground flex items-center gap-2">
               <DollarSign className="w-4 h-4" />
-              المصروفات حسب الفئة
+              المصروفات حسب الصنف
             </h2>
           </div>
           <div className="p-5">
             {loading ? (
               <p className="text-sm text-muted-foreground text-center py-8">
-                جاري التحميل...
+                بيتحمّل...
               </p>
             ) : !data?.expensesByCategory?.length ? (
               <p className="text-sm text-muted-foreground text-center py-8">
-                لا توجد مصروفات بعد
+                مفيش مصروفات لسه
               </p>
             ) : (
               <div className="space-y-4">
@@ -272,7 +272,7 @@ export default function ReportsPage() {
           <div className="px-5 py-4 border-b border-border">
             <h2 className="font-semibold text-foreground flex items-center gap-2">
               <Package className="w-4 h-4" />
-              المنتجات الأكثر مبيعاً
+              أكتر منتجات اتباعت
             </h2>
           </div>
           <div className="overflow-x-auto">
@@ -297,7 +297,7 @@ export default function ReportsPage() {
                       colSpan={3}
                       className="px-5 py-8 text-center text-muted-foreground text-sm"
                     >
-                      جاري التحميل...
+                      بيتحمّل...
                     </td>
                   </tr>
                 ) : !data?.topSellingProducts?.length ? (
@@ -306,7 +306,7 @@ export default function ReportsPage() {
                       colSpan={3}
                       className="px-5 py-8 text-center text-muted-foreground text-sm"
                     >
-                      لا توجد بيانات بعد
+                      مفيش بيانات لسه
                     </td>
                   </tr>
                 ) : (
@@ -337,17 +337,17 @@ export default function ReportsPage() {
           <div className="px-5 py-4 border-b border-border">
             <h2 className="font-semibold text-foreground flex items-center gap-2">
               <FileText className="w-4 h-4" />
-              الفواتير المعلقة
+              الفواتير اللي لسه مش مدفوعة
             </h2>
           </div>
           <div className="p-5 space-y-3">
             {loading ? (
               <p className="text-sm text-muted-foreground text-center py-4">
-                جاري التحميل...
+                بيتحمّل...
               </p>
             ) : !data?.outstandingInvoices?.length ? (
               <p className="text-sm text-muted-foreground text-center py-4">
-                لا توجد فواتير معلقة
+                مفيش فواتير لسه مش مدفوعة
               </p>
             ) : (
               data.outstandingInvoices.map((invoice) => (
@@ -367,7 +367,7 @@ export default function ReportsPage() {
                             : "bg-yellow-50 text-yellow-600"
                         }`}
                       >
-                        {invoice.status === "unpaid" ? "غير مدفوعة" : "جزئي"}
+                        {invoice.status === "unpaid" ? "مش مدفوعة" : "جزئي"}
                       </span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">

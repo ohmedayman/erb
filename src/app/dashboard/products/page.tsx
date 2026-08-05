@@ -81,7 +81,7 @@ export default function ProductsPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("هل أنت متأكد من حذف هذا المنتج؟")) return;
+    if (!confirm("انت متأكد من حذف هذا المنتج؟")) return;
     deleteDocFromCollection("products", id);
     fetchProducts();
   };
@@ -125,7 +125,7 @@ export default function ProductsPage() {
             <p className="text-muted-foreground text-sm mt-1">إدارة كتالوج المنتجات</p>
           </div>
           <button onClick={() => { setEditingProduct(null); setShowModal(true); }} className="flex items-center gap-2 bg-primary text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-primary-hover transition-colors">
-            <Plus className="w-4 h-4" /> إضافة منتج
+            <Plus className="w-4 h-4" /> اضف منتج
           </button>
         </div>
 
@@ -155,9 +155,9 @@ export default function ProductsPage() {
               </thead>
               <tbody>
                 {loading ? (
-                  <tr><td colSpan={8} className="px-5 py-8 text-center text-muted-foreground text-sm">جاري التحميل...</td></tr>
+                  <tr><td colSpan={8} className="px-5 py-8 text-center text-muted-foreground text-sm">بيتحمّل...</td></tr>
                 ) : filtered.length === 0 ? (
-                  <tr><td colSpan={8} className="px-5 py-8 text-center text-muted-foreground text-sm">لم يتم العثور على منتجات</td></tr>
+                  <tr><td colSpan={8} className="px-5 py-8 text-center text-muted-foreground text-sm">مفيش منتجات</td></tr>
                 ) : (
                   filtered.map((product) => (
                     <tr key={product.id} className="border-b border-border last:border-0 hover:bg-muted/50 transition-colors">
@@ -176,7 +176,7 @@ export default function ProductsPage() {
                       <td className="px-5 py-3 text-sm text-foreground">{product.stock}</td>
                       <td className="px-5 py-3">
                         <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${product.status === "Active" ? "bg-green-50 text-green-600" : product.status === "Low Stock" ? "bg-yellow-50 text-yellow-600" : "bg-red-50 text-red-600"}`}>
-                          {product.status === "Active" ? "نشط" : product.status === "Low Stock" ? "مخزون منخفض" : "نفذ من المخزون"}
+                          {product.status === "Active" ? "شغّال" : product.status === "Low Stock" ? "مخزون قليل" : "خلص"}
                         </span>
                       </td>
                       <td className="px-5 py-3">
@@ -199,7 +199,7 @@ export default function ProductsPage() {
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 no-print">
           <div className="bg-card rounded-2xl shadow-xl w-full max-w-md border border-border">
             <div className="px-6 py-4 border-b border-border flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-foreground">{editingProduct ? "تعديل المنتج" : "إضافة منتج"}</h2>
+              <h2 className="text-lg font-semibold text-foreground">{editingProduct ? "عدّل المنتج" : "اضف منتج"}</h2>
               <button onClick={() => { setShowModal(false); setEditingProduct(null); }} className="text-muted-foreground hover:text-foreground">✕</button>
             </div>
             <form onSubmit={editingProduct ? handleEdit : handleAdd} className="p-6 space-y-4">
@@ -227,13 +227,13 @@ export default function ProductsPage() {
                   <input type="number" value={editingProduct?.stock ?? newProduct.stock} onChange={(e) => editingProduct ? setEditingProduct({ ...editingProduct, stock: e.target.value }) : setNewProduct({ ...newProduct, stock: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" required />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-1.5">الحد الأدنى</label>
+                  <label className="block text-sm font-medium text-foreground mb-1.5">الأدنى</label>
                   <input type="number" value={editingProduct?.minStock ?? newProduct.minStock} onChange={(e) => editingProduct ? setEditingProduct({ ...editingProduct, minStock: e.target.value }) : setNewProduct({ ...newProduct, minStock: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" />
                 </div>
               </div>
               <div className="flex gap-3 pt-2">
                 <button type="button" onClick={() => { setShowModal(false); setEditingProduct(null); }} className="flex-1 py-2.5 rounded-lg border border-border text-sm font-medium hover:bg-muted transition-colors">إلغاء</button>
-                <button type="submit" className="flex-1 py-2.5 rounded-lg bg-primary text-white text-sm font-medium hover:bg-primary-hover transition-colors">{editingProduct ? "حفظ التغييرات" : "إضافة منتج"}</button>
+                <button type="submit" className="flex-1 py-2.5 rounded-lg bg-primary text-white text-sm font-medium hover:bg-primary-hover transition-colors">{editingProduct ? "حفظ التغييرات" : "اضف منتج"}</button>
               </div>
             </form>
           </div>

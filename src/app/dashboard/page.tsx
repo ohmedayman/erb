@@ -117,9 +117,9 @@ export default function DashboardPage() {
   const formatCurrency = (n: number) => n.toLocaleString("ar-EG", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
   const StatCard = ({ label, value, icon: Icon, color, trend, trendUp, link }: any) => (
-    <Link href={link || "#"} className="bg-white rounded-2xl p-5 border border-gray-100 hover:shadow-lg hover:border-gray-200 transition-all duration-300 group block">
+    <Link href={link || "#"} className="bg-card rounded-2xl p-5 border border-border/60 hover:shadow-lg hover:border-border transition-all duration-300 group block">
       <div className="flex items-start justify-between mb-4">
-        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${color} group-hover:scale-110 transition-transform`}>
+        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${color} group-hover:scale-110 transition-transform duration-300`}>
           <Icon className="w-6 h-6" />
         </div>
         {trend && (
@@ -129,8 +129,8 @@ export default function DashboardPage() {
           </span>
         )}
       </div>
-      <p className="text-2xl font-bold text-gray-900 mb-1">{loading ? "..." : value}</p>
-      <p className="text-sm text-gray-500">{label}</p>
+      <p className="text-2xl font-bold text-foreground mb-1 tracking-tight">{loading ? "..." : value}</p>
+      <p className="text-sm text-muted-foreground">{label}</p>
       {link && (
         <div className="flex items-center gap-1 mt-3 text-xs font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity">
           <span>عرض التفاصيل</span>
@@ -143,22 +143,22 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6" dir="rtl">
       {/* Welcome Header */}
-      <div className="bg-gradient-to-l from-primary/10 via-orange-50 to-white rounded-2xl p-6 border border-primary/10">
-        <div className="flex items-center justify-between">
+      <div className="bg-gradient-to-l from-primary/10 via-orange-50/50 to-white rounded-2xl p-6 border border-primary/10 shadow-sm">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">
+            <h1 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">
               {storeName ? `مرحباً بيك في ${storeName}` : "مرحباً بيك!"}
             </h1>
-            <p className="text-gray-500 mt-1 flex items-center gap-2">
+            <p className="text-muted-foreground mt-1 flex items-center gap-2 text-sm">
               <CalendarDays className="w-4 h-4" />
               {new Date().toLocaleDateString("ar-EG", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
             </p>
           </div>
-          <div className="hidden sm:flex items-center gap-2">
-            <Link href="/dashboard/products" className="flex items-center gap-2 bg-primary text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-primary/90 transition-colors">
+          <div className="flex items-center gap-2">
+            <Link href="/dashboard/products" className="flex items-center gap-2 bg-primary text-white px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-primary-hover transition-colors shadow-md shadow-primary/20">
               <Plus className="w-4 h-4" /> منتج جديد
             </Link>
-            <Link href="/dashboard/orders" className="flex items-center gap-2 bg-white text-gray-700 px-4 py-2.5 rounded-xl text-sm font-medium border border-gray-200 hover:bg-gray-50 transition-colors">
+            <Link href="/dashboard/orders" className="flex items-center gap-2 bg-white text-foreground px-4 py-2.5 rounded-xl text-sm font-semibold border border-border hover:bg-muted transition-colors">
               <ShoppingCart className="w-4 h-4" /> أوردر جديد
             </Link>
           </div>
@@ -198,11 +198,11 @@ export default function DashboardPage() {
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Revenue vs Expenses Chart */}
           {has("invoices") && has("expenses") && (
-            <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 p-5">
+            <div className="lg:col-span-2 bg-card rounded-2xl border border-border/60 p-5">
               <div className="flex items-center justify-between mb-5">
                 <div>
-                  <h3 className="font-bold text-gray-900">الإيرادات مقابل المصروفات</h3>
-                  <p className="text-xs text-gray-400 mt-0.5">آخر 6 شهور</p>
+                  <h3 className="font-bold text-foreground">الإيرادات مقابل المصروفات</h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">آخر 6 شهور</p>
                 </div>
                 <div className="flex items-center gap-4 text-xs">
                   <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-primary" /> الإيراد</span>
@@ -238,8 +238,8 @@ export default function DashboardPage() {
 
           {/* Order Status Pie */}
           {has("orders") && (
-            <div className="bg-white rounded-2xl border border-gray-100 p-5">
-              <h3 className="font-bold text-gray-900 mb-5">حالة الأوردرات</h3>
+            <div className="bg-card rounded-2xl border border-border/60 p-5">
+              <h3 className="font-bold text-foreground mb-5">حالة الأوردرات</h3>
               {loading ? (
                 <div className="h-[220px] flex items-center justify-center text-gray-400 text-sm">بيتحمّل...</div>
               ) : orderStatusPie.length === 0 ? (
@@ -300,48 +300,48 @@ export default function DashboardPage() {
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Recent Orders */}
         {has("orders") && (
-          <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 overflow-hidden">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+          <div className="lg:col-span-2 bg-card rounded-2xl border border-border/60 overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-border/60">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
                   <ShoppingCart className="w-5 h-5 text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-gray-900">آخر الأوردرات</h3>
-                  <p className="text-xs text-gray-400">{orders.length} أوردر الكلي</p>
+                  <h3 className="font-bold text-foreground">آخر الأوردرات</h3>
+                  <p className="text-xs text-muted-foreground">{orders.length} أوردر الكلي</p>
                 </div>
               </div>
-              <Link href="/dashboard/orders" className="text-primary text-sm font-medium hover:text-primary/80 flex items-center gap-1">
+              <Link href="/dashboard/orders" className="text-primary text-sm font-semibold hover:text-primary-hover flex items-center gap-1">
                 عرض الكل <ChevronLeft className="w-4 h-4" />
               </Link>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-gray-100">
-                    <th className="text-right text-xs font-medium text-gray-400 px-5 py-3">رقم الطلب</th>
-                    <th className="text-right text-xs font-medium text-gray-400 px-5 py-3">العميل</th>
-                    <th className="text-right text-xs font-medium text-gray-400 px-5 py-3">الحالة</th>
-                    <th className="text-right text-xs font-medium text-gray-400 px-5 py-3">المجموع</th>
-                    <th className="text-right text-xs font-medium text-gray-400 px-5 py-3">التاريخ</th>
+                  <tr className="border-b border-border/60 bg-muted/30">
+                    <th className="text-right text-xs font-semibold text-muted-foreground px-5 py-3">رقم الطلب</th>
+                    <th className="text-right text-xs font-semibold text-muted-foreground px-5 py-3">العميل</th>
+                    <th className="text-right text-xs font-semibold text-muted-foreground px-5 py-3">الحالة</th>
+                    <th className="text-right text-xs font-semibold text-muted-foreground px-5 py-3">المجموع</th>
+                    <th className="text-right text-xs font-semibold text-muted-foreground px-5 py-3">التاريخ</th>
                   </tr>
                 </thead>
                 <tbody>
                   {loading ? (
-                    <tr><td colSpan={5} className="px-5 py-10 text-center text-gray-400 text-sm">بيتحمّل...</td></tr>
+                    <tr><td colSpan={5} className="px-5 py-10 text-center text-muted-foreground text-sm">بيتحمّل...</td></tr>
                   ) : recentOrders.length === 0 ? (
-                    <tr><td colSpan={5} className="px-5 py-10 text-center text-gray-400 text-sm">مفيش أوردرات لسه — ابدأ بإضافة أوردر جديد</td></tr>
+                    <tr><td colSpan={5} className="px-5 py-10 text-center text-muted-foreground text-sm">مفيش أوردرات لسه — ابدأ بإضافة أوردر جديد</td></tr>
                   ) : recentOrders.map((order: any, i: number) => (
-                    <tr key={order.id || i} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors">
-                      <td className="px-5 py-3 text-sm font-semibold text-gray-900">{order.orderNumber || order.id?.slice(0, 8)}</td>
-                      <td className="px-5 py-3 text-sm text-gray-600">{order.customerName || "—"}</td>
+                    <tr key={order.id || i} className="border-b border-border/30 last:border-0 hover:bg-muted/30 transition-colors">
+                      <td className="px-5 py-3 text-sm font-semibold text-foreground">{order.orderNumber || order.id?.slice(0, 8)}</td>
+                      <td className="px-5 py-3 text-sm text-muted-foreground">{order.customerName || "—"}</td>
                       <td className="px-5 py-3">
-                        <span className={`inline-flex px-2.5 py-1 rounded-lg text-xs font-medium ${STATUS_STYLE[order.status] || STATUS_STYLE.Pending}`}>
+                        <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-semibold ${STATUS_STYLE[order.status] || STATUS_STYLE.Pending}`}>
                           {STATUS_MAP[order.status] || order.status || "معلّق"}
                         </span>
                       </td>
-                      <td className="px-5 py-3 text-sm font-bold text-gray-900">{(order.total || 0).toLocaleString("ar-EG")} ج.م</td>
-                      <td className="px-5 py-3 text-xs text-gray-400">{order.date || new Date(order.created_at).toLocaleDateString("ar-EG")}</td>
+                      <td className="px-5 py-3 text-sm font-bold text-foreground">{(order.total || 0).toLocaleString("ar-EG")} ج.م</td>
+                      <td className="px-5 py-3 text-xs text-muted-foreground">{order.date || new Date(order.created_at).toLocaleDateString("ar-EG")}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -352,43 +352,43 @@ export default function DashboardPage() {
 
         {/* Low Stock Alert */}
         {has("products") && (
-          <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+          <div className="bg-card rounded-2xl border border-border/60 overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-border/60">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center">
                   <AlertTriangle className="w-5 h-5 text-amber-500" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-gray-900">مخزون قليل</h3>
-                  <p className="text-xs text-gray-400">{lowStockProducts.length} منتج محتاج تعبئة</p>
+                  <h3 className="font-bold text-foreground">مخزون قليل</h3>
+                  <p className="text-xs text-muted-foreground">{lowStockProducts.length} منتج محتاج تعبئة</p>
                 </div>
               </div>
-              <Link href="/dashboard/inventory" className="text-primary text-sm font-medium hover:text-primary/80 flex items-center gap-1">
+              <Link href="/dashboard/inventory" className="text-primary text-sm font-semibold hover:text-primary-hover flex items-center gap-1">
                 عرض الكل <ChevronLeft className="w-4 h-4" />
               </Link>
             </div>
             <div className="p-3">
               {loading ? (
-                <p className="text-center text-gray-400 text-sm py-6">بيتحمّل...</p>
+                <p className="text-center text-muted-foreground text-sm py-6">بيتحمّل...</p>
               ) : lowStockProducts.length === 0 ? (
                 <div className="text-center py-8">
                   <PackageCheck className="w-10 h-10 text-emerald-300 mx-auto mb-2" />
-                  <p className="text-sm text-gray-500">المخزون كله تمام!</p>
+                  <p className="text-sm text-muted-foreground font-medium">المخزون كله تمام!</p>
                 </div>
               ) : lowStockProducts.map((product: any, i: number) => (
-                <div key={product.id || i} className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors">
+                <div key={product.id || i} className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted/50 transition-colors">
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${(product.stock || 0) === 0 ? "bg-red-50" : "bg-amber-50"}`}>
                     <Package className={`w-5 h-5 ${(product.stock || 0) === 0 ? "text-red-500" : "text-amber-500"}`} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">{product.name}</p>
-                    <p className="text-xs text-gray-400">{product.sku}</p>
+                    <p className="text-sm font-semibold text-foreground truncate">{product.name}</p>
+                    <p className="text-xs text-muted-foreground">{product.sku}</p>
                   </div>
                   <div className="text-left">
                     <span className={`text-sm font-bold ${(product.stock || 0) === 0 ? "text-red-500" : "text-amber-600"}`}>
                       {product.stock || 0}
                     </span>
-                    <p className="text-[10px] text-gray-400">المتبقي</p>
+                    <p className="text-[10px] text-muted-foreground">المتبقي</p>
                   </div>
                 </div>
               ))}
@@ -401,46 +401,46 @@ export default function DashboardPage() {
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Recent Invoices */}
         {has("invoices") && (
-          <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+          <div className="bg-card rounded-2xl border border-border/60 overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-border/60">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center">
                   <Receipt className="w-5 h-5 text-indigo-500" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-gray-900">آخر الفواتير</h3>
-                  <p className="text-xs text-gray-400">{invoices.length} فاتورة الكلي</p>
+                  <h3 className="font-bold text-foreground">آخر الفواتير</h3>
+                  <p className="text-xs text-muted-foreground">{invoices.length} فاتورة الكلي</p>
                 </div>
               </div>
-              <Link href="/dashboard/invoices" className="text-primary text-sm font-medium hover:text-primary/80 flex items-center gap-1">
+              <Link href="/dashboard/invoices" className="text-primary text-sm font-semibold hover:text-primary-hover flex items-center gap-1">
                 عرض الكل <ChevronLeft className="w-4 h-4" />
               </Link>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-gray-100">
-                    <th className="text-right text-xs font-medium text-gray-400 px-5 py-3">رقم الفاتورة</th>
-                    <th className="text-right text-xs font-medium text-gray-400 px-5 py-3">العميل</th>
-                    <th className="text-right text-xs font-medium text-gray-400 px-5 py-3">الحالة</th>
-                    <th className="text-right text-xs font-medium text-gray-400 px-5 py-3">المجموع</th>
+                  <tr className="border-b border-border/60 bg-muted/30">
+                    <th className="text-right text-xs font-semibold text-muted-foreground px-5 py-3">رقم الفاتورة</th>
+                    <th className="text-right text-xs font-semibold text-muted-foreground px-5 py-3">العميل</th>
+                    <th className="text-right text-xs font-semibold text-muted-foreground px-5 py-3">الحالة</th>
+                    <th className="text-right text-xs font-semibold text-muted-foreground px-5 py-3">المجموع</th>
                   </tr>
                 </thead>
                 <tbody>
                   {loading ? (
-                    <tr><td colSpan={4} className="px-5 py-8 text-center text-gray-400 text-sm">بيتحمّل...</td></tr>
+                    <tr><td colSpan={4} className="px-5 py-8 text-center text-muted-foreground text-sm">بيتحمّل...</td></tr>
                   ) : recentInvoices.length === 0 ? (
-                    <tr><td colSpan={4} className="px-5 py-8 text-center text-gray-400 text-sm">مفيش فواتير لسه</td></tr>
+                    <tr><td colSpan={4} className="px-5 py-8 text-center text-muted-foreground text-sm">مفيش فواتير لسه</td></tr>
                   ) : recentInvoices.map((inv: any, i: number) => (
-                    <tr key={inv.id || i} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors">
-                      <td className="px-5 py-3 text-sm font-semibold text-gray-900">{inv.invoiceNumber || inv.id?.slice(0, 8)}</td>
-                      <td className="px-5 py-3 text-sm text-gray-600">{inv.customerName || "—"}</td>
+                    <tr key={inv.id || i} className="border-b border-border/30 last:border-0 hover:bg-muted/30 transition-colors">
+                      <td className="px-5 py-3 text-sm font-semibold text-foreground">{inv.invoiceNumber || inv.id?.slice(0, 8)}</td>
+                      <td className="px-5 py-3 text-sm text-muted-foreground">{inv.customerName || "—"}</td>
                       <td className="px-5 py-3">
-                        <span className={`inline-flex px-2.5 py-1 rounded-lg text-xs font-medium ${INVOICE_STATUS[inv.status]?.style || INVOICE_STATUS.unpaid.style}`}>
+                        <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-semibold ${INVOICE_STATUS[inv.status]?.style || INVOICE_STATUS.unpaid.style}`}>
                           {INVOICE_STATUS[inv.status]?.label || inv.status}
                         </span>
                       </td>
-                      <td className="px-5 py-3 text-sm font-bold text-gray-900">{(inv.total || 0).toLocaleString("ar-EG")} ج.م</td>
+                      <td className="px-5 py-3 text-sm font-bold text-foreground">{(inv.total || 0).toLocaleString("ar-EG")} ج.م</td>
                     </tr>
                   ))}
                 </tbody>
@@ -451,42 +451,42 @@ export default function DashboardPage() {
 
         {/* Top Products */}
         {has("products") && (
-          <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+          <div className="bg-card rounded-2xl border border-border/60 overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-border/60">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
                   <Star className="w-5 h-5 text-blue-500" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-gray-900">المنتجات</h3>
-                  <p className="text-xs text-gray-400">{products.length} منتج الكلي</p>
+                  <h3 className="font-bold text-foreground">المنتجات</h3>
+                  <p className="text-xs text-muted-foreground">{products.length} منتج الكلي</p>
                 </div>
               </div>
-              <Link href="/dashboard/products" className="text-primary text-sm font-medium hover:text-primary/80 flex items-center gap-1">
+              <Link href="/dashboard/products" className="text-primary text-sm font-semibold hover:text-primary-hover flex items-center gap-1">
                 عرض الكل <ChevronLeft className="w-4 h-4" />
               </Link>
             </div>
             <div className="p-3">
               {loading ? (
-                <p className="text-center text-gray-400 text-sm py-6">بيتحمّل...</p>
+                <p className="text-center text-muted-foreground text-sm py-6">بيتحمّل...</p>
               ) : products.length === 0 ? (
                 <div className="text-center py-8">
                   <Package className="w-10 h-10 text-gray-200 mx-auto mb-2" />
-                  <p className="text-sm text-gray-500">مفيش منتجات لسه</p>
-                  <Link href="/dashboard/products" className="text-primary text-sm font-medium hover:underline mt-2 inline-block">إضافة منتج</Link>
+                  <p className="text-sm text-muted-foreground font-medium">مفيش منتجات لسه</p>
+                  <Link href="/dashboard/products" className="text-primary text-sm font-semibold hover:underline mt-2 inline-block">إضافة منتج</Link>
                 </div>
               ) : products.slice(0, 6).map((product: any, i: number) => (
-                <div key={product.id || i} className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors">
-                  <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center">
-                    <Package className="w-5 h-5 text-gray-400" />
+                <div key={product.id || i} className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted/50 transition-colors">
+                  <div className="w-10 h-10 bg-muted rounded-xl flex items-center justify-center">
+                    <Package className="w-5 h-5 text-muted-foreground" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">{product.name}</p>
-                    <p className="text-xs text-gray-400">{product.category || product.sku}</p>
+                    <p className="text-sm font-semibold text-foreground truncate">{product.name}</p>
+                    <p className="text-xs text-muted-foreground">{product.category || product.sku}</p>
                   </div>
                   <div className="text-left">
                     <p className="text-sm font-bold text-primary">{(product.price || 0).toLocaleString("ar-EG")} ج.م</p>
-                    <p className="text-[10px] text-gray-400">مخزون: {product.stock || 0}</p>
+                    <p className="text-[10px] text-muted-foreground">مخزون: {product.stock || 0}</p>
                   </div>
                 </div>
               ))}
@@ -496,8 +496,8 @@ export default function DashboardPage() {
       </div>
 
       {/* Quick Actions */}
-      <div className="bg-gradient-to-l from-gray-50 to-white rounded-2xl border border-gray-100 p-5">
-        <h3 className="font-bold text-gray-900 mb-4">إجراءات سريعة</h3>
+      <div className="bg-gradient-to-l from-muted/50 to-white rounded-2xl border border-border/60 p-5">
+        <h3 className="font-bold text-foreground mb-4">إجراءات سريعة</h3>
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
           {[
             { label: "نقطة البيع", icon: CreditCard, href: "/dashboard/pos", color: "bg-primary/10 text-primary" },
@@ -508,11 +508,11 @@ export default function DashboardPage() {
             { label: "تسجيل مصروف", icon: Wallet, href: "/dashboard/expenses", color: "bg-red-50 text-red-600" },
           ].map((action) => (
             <Link key={action.href} href={action.href}
-              className="flex flex-col items-center gap-2 p-4 rounded-xl bg-white border border-gray-100 hover:shadow-md hover:border-gray-200 transition-all group">
-              <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${action.color} group-hover:scale-110 transition-transform`}>
+              className="flex flex-col items-center gap-2 p-4 rounded-xl bg-card border border-border/60 hover:shadow-md hover:border-border transition-all group">
+              <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${action.color} group-hover:scale-110 transition-transform duration-200`}>
                 <action.icon className="w-5 h-5" />
               </div>
-              <span className="text-xs font-medium text-gray-700">{action.label}</span>
+              <span className="text-xs font-semibold text-foreground">{action.label}</span>
             </Link>
           ))}
         </div>

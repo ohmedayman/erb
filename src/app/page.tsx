@@ -7,7 +7,8 @@ import {
   Warehouse, Package, ClipboardList, Receipt, Users, BarChart3,
   ShoppingCart, ArrowRight, CheckCircle, Star, Zap, Menu, X,
   Play, TrendingUp, Clock, HeadphonesIcon, Store, CreditCard,
-  UserPlus, Settings, Rocket, ArrowLeft,
+  UserPlus, Settings, Rocket, ArrowLeft, Shield, Smartphone,
+  Globe, FileText, Truck, Barcode,
 } from "lucide-react";
 import Image from "next/image";
 import SEOHead from "@/components/SEOHead";
@@ -76,12 +77,12 @@ function CountUp({ end, duration = 2000 }: { end: number; duration?: number }) {
 }
 
 const features = [
-  { icon: Package, title: "إدارة المنتجات", desc: "تتبع كل منتج في مخزنك — الكميات، الألوان، المقاسات، كل حاجة من مكان واحد" },
-  { icon: ClipboardList, title: "إدارة الأوردرات", desc: "ابدأ من الأوردر لحد الشحن، كل خطوة تحت سيطرتك وأنت مطمن" },
-  { icon: Receipt, title: "الفواتير التلقائية", desc: "اعمل فواتير اوتوماتيك لكل أوردر، من غير أي غلطة أو نسيان" },
-  { icon: Users, title: "قاعدة بيانات الزبائن", desc: "اعرف كل زبونك، تاريخه، طلباته، وتواصل معاه بشكل ذكي" },
-  { icon: BarChart3, title: "التقارير والإحصائيات", desc: "شوف أرقامك لحظة بلحظة — إيه اللي بيتباع أكتر، وإيه اللي محتاج تركز عليه" },
-  { icon: ShoppingCart, title: "نقطة البيع", desc: "بيع في محلك أو أونلاين بـ POS متكامل وسريع زي المحلات الكبيرة" },
+  { icon: Package, title: "إدارة المنتجات", desc: "تتبع كل منتج في مخزنك — الكميات، الألوان، المقاسات، كل حاجة من مكان واحد", color: "from-blue-500 to-blue-600" },
+  { icon: ClipboardList, title: "إدارة الأوردرات", desc: "ابدأ من الأوردر لحد الشحن، كل خطوة تحت سيطرتك وأنت مطمن", color: "from-orange-500 to-orange-600" },
+  { icon: Receipt, title: "الفواتير التلقائية", desc: "اعمل فواتير اوتوماتيك لكل أوردر، من غير أي غلطة أو نسيان", color: "from-emerald-500 to-emerald-600" },
+  { icon: Users, title: "قاعدة بيانات الزبائن", desc: "اعرف كل زبونك، تاريخه، طلباته، وتواصل معاه بشكل ذكي", color: "from-purple-500 to-purple-600" },
+  { icon: BarChart3, title: "التقارير والإحصائيات", desc: "شوف أرقامك لحظة بلحظة — إيه اللي بيتباع أكتر، وإيه اللي محتاج تركز عليه", color: "from-pink-500 to-pink-600" },
+  { icon: ShoppingCart, title: "نقطة البيع", desc: "بيع في محلك أو أونلاين بـ POS متكامل وسريع زي المحلات الكبيرة", color: "from-cyan-500 to-cyan-600" },
 ];
 
 const steps = [
@@ -109,6 +110,15 @@ const pricingPlan = {
   ],
 };
 
+const moreFeatures = [
+  { icon: Shield, title: "حماية وأمان", desc: "بياناتك في أمان تام مع تشفير كامل" },
+  { icon: Smartphone, title: "PWA", desc: "اشتغل أوفلاين واتزامن أونلاين" },
+  { icon: Globe, title: "سحابي", desc: "وصول من أي جهاز في أي مكان" },
+  { icon: FileText, title: "تقارير PDF", desc: "صدر تقارير احترافية لأرباحك" },
+  { icon: Truck, title: "شحن وتوصيل", desc: "تتبع شحناتك ومصاريفها" },
+  { icon: Barcode, title: "باركود", desc: "اطبع باركود لكل منتج" },
+];
+
 export default function HomePage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { scrollYProgress } = useScroll();
@@ -135,18 +145,9 @@ export default function HomePage() {
           name: "StockFlow - نظام إدارة المخازن والمخزون",
           description: "نظام إدارة مخازن ومخزون SaaS متكامل للشركات المصرية",
           url: "https://stockflow.vexonet.online",
-          breadcrumb: {
-            "@type": "BreadcrumbList",
-            itemListElement: [
-              { "@type": "ListItem", position: 1, name: "الرئيسية", item: "https://stockflow.vexonet.online" },
-              { "@type": "ListItem", position: 2, name: "المنتجات", item: "https://stockflow.vexonet.online/dashboard/products" },
-              { "@type": "ListItem", position: 3, name: "الأوردرات", item: "https://stockflow.vexonet.online/dashboard/orders" },
-              { "@type": "ListItem", position: 4, name: "الفواتير", item: "https://stockflow.vexonet.online/dashboard/invoices" },
-              { "@type": "ListItem", position: 5, name: "الزبائن", item: "https://stockflow.vexonet.online/dashboard/customers" },
-            ],
-          },
         }}
       />
+
       {/* Navigation */}
       <motion.nav
         initial={{ y: -100 }}
@@ -157,7 +158,7 @@ export default function HomePage() {
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center justify-between h-16 lg:h-20">
             <Link href="/" className="flex items-center gap-2.5">
               <Image src="/favicon.svg" alt="StockFlow" width={36} height={36} />
               <span className="text-xl font-bold text-gray-900">Stock<span className="text-orange-500">Flow</span></span>
@@ -165,13 +166,16 @@ export default function HomePage() {
             <div className="hidden md:flex items-center gap-8">
               <a href="#features" className="text-sm font-medium text-gray-600 hover:text-orange-500 transition-colors">المميزات</a>
               <a href="#pricing" className="text-sm font-medium text-gray-600 hover:text-orange-500 transition-colors">الأسعار</a>
-              <a href="#about" className="text-sm font-medium text-gray-600 hover:text-orange-500 transition-colors">حول</a>
+              <a href="#testimonials" className="text-sm font-medium text-gray-600 hover:text-orange-500 transition-colors">عملاؤنا</a>
+              <Link href="/contact" className="text-sm font-medium text-gray-600 hover:text-orange-500 transition-colors">تواصل معانا</Link>
             </div>
             <div className="hidden md:flex items-center gap-3">
-              <Link href="/login" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors px-4 py-2 rounded-lg hover:bg-gray-100">تسجيل الدخول</Link>
-              <Link href="/signup" className="text-sm font-semibold bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-2.5 rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all shadow-lg shadow-orange-500/25">ابدأ الآن</Link>
+              <Link href="/login" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors px-4 py-2 rounded-xl hover:bg-gray-100">تسجيل الدخول</Link>
+              <Link href="/signup" className="text-sm font-semibold bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-2.5 rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all shadow-lg shadow-orange-500/25">
+                ابدأ مجاناً
+              </Link>
             </div>
-            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden p-2 rounded-lg hover:bg-gray-100">
+            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden p-2 rounded-xl hover:bg-gray-100">
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
           </div>
@@ -180,10 +184,11 @@ export default function HomePage() {
           {mobileMenuOpen && (
             <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="md:hidden bg-white/95 backdrop-blur-xl border-b border-gray-200">
               <div className="px-4 py-4 space-y-3">
-                <a href="#features" className="block text-sm font-medium text-gray-600 hover:text-orange-500 py-2">المميزات</a>
-                <a href="#pricing" className="block text-sm font-medium text-gray-600 hover:text-orange-500 py-2">الأسعار</a>
+                <a href="#features" onClick={() => setMobileMenuOpen(false)} className="block text-sm font-medium text-gray-600 hover:text-orange-500 py-2">المميزات</a>
+                <a href="#pricing" onClick={() => setMobileMenuOpen(false)} className="block text-sm font-medium text-gray-600 hover:text-orange-500 py-2">الأسعار</a>
+                <a href="#testimonials" onClick={() => setMobileMenuOpen(false)} className="block text-sm font-medium text-gray-600 hover:text-orange-500 py-2">عملاؤنا</a>
                 <div className="pt-3 border-t border-gray-200 space-y-2">
-                  <Link href="/login" className="block text-center text-sm font-medium text-gray-600 py-2.5 rounded-lg hover:bg-gray-100">تسجيل الدخول</Link>
+                  <Link href="/login" className="block text-center text-sm font-medium text-gray-600 py-2.5 rounded-xl hover:bg-gray-100">تسجيل الدخول</Link>
                   <Link href="/signup" className="block text-center text-sm font-semibold bg-gradient-to-r from-orange-500 to-orange-600 text-white py-2.5 rounded-xl">ابدأ الآن</Link>
                 </div>
               </div>
@@ -193,8 +198,8 @@ export default function HomePage() {
       </motion.nav>
 
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center pt-16 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-orange-50 via-white to-blue-50" />
+      <section className="relative min-h-screen flex items-center pt-20 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-orange-50/80 via-white to-blue-50/50" />
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <motion.div animate={{ x: [0, 30, 0], y: [0, -20, 0] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }} className="absolute top-20 left-[10%] w-72 h-72 bg-orange-200/30 rounded-full blur-3xl" />
           <motion.div animate={{ x: [0, -20, 0], y: [0, 30, 0] }} transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }} className="absolute top-40 right-[15%] w-96 h-96 bg-blue-200/20 rounded-full blur-3xl" />
@@ -202,26 +207,32 @@ export default function HomePage() {
         </div>
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
 
-        <motion.div style={{ opacity: heroOpacity, scale: heroScale }} className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <motion.div style={{ opacity: heroOpacity, scale: heroScale }} className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="text-center lg:text-right">
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="inline-flex items-center gap-2 bg-orange-50 text-orange-600 px-4 py-2 rounded-full text-sm font-semibold mb-6 border border-orange-100">
                 <Zap className="w-4 h-4" /> نظام إدارة مخازن احترافي
               </motion.div>
-              <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.7 }} className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
-                أدر مخزنك<br />
+              <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.7 }} className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 leading-[1.2]">
+                أدر مخزنك
+                <br />
                 <span className="bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">بذكاء</span>
               </motion.h1>
-              <motion.p initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4, duration: 0.7 }} className="mt-6 text-lg text-gray-600 max-w-lg mx-auto lg:mr-0">
+              <motion.p initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4, duration: 0.7 }} className="mt-6 text-lg text-gray-600 max-w-lg mx-auto lg:mr-0 leading-relaxed">
                 نظام إدارة مخازن متكامل — كل حاجة من مكان واحد. تابع مخزونك، أدر أوردراتك، وشوف تقاريرك لحظة بلحظة
               </motion.p>
               <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.7 }} className="mt-10 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
-                <Link href="/signup" className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-8 py-4 rounded-xl font-semibold hover:from-orange-600 hover:to-orange-700 transition-all shadow-xl shadow-orange-500/25 text-base">
+                <Link href="/signup" className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-8 py-4 rounded-2xl font-bold hover:from-orange-600 hover:to-orange-700 transition-all shadow-xl shadow-orange-500/25 text-base">
                   ابدأ مجاناً <ArrowRight className="w-5 h-5" />
                 </Link>
-                <Link href="/login" className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white text-gray-700 px-8 py-4 rounded-xl font-semibold border-2 border-gray-200 hover:border-orange-300 hover:bg-orange-50 transition-all text-base">
+                <Link href="/login" className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white text-gray-700 px-8 py-4 rounded-2xl font-bold border-2 border-gray-200 hover:border-orange-300 hover:bg-orange-50 transition-all text-base">
                   <Play className="w-5 h-5 text-orange-500" /> شوف Demo
                 </Link>
+              </motion.div>
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }} className="mt-8 flex items-center justify-center lg:justify-start gap-6 text-sm text-gray-500">
+                <span className="flex items-center gap-1.5"><CheckCircle className="w-4 h-4 text-green-500" /> مجاني 14 يوم</span>
+                <span className="flex items-center gap-1.5"><CheckCircle className="w-4 h-4 text-green-500" /> بدون بطاقة</span>
+                <span className="flex items-center gap-1.5"><CheckCircle className="w-4 h-4 text-green-500" /> إلغاء في أي وقت</span>
               </motion.div>
             </div>
 
@@ -269,7 +280,7 @@ export default function HomePage() {
             </motion.div>
           </div>
 
-          <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8, duration: 0.6 }} className="mt-16 bg-white/70 backdrop-blur-xl rounded-2xl shadow-xl shadow-gray-200/50 border border-gray-100 p-6">
+          <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8, duration: 0.6 }} className="mt-16 bg-white/70 backdrop-blur-xl rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 p-6 lg:p-8">
             <div className="grid grid-cols-3 gap-6">
               <div className="text-center">
                 <div className="flex items-center justify-center gap-2 mb-2">
@@ -298,29 +309,41 @@ export default function HomePage() {
       </section>
 
       {/* Features */}
-      <section id="features" className="py-24 px-4 sm:px-6 lg:px-8 bg-gray-50">
+      <section id="features" className="py-24 px-4 sm:px-6 lg:px-8 bg-gray-50/50">
         <div className="max-w-7xl mx-auto">
           <AnimateOnScroll className="text-center max-w-2xl mx-auto mb-16">
             <div className="inline-flex items-center gap-2 bg-orange-50 text-orange-600 px-4 py-2 rounded-full text-sm font-semibold mb-4 border border-orange-100">
               <Zap className="w-4 h-4" /> مميزات قوية
             </div>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">كل حاجة تحتاجها في مكان واحد</h2>
-            <p className="mt-4 text-lg text-gray-600">أدوات متقدمة لتبسيط عمليات المخازن من الاستلام للشحن</p>
+            <p className="mt-4 text-lg text-gray-500">أدوات متقدمة لتبسيط عمليات المخازن من الاستلام للشحن</p>
           </AnimateOnScroll>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {features.map((f, i) => (
               <AnimateOnScroll key={i} delay={i * 0.1}>
-                <div className="bg-white rounded-2xl p-7 border border-gray-100 hover:shadow-xl hover:shadow-orange-500/5 hover:border-orange-200 transition-all group cursor-default h-full">
-                  <div className="w-14 h-14 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform shadow-lg shadow-orange-500/20">
+                <div className="bg-white rounded-2xl p-7 border border-gray-100 hover:shadow-xl hover:shadow-orange-500/5 hover:border-orange-200/80 transition-all duration-300 group cursor-default h-full">
+                  <div className={`w-14 h-14 bg-gradient-to-br ${f.color} rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
                     <f.icon className="w-7 h-7 text-white" />
                   </div>
                   <h3 className="text-lg font-bold text-gray-900 mb-2">{f.title}</h3>
-                  <p className="text-sm text-gray-600 leading-relaxed">{f.desc}</p>
+                  <p className="text-sm text-gray-500 leading-relaxed">{f.desc}</p>
                 </div>
               </AnimateOnScroll>
             ))}
           </div>
+
+          <AnimateOnScroll className="mt-16">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              {moreFeatures.map((f, i) => (
+                <div key={i} className="bg-white rounded-xl p-4 border border-gray-100 text-center hover:border-orange-200 transition-colors">
+                  <f.icon className="w-6 h-6 text-orange-500 mx-auto mb-2" />
+                  <p className="text-xs font-bold text-gray-900">{f.title}</p>
+                  <p className="text-[11px] text-gray-500 mt-0.5">{f.desc}</p>
+                </div>
+              ))}
+            </div>
+          </AnimateOnScroll>
         </div>
       </section>
 
@@ -332,7 +355,7 @@ export default function HomePage() {
               <Rocket className="w-4 h-4" /> إعداد سريع
             </div>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">3 خطوات بس وابدأ تشتغل</h2>
-            <p className="mt-4 text-lg text-gray-600">من التسجيل لحد ما تبقى شغال — في 5 دقايق بالكتير</p>
+            <p className="mt-4 text-lg text-gray-500">من التسجيل لحد ما تبقى شغال — في 5 دقايق بالكتير</p>
           </AnimateOnScroll>
 
           <div className="relative">
@@ -342,7 +365,7 @@ export default function HomePage() {
                 <AnimateOnScroll key={i} delay={i * 0.15}>
                   <div className="text-center relative">
                     <div className="relative z-10 inline-block">
-                      <div className="w-20 h-20 bg-gradient-to-br from-orange-500 to-orange-600 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-orange-500/25">
+                      <div className="w-20 h-20 bg-gradient-to-br from-orange-500 to-orange-600 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-orange-500/25 group-hover:scale-105 transition-transform">
                         <step.icon className="w-9 h-9 text-white" />
                       </div>
                       <div className="absolute -top-2 -right-2 w-8 h-8 bg-white rounded-full shadow-lg border-2 border-orange-500 flex items-center justify-center">
@@ -350,7 +373,7 @@ export default function HomePage() {
                       </div>
                     </div>
                     <h3 className="text-xl font-bold text-gray-900 mb-2 mt-4">{step.title}</h3>
-                    <p className="text-gray-600">{step.desc}</p>
+                    <p className="text-gray-500">{step.desc}</p>
                   </div>
                 </AnimateOnScroll>
               ))}
@@ -449,7 +472,7 @@ export default function HomePage() {
                 </div>
               </div>
               <div className="mt-10 text-center">
-                <Link href="/signup" className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-8 py-4 rounded-xl font-semibold hover:from-orange-600 hover:to-orange-700 transition-all shadow-xl shadow-orange-500/25">
+                <Link href="/signup" className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-8 py-4 rounded-2xl font-bold hover:from-orange-600 hover:to-orange-700 transition-all shadow-xl shadow-orange-500/25">
                   شوف البورد <ArrowLeft className="w-5 h-5" />
                 </Link>
               </div>
@@ -459,26 +482,26 @@ export default function HomePage() {
       </section>
 
       {/* Testimonials */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-white">
+      <section id="testimonials" className="py-24 px-4 sm:px-6 lg:px-8 bg-white">
         <div className="max-w-7xl mx-auto">
           <AnimateOnScroll className="text-center max-w-2xl mx-auto mb-16">
             <div className="inline-flex items-center gap-2 bg-orange-50 text-orange-600 px-4 py-2 rounded-full text-sm font-semibold mb-4 border border-orange-100">
               <Star className="w-4 h-4" /> آراء عملائنا
             </div>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">شركات زيك بتثق في StockFlow</h2>
-            <p className="mt-4 text-lg text-gray-600">اعرف ليه آلاف المحلات اختارتنا</p>
+            <p className="mt-4 text-lg text-gray-500">اعرف ليه آلاف المحلات اختارتنا</p>
           </AnimateOnScroll>
 
           <div className="grid md:grid-cols-3 gap-8">
             {testimonials.map((t, i) => (
               <AnimateOnScroll key={i} delay={i * 0.1}>
-                <div className="bg-white rounded-2xl p-7 border border-gray-100 shadow-lg shadow-gray-100/50 hover:shadow-xl hover:shadow-orange-500/5 transition-all h-full">
+                <div className="bg-white rounded-2xl p-7 border border-gray-100 shadow-lg shadow-gray-100/50 hover:shadow-xl hover:shadow-orange-500/5 transition-all duration-300 h-full">
                   <div className="flex items-center gap-1 mb-4">
                     {Array.from({ length: t.rating }).map((_, j) => (
                       <Star key={j} className="w-5 h-5 text-yellow-400 fill-yellow-400" />
                     ))}
                   </div>
-                  <p className="text-gray-700 leading-relaxed mb-6">&ldquo;{t.text}&rdquo;</p>
+                  <p className="text-gray-600 leading-relaxed mb-6">&ldquo;{t.text}&rdquo;</p>
                   <div className="flex items-center gap-4 pt-4 border-t border-gray-100">
                     <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center text-white font-bold text-lg">{t.name[0]}</div>
                     <div>
@@ -494,22 +517,22 @@ export default function HomePage() {
       </section>
 
       {/* Pricing */}
-      <section id="pricing" className="py-24 px-4 sm:px-6 lg:px-8 bg-gray-50">
+      <section id="pricing" className="py-24 px-4 sm:px-6 lg:px-8 bg-gray-50/50">
         <div className="max-w-7xl mx-auto">
           <AnimateOnScroll className="text-center max-w-2xl mx-auto mb-16">
             <div className="inline-flex items-center gap-2 bg-orange-50 text-orange-600 px-4 py-2 rounded-full text-sm font-semibold mb-4 border border-orange-100">
               <CreditCard className="w-4 h-4" /> سعر واحد بسيط
             </div>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">خطة واحدة — كل اللي محتاجه</h2>
-            <p className="mt-4 text-lg text-gray-600">ادفع سنوي ووفر — السعر الشهري أقل بكتير</p>
+            <p className="mt-4 text-lg text-gray-500">ادفع سنوي ووفر — السعر الشهري أقل بكتير</p>
           </AnimateOnScroll>
 
           <AnimateOnScroll className="max-w-2xl mx-auto">
             <div className="rounded-3xl border-2 border-orange-500 bg-white shadow-2xl shadow-orange-500/10 relative overflow-hidden">
-              <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-orange-500 to-orange-600 py-2 text-center">
+              <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-orange-500 to-orange-600 py-2.5 text-center">
                 <span className="text-white text-sm font-bold">الباقة الشاملة</span>
               </div>
-              <div className="pt-12 px-8 pb-8">
+              <div className="pt-14 px-8 pb-8">
                 <h3 className="text-2xl font-bold text-gray-900">{pricingPlan.name}</h3>
                 <p className="text-sm text-gray-500 mt-1">{pricingPlan.desc}</p>
                 <div className="mt-6 bg-orange-50 rounded-2xl p-6 border border-orange-100">
@@ -537,15 +560,15 @@ export default function HomePage() {
                 </div>
                 <div className="mt-8">
                   <h4 className="text-sm font-bold text-gray-900 mb-4">الباقة تشمل:</h4>
-                  <ul className="space-y-3">
+                  <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {pricingPlan.features.map((f, j) => (
-                      <li key={j} className="flex items-center gap-3 text-sm text-gray-700">
-                        <CheckCircle className="w-5 h-5 text-orange-500 shrink-0" /> {f}
+                      <li key={j} className="flex items-center gap-2.5 text-sm text-gray-600">
+                        <CheckCircle className="w-4 h-4 text-orange-500 shrink-0" /> {f}
                       </li>
                     ))}
                   </ul>
                 </div>
-                <Link href="/signup" className="mt-8 block text-center py-4 rounded-xl font-bold text-lg bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:from-orange-600 hover:to-orange-700 shadow-lg shadow-orange-500/25 transition-all">
+                <Link href="/signup" className="mt-8 block text-center py-4 rounded-2xl font-bold text-lg bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:from-orange-600 hover:to-orange-700 shadow-lg shadow-orange-500/25 transition-all">
                   ابدأ الآن — مجاناً
                 </Link>
                 <p className="text-center text-xs text-gray-400 mt-3">تجربة مجانية 14 يوم — بدون بطاقة ائتمان</p>
@@ -561,7 +584,7 @@ export default function HomePage() {
                 { old: "6,000 ج.م/سنة", neww: "3,000 ج.م/سنة", title: "وفّر 3,000 جنيه في السنة" },
                 { old: "كل شهر", neww: "مرة واحدة", title: "ادفع مرة واحدة وارتاح" },
               ].map((item, i) => (
-                <div key={i} className="bg-white rounded-2xl p-6 border border-gray-200 text-center">
+                <div key={i} className="bg-white rounded-2xl p-6 border border-gray-200 text-center hover-lift">
                   <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mx-auto mb-3">
                     <CheckCircle className="w-6 h-6 text-orange-500" />
                   </div>
@@ -588,7 +611,7 @@ export default function HomePage() {
           <AnimateOnScroll>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6">جاهز تبدأ؟</h2>
             <p className="text-lg sm:text-xl text-orange-100 mb-10 max-w-2xl mx-auto">ابدأ تجربتك المجانية النهاردة — من غير بطاقة ائتمان ولا أي التزام</p>
-            <Link href="/signup" className="inline-flex items-center gap-3 bg-white text-orange-600 px-10 py-4 rounded-xl font-bold text-lg hover:bg-orange-50 transition-all shadow-2xl shadow-black/10">
+            <Link href="/signup" className="inline-flex items-center gap-3 bg-white text-orange-600 px-10 py-4 rounded-2xl font-bold text-lg hover:bg-orange-50 transition-all shadow-2xl shadow-black/10">
               ابدأ مجاناً الآن <ArrowLeft className="w-6 h-6" />
             </Link>
           </AnimateOnScroll>
@@ -622,7 +645,7 @@ export default function HomePage() {
               <ul className="space-y-3">
                 <li><a href="#features" className="hover:text-orange-400 transition-colors">المميزات</a></li>
                 <li><a href="#pricing" className="hover:text-orange-400 transition-colors">الأسعار</a></li>
-                <li><a href="#about" className="hover:text-orange-400 transition-colors">حول</a></li>
+                <li><a href="#testimonials" className="hover:text-orange-400 transition-colors">عملاؤنا</a></li>
                 <li><Link href="/login" className="hover:text-orange-400 transition-colors">تسجيل الدخول</Link></li>
               </ul>
             </div>

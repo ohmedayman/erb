@@ -8,7 +8,7 @@ import {
   Warehouse, CreditCard, Building2, Smartphone, CheckCircle, Copy,
   Loader2, Shield, Clock, ArrowLeft, Phone, Wallet, Banknote,
   FileText, Star, Zap, Users, Package, BarChart3, Settings,
-  Receipt, Truck, Bell, AlertCircle
+  Receipt, Truck, Bell, AlertCircle, Upload, Image as ImageIcon
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import Image from "next/image";
@@ -133,6 +133,8 @@ export default function CheckoutPage() {
   const [copied, setCopied] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [orderId, setOrderId] = useState("");
+  const [screenshot, setScreenshot] = useState<File | null>(null);
+  const [screenshotPreview, setScreenshotPreview] = useState<string | null>(null);
 
   useEffect(() => {
     const stored = JSON.parse(localStorage.getItem("user") || "null");
@@ -148,6 +150,40 @@ export default function CheckoutPage() {
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleScreenshotChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      alert("الصورة كبيرة جداً. الحد الأقصى 5 ميجا");
+      return;
+    }
+    setScreenshot(file);
+    const reader = new FileReader();
+    reader.onload = (ev) => setScreenshotPreview(ev.target?.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  const uploadScreenshot = async (): Promise<string | null> => {
+    if (!screenshot || !user) return null;
+    try {
+      const fileExt = screenshot.name.split(".").pop();
+      const fileName = `${user.id}_${Date.now()}.${fileExt}`;
+      const { error } = await supabase.storage
+        .from("payment-screenshots")
+        .upload(fileName, screenshot);
+      if (error) {
+        console.error("Upload error:", error);
+        return null;
+      }
+      const { data } = supabase.storage
+        .from("payment-screenshots")
+        .getPublicUrl(fileName);
+      return data.publicUrl;
+    } catch {
+      return null;
+    }
   };
 
   const handleSubmitOrder = async () => {
@@ -169,6 +205,12 @@ export default function CheckoutPage() {
         return;
       }
 
+      // Upload screenshot if provided
+      let screenshotUrl = null;
+      if (screenshot) {
+        screenshotUrl = await uploadScreenshot();
+      }
+
       const orderData = {
         user_id: user.id,
         user_name: userName,
@@ -180,6 +222,7 @@ export default function CheckoutPage() {
         payment_method: selectedMethod,
         payment_details: PAYMENT_METHODS.find(m => m.id === selectedMethod)?.notes || "",
         transaction_id: transactionId,
+        screenshot_url: screenshotUrl,
         status: "pending",
       };
 
@@ -499,6 +542,47 @@ export default function CheckoutPage() {
                             placeholder="الرقم اللي استلمته بعد الدفع"
                           />
                           <p className="mt-1 text-xs text-muted-foreground">مهم جداً — ده اللي هنتحقق بيه من الدفع</p>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-foreground mb-1.5">صورة الإيصال (اختياري)</label>
+                          <div className="relative">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={handleScreenshotChange}
+                              className="hidden"
+                              id="screenshot-upload"
+                            />
+                            <label
+                              htmlFor="screenshot-upload"
+                              className="flex items-center justify-center gap-2 w-full px-4 py-4 rounded-xl border-2 border-dashed border-border bg-muted/30 hover:bg-muted/50 cursor-pointer transition-all"
+                            >
+                              {screenshotPreview ? (
+                                <div className="relative w-full">
+                                  <img src={screenshotPreview} alt="الإيصال" className="w-full max-h-40 object-contain rounded-lg" />
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      setScreenshot(null);
+                                      setScreenshotPreview(null);
+                                    }}
+                                    className="absolute top-2 left-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                                  >
+                                    <span className="sr-only">حذف</span>
+                                    ✕
+                                  </button>
+                                </div>
+                              ) : (
+                                <>
+                                  <Upload className="w-5 h-5 text-muted-foreground" />
+                                  <span className="text-sm text-muted-foreground">اضغط لرفع صورة الإيصال</span>
+                                </>
+                              )}
+                            </label>
+                          </div>
+                          <p className="mt-1 text-xs text-muted-foreground">صورة التحويل البنكي أو الإيصال (حد أقصى 5 ميجا)</p>
                         </div>
                       </div>
 

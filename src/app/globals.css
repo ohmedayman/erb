@@ -395,14 +395,19 @@ input:focus, select:focus, textarea:focus {
   color: inherit;
 }
 
-img {
+img, svg, canvas, video, audio {
   -webkit-user-drag: none;
   user-select: none;
   -webkit-user-select: none;
   -webkit-touch-callout: none;
+  pointer-events: none;
 }
 
-.no-copy {
+a img, button img {
+  pointer-events: auto;
+}
+
+.no-copy, .copy-protected {
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
@@ -410,8 +415,21 @@ img {
   -webkit-touch-callout: none;
 }
 
+/* Disable print */
 @media print {
-  body {
+  body, html {
     display: none !important;
+    visibility: hidden !important;
   }
+}
+
+/* Disable drag on everything */
+img, svg, canvas, video, audio, a {
+  -webkit-user-drag: none;
+}
+
+/* Allow input fields to be editable */
+input, textarea, [contenteditable="true"] {
+  user-select: text !important;
+  -webkit-user-select: text !important;
 }

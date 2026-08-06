@@ -10,9 +10,16 @@ import {
   Star,
   Mail,
   Phone,
+  Download,
 } from "lucide-react";
 import { getDocsFromCollection, addDocToCollection, updateDocInCollection, deleteDocFromCollection } from "@/lib/localdb";
+import { exportToExcel } from "@/lib/excel";
+import { toast } from "@/components/Toast";
 import ExcelImport from "@/components/ExcelImport";
+
+const Skeleton = ({ className }: { className?: string }) => (
+  <div className={`animate-pulse bg-muted rounded ${className}`} />
+);
 
 export default function SuppliersPage() {
   const [suppliers, setSuppliers] = useState<any[]>([]);
@@ -54,20 +61,25 @@ export default function SuppliersPage() {
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
-    const user = JSON.parse(localStorage.getItem("user") || "{}");
-    await addDocToCollection("suppliers", { ...newSupplier, rating: newSupplier.rating || 5, storeId: user.storeId });
-    setShowModal(false);
-    setNewSupplier({
-      name: "",
-      code: "",
-      contactName: "",
-      email: "",
-      phone: "",
-      address: "",
-      category: "",
-      rating: 5,
-    });
-    fetchSuppliers();
+    try {
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      await addDocToCollection("suppliers", { ...newSupplier, rating: newSupplier.rating || 5, storeId: user.storeId });
+      setShowModal(false);
+      setNewSupplier({
+        name: "",
+        code: "",
+        contactName: "",
+        email: "",
+        phone: "",
+        address: "",
+        category: "",
+        rating: 5,
+      });
+      fetchSuppliers();
+      toast.success("تم إضافة المورد بنجاح");
+    } catch {
+      toast.error("فيه مشكلة حصلت");
+    }
   };
 
   const handleEdit = async (e: React.FormEvent) => {
@@ -79,8 +91,13 @@ export default function SuppliersPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm("هل أنت متأكد من حذف هذا المورد؟")) return;
-    await deleteDocFromCollection("suppliers", id);
-    fetchSuppliers();
+    try {
+      await deleteDocFromCollection("suppliers", id);
+      fetchSuppliers();
+      toast.success("تم حذف المورد");
+    } catch {
+      toast.error("فيه مشكلة حصلت");
+    }
   };
 
   const openModal = (supplier?: any) => {
@@ -128,12 +145,17 @@ export default function SuppliersPage() {
             إدارة الموردين والتواصل معهم
           </p>
         </div>
-        <button
-          onClick={() => openModal()}
-          className="flex items-center gap-2 bg-primary text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-primary-hover transition-colors"
-        >
-          <Plus className="w-4 h-4" /> إضافة مورد
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={() => exportToExcel(suppliers.map(s => ({ name: s.name, code: s.code, contactName: s.contactName, email: s.email, phone: s.phone, address: s.address, category: s.category, rating: s.rating })), "suppliers", "الموردين")} className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-xl text-sm font-medium hover:bg-green-600 transition-colors">
+            <Download className="w-4 h-4" /> تصدير
+          </button>
+          <button
+            onClick={() => openModal()}
+            className="flex items-center gap-2 bg-primary text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-primary-hover transition-colors"
+          >
+            <Plus className="w-4 h-4" /> إضافة مورد
+          </button>
+        </div>
         <ExcelImport
           title="الموردين"
           columnMappings={[

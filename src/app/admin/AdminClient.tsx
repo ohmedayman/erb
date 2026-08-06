@@ -9,6 +9,7 @@ import {
   ChevronDown, Eye, CheckCircle, XCircle, Clock,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { isAdminEmail } from "@/lib/admin-config";
 import Overview from "./components/Overview";
 import StoresManager from "./components/StoresManager";
 import UsersManager from "./components/UsersManager";
@@ -23,8 +24,6 @@ import EmployeesManager from "./components/EmployeesManager";
 import ActivityLogManager from "./components/ActivityLogManager";
 import SettingsManager from "./components/SettingsManager";
 import SecurityDashboard from "./components/SecurityDashboard";
-
-const ADMIN_EMAILS = ["admin@stockflow.com", "m44408335@gmail.com", "admin@stockflow.vexonet.online"];
 
 const SIDEBAR_ITEMS = [
   { id: "overview", label: "لوحة التحكم", icon: Home },
@@ -111,7 +110,7 @@ export default function AdminClient() {
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user") || "{}");
     if (!user.email) { router.push("/login"); return; }
-    const admin = user.role === "admin" || ADMIN_EMAILS.includes(user.email);
+    const admin = user.role === "admin" || isAdminEmail(user.email || "");
     setIsAdmin(admin);
     setChecked(true);
     if (!admin) return;
@@ -152,13 +151,26 @@ export default function AdminClient() {
     try {
       const expiresAt = new Date();
       expiresAt.setFullYear(expiresAt.getFullYear() + 1);
+
+      // Get the order to find user_id
+      const order = subscriptionOrders.find(o => o.id === orderId);
+
       const { error } = await supabase.from("subscription_orders").update({
         status: "approved", approved_at: new Date().toISOString(),
         expires_at: expiresAt.toISOString(), admin_note: adminNote || "تم التأكيد",
         updated_at: new Date().toISOString(),
       }).eq("id", orderId);
       if (error) throw error;
-      setSubscriptionOrders(subscriptionOrders.map(o => o.id === orderId ? { ...o, status: "approved", admin_note: adminNote || "تم التأكيد" } : o));
+
+      // Also update registered_users.subscription_status
+      if (order?.user_id) {
+        await supabase.from("registered_users").update({
+          subscription_status: "approved",
+          updated_at: new Date().toISOString(),
+        }).eq("id", order.user_id);
+      }
+
+      setSubscriptionOrders(subscriptionOrders.map(o => o.id === orderId ? { ...o, status: "approved", admin_note: adminNote || "تم التأكيد", expires_at: expiresAt.toISOString() } : o));
       setSelectedOrder(null); setAdminNote("");
     } catch (e: any) { alert("خطأ: " + e.message); }
     finally { setActionLoading(null); }
@@ -167,10 +179,21 @@ export default function AdminClient() {
   const handleRejectOrder = async (orderId: string) => {
     setActionLoading(orderId);
     try {
+      const order = subscriptionOrders.find(o => o.id === orderId);
+
       const { error } = await supabase.from("subscription_orders").update({
         status: "rejected", admin_note: adminNote || "مرفوض", updated_at: new Date().toISOString(),
       }).eq("id", orderId);
       if (error) throw error;
+
+      // Also update registered_users.subscription_status
+      if (order?.user_id) {
+        await supabase.from("registered_users").update({
+          subscription_status: "rejected",
+          updated_at: new Date().toISOString(),
+        }).eq("id", order.user_id);
+      }
+
       setSubscriptionOrders(subscriptionOrders.map(o => o.id === orderId ? { ...o, status: "rejected", admin_note: adminNote || "مرفوض" } : o));
       setSelectedOrder(null); setAdminNote("");
     } catch (e: any) { alert("خطأ: " + e.message); }
@@ -220,6 +243,8 @@ export default function AdminClient() {
     await supabase.auth.signOut();
     localStorage.removeItem("isLoggedIn");
     localStorage.removeItem("user");
+    localStorage.removeItem("store");
+    localStorage.removeItem("user_prefs");
     router.push("/login");
   };
 
@@ -374,6 +399,12 @@ export default function AdminClient() {
               <div className="flex justify-between text-sm"><span className="text-slate-400">السعر</span><span className="text-orange-400 font-bold">{selectedOrder.plan_price?.toLocaleString()} ج.م</span></div>
               <div className="flex justify-between text-sm"><span className="text-slate-400">طريقة الدفع</span><span className="text-white">{selectedOrder.payment_method}</span></div>
               <div className="flex justify-between text-sm"><span className="text-slate-400">رقم المعاملة</span><span className="text-white">{selectedOrder.transaction_id}</span></div>
+              {selectedOrder.expires_at && (
+                <div className="flex justify-between text-sm"><span className="text-slate-400">تاريخ الانتهاء</span><span className="text-white">{new Date(selectedOrder.expires_at).toLocaleDateString("ar-EG")}</span></div>
+              )}
+              {selectedOrder.admin_note && (
+                <div className="flex justify-between text-sm"><span className="text-slate-400">ملاحظة المدير</span><span className="text-white">{selectedOrder.admin_note}</span></div>
+              )}
               {selectedOrder.screenshot_url && (
                 <div><span className="text-slate-400 text-sm block mb-2">صورة الإيصال</span>
                   <img src={selectedOrder.screenshot_url} alt="receipt" className="w-full rounded-lg border border-slate-700" />

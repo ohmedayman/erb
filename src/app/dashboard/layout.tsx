@@ -15,6 +15,7 @@ import Image from "next/image";
 import { OfflineIndicator, InstallPrompt, SyncStatus } from "@/app/components/PWAComponents";
 import { getUnreadCount, subscribeToNotifications, requestNotificationPermission } from "@/lib/notifications";
 import GlobalSearch from "@/components/GlobalSearch";
+import { isAdminEmail } from "@/lib/admin-config";
 
 const allSidebarLinks: Record<string, { href: string; label: string; icon: any; group?: string }> = {
   dashboard: { href: "/dashboard", label: "البورد", icon: LayoutDashboard, group: "main" },
@@ -94,13 +95,52 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
 
     const email = (user.email || "").toLowerCase();
-    const ADMIN_EMAILS = ["admin@stockflow.com", "m44408335@gmail.com", "admin@stockflow.vexonet.online"];
-    const isAdmin = ADMIN_EMAILS.includes(email);
+    const isAdmin = isAdminEmail(email);
 
     if (isAdmin) {
       router.push("/admin");
       return;
     }
+
+    // Check subscription status - redirect to login if no valid subscription
+    const checkSubscription = async () => {
+      try {
+        const { data: orders } = await supabase
+          .from("subscription_orders")
+          .select("status")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(1);
+
+        if (orders && orders.length > 0) {
+          if (orders[0].status === "pending") {
+            router.push("/login");
+            return;
+          }
+          if (orders[0].status === "rejected") {
+            router.push("/login");
+            return;
+          }
+        } else {
+          // No orders - check registered_users
+          const { data: regUser } = await supabase
+            .from("registered_users")
+            .select("subscription_status")
+            .eq("id", user.id)
+            .single();
+
+          const subStatus = regUser?.subscription_status;
+          if (subStatus !== "approved" && subStatus !== "active") {
+            router.push("/checkout");
+            return;
+          }
+        }
+      } catch {
+        // If check fails, allow access (offline mode)
+      }
+    };
+
+    checkSubscription();
 
     setUsername(user.fullName || user.username || user.name || "مستخدم");
 
@@ -174,6 +214,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     localStorage.removeItem("user");
     localStorage.removeItem("token");
     localStorage.removeItem("store");
+    localStorage.removeItem("user_prefs");
     router.push("/login");
   };
 

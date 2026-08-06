@@ -155,13 +155,27 @@ export default function CheckoutPage() {
 
     setLoading(true);
     try {
+      // Check if user already has a pending order
+      const { data: existingOrders } = await supabase
+        .from("subscription_orders")
+        .select("id, status")
+        .eq("user_id", user.id)
+        .eq("status", "pending")
+        .limit(1);
+
+      if (existingOrders && existingOrders.length > 0) {
+        alert("عندك طلب اشتراك قيد المراجعة بالفعل. هتتقبل في أقرب وقت!");
+        setLoading(false);
+        return;
+      }
+
       const orderData = {
         user_id: user.id,
         user_name: userName,
         user_email: user.email,
         user_phone: userPhone,
         plan_name: PLAN.name,
-        plan_price: PLAN.upfront,
+        plan_price: PLAN.price,
         plan_duration: PLAN.duration,
         payment_method: selectedMethod,
         payment_details: PAYMENT_METHODS.find(m => m.id === selectedMethod)?.notes || "",

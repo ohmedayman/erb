@@ -9,6 +9,7 @@ import { supabase } from "@/lib/supabase";
 import { trackUserActivity } from "@/lib/user-activity";
 import Image from "next/image";
 import SEOHead from "@/components/SEOHead";
+import { isAdminEmail } from "@/lib/admin-config";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -24,8 +25,6 @@ export default function LoginPage() {
   const [resetLoading, setResetLoading] = useState(false);
   const [resetMessage, setResetMessage] = useState("");
   const [resetError, setResetError] = useState("");
-
-  const ADMIN_EMAILS = ["admin@stockflow.com", "m44408335@gmail.com", "admin@stockflow.vexonet.online"];
 
   const handleResetPassword = async () => {
     setResetLoading(true);
@@ -87,7 +86,7 @@ export default function LoginPage() {
       }
 
       const userEmail = (data.user.email || "").toLowerCase();
-      const isAdmin = ADMIN_EMAILS.includes(userEmail);
+      const isAdmin = isAdminEmail(userEmail);
 
       // Save user to localStorage
       localStorage.setItem("user", JSON.stringify({

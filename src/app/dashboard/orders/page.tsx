@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Search, Eye, ChevronDown, Plus, X, Package, Download } from "lucide-react";
 import { getDocsFromCollection, addDocToCollection } from "@/lib/localdb";
 import { exportToExcel } from "@/lib/excel";
+import ExcelImport from "@/components/ExcelImport";
 import { toast } from "@/components/Toast";
 
 const statusColors: Record<string, string> = {
@@ -163,6 +164,31 @@ export default function OrdersPage() {
         <button onClick={() => exportToExcel(orders.map(o => ({ orderNumber: o.orderNumber, customerName: o.customerName, items: o.items, total: o.total, status: o.status, payment: o.payment, date: o.date })), "orders", "الأوردرات")} className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-xl text-sm font-medium hover:bg-green-600 transition-colors">
           <Download className="w-4 h-4" /> تصدير Excel
         </button>
+        <ExcelImport
+          title="الأوردرات"
+          columnMappings={[
+            { excelColumn: "اسم الزبون", dbField: "customerName", label: "اسم الزبون", required: true },
+            { excelColumn: "عدد العناصر", dbField: "items", label: "عدد العناصر", transform: (v) => parseInt(v) || 1 },
+            { excelColumn: "المبلغ", dbField: "total", label: "المبلغ", required: true, transform: (v) => parseFloat(v) || 0 },
+            { excelColumn: "الحالة", dbField: "status", label: "الحالة" },
+            { excelColumn: "الدفع", dbField: "payment", label: "الدفع" },
+          ]}
+          sampleHeaders={["اسم الزبون", "عدد العناصر", "المبلغ", "الحالة", "الدفع"]}
+          onImport={async (data) => {
+            const user = JSON.parse(localStorage.getItem("user") || "{}");
+            for (const item of data) {
+              if (!item.customerName) continue;
+              await addDocToCollection("orders", {
+                ...item,
+                orderNumber: `ORD-${Date.now().toString(36).toUpperCase()}`,
+                date: new Date().toISOString(),
+                storeId: user.storeId,
+              });
+            }
+            const updatedOrders = await getDocsFromCollection("orders", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
+            setOrders(updatedOrders);
+          }}
+        />
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">

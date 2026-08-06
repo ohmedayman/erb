@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Search, Plus, X, Edit2, Download } from "lucide-react";
 import { getDocsFromCollection, addDocToCollection, updateDocInCollection } from "@/lib/localdb";
 import { exportToExcel } from "@/lib/excel";
+import ExcelImport from "@/components/ExcelImport";
 import { toast } from "@/components/Toast";
 
 interface Customer {
@@ -148,6 +149,26 @@ export default function CustomersPage() {
           <button onClick={() => exportToExcel(customers.map(c => ({ name: c.name, phone: c.phone, email: c.email, address: c.address, type: c.type, balance: c.balance, createdAt: c.createdAt })), "customers", "الزبائن")} className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-xl text-sm font-medium hover:bg-green-600 transition-colors">
             <Download className="w-4 h-4" /> تصدير Excel
           </button>
+          <ExcelImport
+            title="الزبائن"
+            columnMappings={[
+              { excelColumn: "الاسم", dbField: "name", label: "الاسم", required: true },
+              { excelColumn: "الموبايل", dbField: "phone", label: "الموبايل" },
+              { excelColumn: "البريد", dbField: "email", label: "البريد" },
+              { excelColumn: "العنوان", dbField: "address", label: "العنوان" },
+              { excelColumn: "النوع", dbField: "type", label: "النوع" },
+              { excelColumn: "الرصيد", dbField: "balance", label: "الرصيد", transform: (v) => parseFloat(v) || 0 },
+            ]}
+            sampleHeaders={["الاسم", "الموبايل", "البريد", "العنوان", "النوع", "الرصيد"]}
+            onImport={async (data) => {
+              const user = JSON.parse(localStorage.getItem("user") || "{}");
+              for (const item of data) {
+                if (!item.name) continue;
+                await addDocToCollection("customers", { ...item, storeId: user.storeId });
+              }
+              fetchCustomers();
+            }}
+          />
         </div>
       </div>
 

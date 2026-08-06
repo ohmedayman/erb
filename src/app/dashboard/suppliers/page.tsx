@@ -12,6 +12,7 @@ import {
   Phone,
 } from "lucide-react";
 import { getDocsFromCollection, addDocToCollection, updateDocInCollection, deleteDocFromCollection } from "@/lib/localdb";
+import ExcelImport from "@/components/ExcelImport";
 
 export default function SuppliersPage() {
   const [suppliers, setSuppliers] = useState<any[]>([]);
@@ -133,6 +134,27 @@ export default function SuppliersPage() {
         >
           <Plus className="w-4 h-4" /> إضافة مورد
         </button>
+        <ExcelImport
+          title="الموردين"
+          columnMappings={[
+            { excelColumn: "الاسم", dbField: "name", label: "الاسم", required: true },
+            { excelColumn: "الكود", dbField: "code", label: "الكود" },
+            { excelColumn: "اسم التواصل", dbField: "contactName", label: "اسم التواصل" },
+            { excelColumn: "البريد", dbField: "email", label: "البريد" },
+            { excelColumn: "الموبايل", dbField: "phone", label: "الموبايل" },
+            { excelColumn: "العنوان", dbField: "address", label: "العنوان" },
+            { excelColumn: "الفئة", dbField: "category", label: "الفئة" },
+          ]}
+          sampleHeaders={["الاسم", "الكود", "اسم التواصل", "البريد", "الموبايل", "العنوان", "الفئة"]}
+          onImport={async (data) => {
+            const user = JSON.parse(localStorage.getItem("user") || "{}");
+            for (const item of data) {
+              if (!item.name) continue;
+              await addDocToCollection("suppliers", { ...item, rating: 5, storeId: user.storeId });
+            }
+            fetchSuppliers();
+          }}
+        />
       </div>
 
       <div className="bg-card rounded-xl border border-border p-4">

@@ -1,15 +1,8 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-// Security nonce for CSP (generated per request)
-function generateNonce(): string {
-  const array = new Uint8Array(16);
-  crypto.getRandomValues(array);
-  return btoa(String.fromCharCode(...array));
-}
-
+// Security headers for CSP
 export function middleware(request: NextRequest) {
-  const nonce = generateNonce();
   const response = NextResponse.next();
 
   // ========================================
@@ -17,7 +10,7 @@ export function middleware(request: NextRequest) {
   // ========================================
   const cspDirectives = [
     `default-src 'self'`,
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://cdn.jotfor.ms https://www.jotfor.ms`,
+    `script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jotfor.ms https://www.jotfor.ms`,
     `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com`,
     `img-src 'self' data: blob: https://*.supabase.co https://ipapi.co https://api.ipify.org`,
     `font-src 'self' https://fonts.gstatic.com`,
@@ -26,8 +19,6 @@ export function middleware(request: NextRequest) {
     `object-src 'none'`,
     `base-uri 'self'`,
     `form-action 'self'`,
-    `frame-ancestors 'none'`,
-    `upgrade-insecure-requests`,
   ].join("; ");
 
   // ========================================
@@ -40,14 +31,6 @@ export function middleware(request: NextRequest) {
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   response.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()");
   response.headers.set("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
-  response.headers.set("Cross-Origin-Embedder-Policy", "require-corp");
-  response.headers.set("Cross-Origin-Resource-Policy", "same-origin");
-  response.headers.set("Cross-Origin-Opener-Policy", "same-origin");
-  response.headers.set("X-DNS-Prefetch-Control", "off");
-  response.headers.set("X-Permitted-Cross-Domain-Policies", "none");
-
-  // Pass nonce to the client via a header (for inline scripts if needed)
-  response.headers.set("X-Nonce", nonce);
 
   // Remove server identification headers
   response.headers.delete("X-Powered-By");

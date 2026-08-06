@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { getDocsFromCollection, addDocToCollection } from "@/lib/localdb";
 import { exportToExcel } from "@/lib/excel";
+import ExcelImport from "@/components/ExcelImport";
 
 const Skeleton = ({ className }: { className?: string }) => (
   <div className={`animate-pulse bg-muted rounded ${className}`} />
@@ -120,9 +121,31 @@ export default function EmployeesPage() {
         >
           <Plus className="w-4 h-4" /> اضف موظف
         </button>
-        <button onClick={() => exportToExcel(employees.map(e => ({ name: e.name, email: e.email, phone: e.phone, position: e.position, department: e.department, salary: e.salary, hireDate: e.hireDate, status: e.status })), "employees", "الموظفين")} className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-xl text-sm font-medium hover:bg-green-600 transition-colors">
-          <Download className="w-4 h-4" /> تصدير Excel
-        </button>
+          <button onClick={() => exportToExcel(employees.map(e => ({ name: e.name, email: e.email, phone: e.phone, position: e.position, department: e.department, salary: e.salary, hireDate: e.hireDate, status: e.status })), "employees", "الموظفين")} className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-xl text-sm font-medium hover:bg-green-600 transition-colors">
+            <Download className="w-4 h-4" /> تصدير Excel
+          </button>
+          <ExcelImport
+            title="الموظفين"
+            columnMappings={[
+              { excelColumn: "الاسم", dbField: "name", label: "الاسم", required: true },
+              { excelColumn: "البريد", dbField: "email", label: "البريد" },
+              { excelColumn: "الموبايل", dbField: "phone", label: "الموبايل" },
+              { excelColumn: "المنصب", dbField: "position", label: "المنصب" },
+              { excelColumn: "القسم", dbField: "department", label: "القسم" },
+              { excelColumn: "الراتب", dbField: "salary", label: "الراتب", transform: (v) => parseFloat(v) || 0 },
+              { excelColumn: "تاريخ التوظيف", dbField: "hireDate", label: "تاريخ التوظيف" },
+              { excelColumn: "الحالة", dbField: "status", label: "الحالة" },
+            ]}
+            sampleHeaders={["الاسم", "البريد", "الموبايل", "المنصب", "القسم", "الراتب", "تاريخ التوظيف", "الحالة"]}
+            onImport={async (data) => {
+              const user = JSON.parse(localStorage.getItem("user") || "{}");
+              for (const item of data) {
+                if (!item.name) continue;
+                await addDocToCollection("employees", { ...item, storeId: user.storeId });
+              }
+              fetchEmployees();
+            }}
+          />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

@@ -3,6 +3,7 @@ import { Cairo } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import ToastProvider from "@/components/ToastProvider";
+import AntiInspect from "@/components/AntiInspect";
 
 const cairo = Cairo({
   variable: "--font-cairo",
@@ -187,6 +188,7 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icons/icon-192.png" />
       </head>
       <body className="min-h-full flex flex-col">
+        <AntiInspect />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

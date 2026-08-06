@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { getDocsFromCollection, addDocToCollection } from "@/lib/localdb";
 import { exportToExcel } from "@/lib/excel";
+import ExcelImport from "@/components/ExcelImport";
 import { toast } from "@/components/Toast";
 
 const Skeleton = ({ className }: { className?: string }) => (
@@ -184,6 +185,27 @@ export default function ExpensesPage() {
         <button onClick={() => exportToExcel(expenses.map(e => ({ description: e.description, amount: e.amount, category: e.category, paymentMethod: e.paymentMethod, date: e.date, receiptNumber: e.receiptNumber, notes: e.notes })), "expenses", "المصروفات")} className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-xl text-sm font-medium hover:bg-green-600 transition-colors">
           <Download className="w-4 h-4" /> تصدير Excel
         </button>
+        <ExcelImport
+          title="المصروفات"
+          columnMappings={[
+            { excelColumn: "الوصف", dbField: "description", label: "الوصف", required: true },
+            { excelColumn: "المبلغ", dbField: "amount", label: "المبلغ", required: true, transform: (v) => parseFloat(v) || 0 },
+            { excelColumn: "الفئة", dbField: "category", label: "الفئة" },
+            { excelColumn: "طريقة الدفع", dbField: "paymentMethod", label: "طريقة الدفع" },
+            { excelColumn: "التاريخ", dbField: "date", label: "التاريخ" },
+            { excelColumn: "رقم الإيصال", dbField: "receiptNumber", label: "رقم الإيصال" },
+            { excelColumn: "ملاحظات", dbField: "notes", label: "ملاحظات" },
+          ]}
+          sampleHeaders={["الوصف", "المبلغ", "الفئة", "طريقة الدفع", "التاريخ", "رقم الإيصال", "ملاحظات"]}
+          onImport={async (data) => {
+            const user = JSON.parse(localStorage.getItem("user") || "{}");
+            for (const item of data) {
+              if (!item.description) continue;
+              await addDocToCollection("expenses", { ...item, storeId: user.storeId });
+            }
+            fetchExpenses();
+          }}
+        />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

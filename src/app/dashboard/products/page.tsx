@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { Package, Plus, Search, Edit, Trash2, Printer, Minus, PlusIcon, Download, Image as ImageIcon, X } from "lucide-react";
 import { getDocsFromCollection, addDocToCollection, updateDocInCollection, deleteDocFromCollection } from "@/lib/localdb";
 import { exportToExcel } from "@/lib/excel";
+import ExcelImport from "@/components/ExcelImport";
 import { toast } from "@/components/Toast";
 import JsBarcode from "jsbarcode";
 import { supabase } from "@/lib/supabase";
@@ -257,6 +258,26 @@ export default function ProductsPage() {
           <button onClick={() => exportToExcel(products.map(p => ({ name: p.name, sku: p.sku, category: p.category, price: p.price, stock: p.stock, minStock: p.minStock })), "products", "المنتجات")} className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-xl text-sm font-medium hover:bg-green-600 transition-colors">
             <Download className="w-4 h-4" /> تصدير Excel
           </button>
+          <ExcelImport
+            title="المنتجات"
+            columnMappings={[
+              { excelColumn: "الاسم", dbField: "name", label: "الاسم", required: true },
+              { excelColumn: "كود المنتج", dbField: "sku", label: "كود المنتج" },
+              { excelColumn: "الفئة", dbField: "category", label: "الفئة" },
+              { excelColumn: "السعر", dbField: "price", label: "السعر", required: true, transform: (v) => parseFloat(v) || 0 },
+              { excelColumn: "المخزون", dbField: "stock", label: "المخزون", transform: (v) => parseInt(v) || 0 },
+              { excelColumn: "الحد الأدنى", dbField: "minStock", label: "الحد الأدنى", transform: (v) => parseInt(v) || 10 },
+            ]}
+            sampleHeaders={["الاسم", "كود المنتج", "الفئة", "السعر", "المخزون", "الحد الأدنى"]}
+            onImport={async (data) => {
+              const user = JSON.parse(localStorage.getItem("user") || "{}");
+              for (const item of data) {
+                if (!item.name) continue;
+                await addDocToCollection("products", { ...item, storeId: user.storeId });
+              }
+              fetchProducts();
+            }}
+          />
         </div>
 
         <div className="bg-card rounded-xl border border-border p-4">

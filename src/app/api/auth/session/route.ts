@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { SignJWT, jwtVerify } from "jose";
 import { JWT_SECRET, ADMIN_EMAILS } from "@/lib/admin-config";
+import { supabase } from "@/lib/supabase";
 
 const COOKIE_NAME = "sf_auth";
 
@@ -10,6 +11,11 @@ export async function POST(request: NextRequest) {
 
     if (!userId || !email) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user || user.id !== userId || user.email?.toLowerCase() !== email.toLowerCase()) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const role = ADMIN_EMAILS.includes(email.toLowerCase().trim()) ? "admin" : "user";
@@ -32,7 +38,7 @@ export async function POST(request: NextRequest) {
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
-      maxAge: 30 * 24 * 60 * 60, // 30 days
+      maxAge: 30 * 24 * 60 * 60,
     });
 
     return response;

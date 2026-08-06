@@ -65,6 +65,21 @@ export default function SettingsPage() {
     }
     setPasswordLoading(true);
     try {
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      if (!user.email) {
+        setPasswordMsg({ type: "error", text: "مفيش مستخدم مسجل دخول" });
+        setPasswordLoading(false);
+        return;
+      }
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password: passwords.current,
+      });
+      if (signInError) {
+        setPasswordMsg({ type: "error", text: "كلمة السر الحالية غلط" });
+        setPasswordLoading(false);
+        return;
+      }
       const { error } = await supabase.auth.updateUser({ password: passwords.new });
       if (error) throw error;
       setPasswordMsg({ type: "success", text: "تم تحديث كلمة السر بنجاح" });

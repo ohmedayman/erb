@@ -160,10 +160,10 @@ export default function DashboardPage() {
           </div>
           <div className="flex items-center gap-2 w-full sm:w-auto">
             <Link href="/dashboard/products" className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-primary text-white px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-primary-hover transition-colors shadow-md shadow-primary/20">
-              <Plus className="w-4 h-4" /> <span className="hidden xs:inline">منتج جديد</span><span className="xs:hidden">منتج</span>
+              <Plus className="w-4 h-4" /> <span className="hidden sm:inline">منتج جديد</span><span className="sm:hidden">منتج</span>
             </Link>
             <Link href="/dashboard/orders" className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-white text-foreground px-4 py-2.5 rounded-xl text-sm font-semibold border border-border hover:bg-muted transition-colors">
-              <ShoppingCart className="w-4 h-4" /> <span className="hidden xs:inline">أوردر جديد</span><span className="xs:hidden">أوردر</span>
+              <ShoppingCart className="w-4 h-4" /> <span className="hidden sm:inline">أوردر جديد</span><span className="sm:hidden">أوردر</span>
             </Link>
           </div>
         </div>
@@ -276,8 +276,8 @@ export default function DashboardPage() {
 
           {/* Category Pie */}
           {has("products") && !has("orders") && (
-            <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 p-5">
-              <h3 className="font-bold text-gray-900 mb-5">المنتجات حسب الفئة</h3>
+            <div className="lg:col-span-2 bg-card rounded-2xl border border-border/60 p-5">
+              <h3 className="font-bold text-foreground mb-5">المنتجات حسب الفئة</h3>
               {loading ? (
                 <div className="h-[220px] flex items-center justify-center text-gray-400 text-sm">بيتحمّل...</div>
               ) : categoryPie.length === 0 ? (

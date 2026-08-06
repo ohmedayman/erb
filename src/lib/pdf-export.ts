@@ -1,3 +1,12 @@
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 export function generateInvoicePDF(invoice: {
   id: string;
   customerName: string;
@@ -19,7 +28,7 @@ export function generateInvoicePDF(invoice: {
       (item, i) => `
       <tr>
         <td style="padding:12px;border-bottom:1px solid #e2e8f0;color:#64748b;">${i + 1}</td>
-        <td style="padding:12px;border-bottom:1px solid #e2e8f0;font-weight:600;">${item.name}</td>
+        <td style="padding:12px;border-bottom:1px solid #e2e8f0;font-weight:600;">${escapeHtml(item.name)}</td>
         <td style="padding:12px;border-bottom:1px solid #e2e8f0;text-align:center;">${item.quantity}</td>
         <td style="padding:12px;border-bottom:1px solid #e2e8f0;text-align:left;">${item.price.toLocaleString()} ج.م</td>
         <td style="padding:12px;border-bottom:1px solid #e2e8f0;text-align:left;font-weight:600;">${item.total.toLocaleString()} ج.م</td>
@@ -61,9 +70,9 @@ export function generateInvoicePDF(invoice: {
     <body>
       <div class="header">
         <div>
-          <div class="store-name">${invoice.storeName}</div>
-          ${invoice.storeAddress ? `<div style="color:#64748b;font-size:14px;margin-top:4px;">${invoice.storeAddress}</div>` : ""}
-          ${invoice.storePhone ? `<div style="color:#64748b;font-size:14px;">${invoice.storePhone}</div>` : ""}
+          <div class="store-name">${escapeHtml(invoice.storeName)}</div>
+          ${invoice.storeAddress ? `<div style="color:#64748b;font-size:14px;margin-top:4px;">${escapeHtml(invoice.storeAddress)}</div>` : ""}
+          ${invoice.storePhone ? `<div style="color:#64748b;font-size:14px;">${escapeHtml(invoice.storePhone)}</div>` : ""}
         </div>
         <div class="store-info">
           <div>تاريخ الفاتورة: ${invoice.date}</div>
@@ -79,11 +88,11 @@ export function generateInvoicePDF(invoice: {
       <div class="details">
         <div>
           <div class="label">العميل</div>
-          <div class="value">${invoice.customerName}</div>
+          <div class="value">${escapeHtml(invoice.customerName)}</div>
         </div>
         <div>
           <div class="label">طريقة الدفع</div>
-          <div class="value">${invoice.paymentMethod}</div>
+          <div class="value">${escapeHtml(invoice.paymentMethod)}</div>
         </div>
         <div>
           <div class="label">التاريخ</div>
@@ -155,7 +164,7 @@ export function generateReportPDF(title: string, data: Array<Record<string, any>
   const rows = data
     .map(
       (row) =>
-        `<tr>${columns.map((col) => `<td style="padding:10px;border-bottom:1px solid #e2e8f0;">${row[col] ?? ""}</td>`).join("")}</tr>`
+        `<tr>${columns.map((col) => `<td style="padding:10px;border-bottom:1px solid #e2e8f0;">${escapeHtml(String(row[col] ?? ""))}</td>`).join("")}</tr>`
     )
     .join("");
 
@@ -164,7 +173,7 @@ export function generateReportPDF(title: string, data: Array<Record<string, any>
     <html dir="rtl" lang="ar">
     <head>
       <meta charset="UTF-8">
-      <title>${title} — StockFlow</title>
+      <title>${escapeHtml(title)} — StockFlow</title>
       <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Arial, sans-serif; padding: 40px; color: #0f172a; }
@@ -179,7 +188,7 @@ export function generateReportPDF(title: string, data: Array<Record<string, any>
       </style>
     </head>
     <body>
-      <h1>${title}</h1>
+      <h1>${escapeHtml(title)}</h1>
       <p class="subtitle">تاريخ التقرير: ${new Date().toLocaleDateString("ar-EG")} — بواسطة StockFlow</p>
       <table>
         <thead><tr>${headers.map((h) => `<th>${h}</th>`).join("")}</tr></thead>

@@ -11,7 +11,7 @@ import {
 import { isOnline } from "@/lib/sync-manager";
 
 export function generateId(): string {
-  return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+  return Date.now().toString(36) + Math.random().toString(36).substring(2, 11);
 }
 
 // Convert camelCase keys to snake_case for Supabase columns

@@ -2,6 +2,7 @@
 
 import { Wallet, Store } from "lucide-react";
 import DataTable from "./DataTable";
+import ExportButton from "./ExportButton";
 
 interface ExpensesManagerProps {
   expenses: any[];
@@ -68,6 +69,7 @@ export default function ExpensesManager({ expenses, stores, onEdit, onDelete }: 
           searchPlaceholder="بحث بالوصف أو الفئة..."
           onEdit={onEdit}
           onDelete={onDelete}
+          headerAction={<ExportButton data={expenses} filename="expenses" />}
         />
       </div>
     </div>

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Store, CheckCircle, XCircle, Eye } from "lucide-react";
 import DataTable from "./DataTable";
+import ExportButton from "./ExportButton";
 import StoreDetail from "./StoreDetail";
 
 interface StoresManagerProps {
@@ -78,6 +79,7 @@ export default function StoresManager({ stores, products, orders, customers, inv
           searchPlaceholder="بحث بالاسم أو البريد أو المدينة..."
           onEdit={onEdit}
           onDelete={onDelete}
+          headerAction={<ExportButton data={stores} filename="stores" />}
         />
       </div>
 

@@ -2,6 +2,7 @@
 
 import { Package, Store } from "lucide-react";
 import DataTable from "./DataTable";
+import ExportButton from "./ExportButton";
 
 interface ProductsManagerProps {
   products: any[];
@@ -88,6 +89,7 @@ export default function ProductsManager({ products, stores, onEdit, onDelete }: 
           searchPlaceholder="بحث بالاسم أو الكود أو الفئة..."
           onEdit={onEdit}
           onDelete={onDelete}
+          headerAction={<ExportButton data={products} filename="products" />}
         />
       </div>
     </div>

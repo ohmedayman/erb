@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { Store, Users, Package, ShoppingCart, Receipt, Wallet, UserCog, TrendingUp, TrendingDown, Clock, CheckCircle, AlertCircle } from "lucide-react";
+import { Store, Users, Package, ShoppingCart, Receipt, Wallet, UserCog, TrendingUp, TrendingDown, Clock, CheckCircle, AlertCircle, Globe } from "lucide-react";
 import {
   LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -32,9 +32,10 @@ interface OverviewProps {
   expenses: any[];
   products: any[];
   customers: any[];
+  users?: any[];
 }
 
-export default function Overview({ stats, recentOrders, stores, orders, expenses, products, customers }: OverviewProps) {
+export default function Overview({ stats, recentOrders, stores, orders, expenses, products, customers, users = [] }: OverviewProps) {
   const netProfit = stats.totalRevenue - stats.totalExpenses;
 
   // Revenue trend (last 30 days)
@@ -142,6 +143,19 @@ export default function Overview({ stats, recentOrders, stores, orders, expenses
       };
     }).sort((a, b) => b.revenue - a.revenue);
   }, [stores, orders]);
+
+  // Geographic distribution (countries from users)
+  const geoData = useMemo(() => {
+    const countryMap: Record<string, number> = {};
+    users.forEach((u) => {
+      const country = u.last_country || "غير معروف";
+      countryMap[country] = (countryMap[country] || 0) + 1;
+    });
+    return Object.entries(countryMap)
+      .map(([country, count]) => ({ country, users: count }))
+      .sort((a, b) => b.users - a.users)
+      .slice(0, 10);
+  }, [users]);
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -348,6 +362,37 @@ export default function Overview({ stats, recentOrders, stores, orders, expenses
                   formatter={(value: number, name: string) => [`${value.toLocaleString()} ج.م`, name === "revenue" ? "الإيرادات" : "الأوردرات"]}
                 />
                 <Bar dataKey="revenue" name="revenue" fill="#f97316" radius={[4, 4, 0, 0]} barSize={30} />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+      </div>
+
+      {/* Charts Row 4: Geographic Heatmap */}
+      <div className="grid grid-cols-1 gap-6">
+        <div className="bg-[#1e293b] rounded-xl border border-slate-700/50 p-5">
+          <div className="flex items-center gap-2 mb-1">
+            <Globe className="w-5 h-5 text-orange-400" />
+            <h3 className="text-white font-bold">التوزيع الجغرافي للمستخدمين</h3>
+          </div>
+          <p className="text-slate-500 text-xs mb-4">المستخدمين حسب الدولة</p>
+          {geoData.length === 0 ? (
+            <p className="text-slate-500 text-sm text-center py-16">لا توجد بيانات موقع</p>
+          ) : (
+            <ResponsiveContainer width="100%" height={280}>
+              <BarChart data={geoData} layout="vertical" margin={{ left: 30 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#334155" horizontal={false} />
+                <XAxis type="number" tick={{ fill: "#64748b", fontSize: 10 }} tickLine={false} />
+                <YAxis type="category" dataKey="country" tick={{ fill: "#94a3b8", fontSize: 11 }} tickLine={false} width={100} />
+                <Tooltip
+                  contentStyle={{ backgroundColor: "#1e293b", border: "1px solid #334155", borderRadius: "8px" }}
+                  formatter={(value: number) => [value, "مستخدم"]}
+                />
+                <Bar dataKey="users" radius={[0, 6, 6, 0]} barSize={20}>
+                  {geoData.map((_, index) => (
+                    <Cell key={index} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           )}

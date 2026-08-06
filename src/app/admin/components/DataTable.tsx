@@ -21,6 +21,7 @@ interface DataTableProps<T> {
   pageSize?: number;
   expandable?: boolean;
   renderExpanded?: (item: T) => React.ReactNode;
+  headerAction?: React.ReactNode;
 }
 
 export default function DataTable<T extends { id: string }>({
@@ -34,6 +35,7 @@ export default function DataTable<T extends { id: string }>({
   pageSize = 15,
   expandable = false,
   renderExpanded,
+  headerAction,
 }: DataTableProps<T>) {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -64,6 +66,7 @@ export default function DataTable<T extends { id: string }>({
             className="w-full pr-10 pl-4 py-2.5 rounded-lg border border-slate-700 bg-[#0f172a] text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
           />
         </div>
+        {headerAction}
         <span className="text-slate-400 text-sm">{filtered.length} سجل</span>
       </div>
       <div className="overflow-x-auto">

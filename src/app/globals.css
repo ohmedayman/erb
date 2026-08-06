@@ -397,25 +397,6 @@ input:focus, select:focus, textarea:focus {
 
 img, svg, canvas, video, audio {
   -webkit-user-drag: none;
-  user-select: none;
-  -webkit-user-select: none;
-  -webkit-touch-callout: none;
-}
-
-.no-copy, .copy-protected {
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  -webkit-touch-callout: none;
-}
-
-/* Disable print */
-@media print {
-  body, html {
-    display: none !important;
-    visibility: hidden !important;
-  }
 }
 
 /* Disable drag on everything */

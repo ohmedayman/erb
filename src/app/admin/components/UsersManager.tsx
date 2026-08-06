@@ -9,6 +9,7 @@ import {
   Eye, Edit, Trash2, AlertTriangle
 } from "lucide-react";
 import DataTable from "./DataTable";
+import ExportButton from "./ExportButton";
 import { supabase } from "@/lib/supabase";
 import { toast } from "@/components/Toast";
 
@@ -263,6 +264,7 @@ export default function UsersManager({ users, onEdit, onDelete }: UsersManagerPr
           searchPlaceholder="بحث بالاسم أو البريد أو IP..."
           onEdit={onEdit}
           onDelete={onDelete}
+          headerAction={<ExportButton data={users} filename="users" />}
           expandable
           renderExpanded={(item: any) => {
             const activities = userActivities[item.id] || [];

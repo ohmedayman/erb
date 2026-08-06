@@ -2,6 +2,7 @@
 
 import { UserCircle, Store } from "lucide-react";
 import DataTable from "./DataTable";
+import ExportButton from "./ExportButton";
 
 interface CustomersManagerProps {
   customers: any[];
@@ -69,6 +70,7 @@ export default function CustomersManager({ customers, stores, onEdit, onDelete }
           searchPlaceholder="بحث بالاسم أو البريد أو الهاتف..."
           onEdit={onEdit}
           onDelete={onDelete}
+          headerAction={<ExportButton data={customers} filename="customers" />}
         />
       </div>
     </div>

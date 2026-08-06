@@ -2,6 +2,7 @@
 
 import { Receipt, Store } from "lucide-react";
 import DataTable from "./DataTable";
+import ExportButton from "./ExportButton";
 
 interface InvoicesManagerProps {
   invoices: any[];
@@ -88,6 +89,7 @@ export default function InvoicesManager({ invoices, stores, onEdit, onDelete }: 
           searchPlaceholder="بحث برقم الفاتورة أو اسم العميل..."
           onEdit={onEdit}
           onDelete={onDelete}
+          headerAction={<ExportButton data={invoices} filename="invoices" />}
         />
       </div>
     </div>

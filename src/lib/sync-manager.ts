@@ -124,11 +124,26 @@ export async function fullSync(): Promise<{ pulled: boolean; synced: { synced: n
 export function startAutoSync(intervalMs = 30000): void {
   if (syncInterval) clearInterval(syncInterval);
 
+  // Periodic sync
   syncInterval = setInterval(async () => {
     if (isOnline()) {
       await syncToServer();
     }
   }, intervalMs);
+
+  // Sync when page becomes visible (tab switch)
+  if (typeof document !== "undefined") {
+    document.addEventListener("visibilitychange", async () => {
+      if (document.visibilityState === "visible" && isOnline()) {
+        await fullSync();
+      }
+    });
+
+    // Sync when browser goes online
+    window.addEventListener("online", async () => {
+      await fullSync();
+    });
+  }
 }
 
 export function stopAutoSync(): void {

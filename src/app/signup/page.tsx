@@ -138,8 +138,8 @@ export default function SignupPage() {
         }));
         localStorage.setItem("user_prefs", JSON.stringify({
           storeName: storeName,
-          features: ["products", "orders", "invoices", "customers", "inventory", "expenses", "employees", "shipping", "installments", "accounts", "purchaseOrders", "warehouses", "suppliers", "returns", "analytics"],
-          onboardingDone: true,
+          features: [],
+          onboardingDone: false,
         }));
 
         // Track signup activity

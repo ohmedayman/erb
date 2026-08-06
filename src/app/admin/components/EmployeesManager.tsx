@@ -2,6 +2,7 @@
 
 import { UserCog, Store } from "lucide-react";
 import DataTable from "./DataTable";
+import ExportButton from "./ExportButton";
 
 interface EmployeesManagerProps {
   employees: any[];
@@ -76,6 +77,7 @@ export default function EmployeesManager({ employees, stores, onEdit, onDelete }
           searchPlaceholder="بحث بالاسم أو القسم..."
           onEdit={onEdit}
           onDelete={onDelete}
+          headerAction={<ExportButton data={employees} filename="employees" />}
         />
       </div>
     </div>

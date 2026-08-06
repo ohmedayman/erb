@@ -140,8 +140,43 @@ export default function LoginPage() {
         }
       } catch {}
 
-      // No orders → go to checkout
+      // No orders → check registered_users.subscription_status as fallback
       if (!orders || orders.length === 0) {
+        let subStatus = "none";
+        try {
+          const { data: regUser } = await supabase
+            .from("registered_users")
+            .select("subscription_status")
+            .eq("id", data.user.id)
+            .single();
+          if (regUser?.subscription_status) {
+            subStatus = regUser.subscription_status;
+          }
+        } catch {}
+
+        if (subStatus === "approved") {
+          // Subscription approved but no order row — allow access
+          const prefs = JSON.parse(localStorage.getItem("user_prefs") || "null");
+          if (!prefs?.onboardingDone) {
+            router.push("/onboarding");
+          } else {
+            router.push("/dashboard");
+          }
+          return;
+        }
+
+        if (subStatus === "pending") {
+          setServerError("طلبك قيد المراجعة من الإدارة. هتتقبل في أقرب وقت! 🕐");
+          setLoading(false);
+          return;
+        }
+
+        if (subStatus === "rejected") {
+          setServerError("تم رفض طلب اشتراكك. تواصل مع الدعم على 01028707543");
+          setLoading(false);
+          return;
+        }
+
         router.push("/checkout");
         return;
       }
@@ -155,6 +190,16 @@ export default function LoginPage() {
 
       // Approved → go to dashboard or onboarding
       if (orders[0].status === "approved") {
+        // Also save onboarding prefs if not set
+        const existingPrefs = JSON.parse(localStorage.getItem("user_prefs") || "null");
+        if (!existingPrefs) {
+          localStorage.setItem("user_prefs", JSON.stringify({
+            storeName: "",
+            features: [],
+            onboardingDone: false,
+          }));
+        }
+
         const prefs = JSON.parse(localStorage.getItem("user_prefs") || "null");
         if (!prefs?.onboardingDone) {
           router.push("/onboarding");

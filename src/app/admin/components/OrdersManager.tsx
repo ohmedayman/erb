@@ -2,6 +2,7 @@
 
 import { ShoppingCart, Store } from "lucide-react";
 import DataTable from "./DataTable";
+import ExportButton from "./ExportButton";
 
 interface OrdersManagerProps {
   orders: any[];
@@ -91,6 +92,7 @@ export default function OrdersManager({ orders, stores, onEdit, onDelete }: Orde
           searchPlaceholder="بحث برقم الأوردر أو اسم العميل..."
           onEdit={onEdit}
           onDelete={onDelete}
+          headerAction={<ExportButton data={orders} filename="orders" />}
         />
       </div>
     </div>

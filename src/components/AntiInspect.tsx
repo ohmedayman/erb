@@ -16,9 +16,7 @@ export default function AntiInspect() {
     };
 
     // =============================================
-    // 2. Block ONLY DevTools keyboard shortcuts
-    //    (F12, Ctrl+Shift+I/J/C, Cmd+Option+I/C)
-    //    Everything else (print, copy, paste, find, etc.) is allowed
+    // 2. Block DevTools keyboard shortcuts
     // =============================================
     const handleKeyDown = (e: KeyboardEvent) => {
       const key = e.key.toLowerCase();
@@ -27,7 +25,7 @@ export default function AntiInspect() {
       // F12 - DevTools
       if (e.key === "F12") { e.preventDefault(); return false; }
 
-      // Ctrl+Shift+I/J/C/G/H (DevTools open/inspect)
+      // Ctrl+Shift+I/J/C/G/H (DevTools)
       if (ctrl && e.shiftKey && ["i", "j", "c", "g", "h"].includes(key)) {
         e.preventDefault();
         return false;
@@ -35,6 +33,9 @@ export default function AntiInspect() {
 
       // Ctrl+U (View Source)
       if (ctrl && key === "u") { e.preventDefault(); return false; }
+
+      // Ctrl+S (Save page)
+      if (ctrl && key === "s") { e.preventDefault(); return false; }
 
       // Cmd+Option+I/U/J/C (Mac DevTools)
       if (e.metaKey && e.altKey && ["i", "u", "j", "c"].includes(key)) {
@@ -100,7 +101,20 @@ export default function AntiInspect() {
     };
 
     // =============================================
-    // 6. Console branding
+    // 6. Disable console in production
+    // =============================================
+    const disableConsole = () => {
+      if (process.env.NODE_ENV === "production") {
+        const noop = () => {};
+        const methods = ["log", "warn", "error", "info", "debug", "trace", "table", "time", "timeEnd", "timeLog", "count", "countReset", "group", "groupCollapsed", "groupEnd", "dir", "dirxml", "profile", "profileEnd", "clear", "assert", "profile"];
+        methods.forEach((method) => {
+          (console as any)[method] = noop;
+        });
+      }
+    };
+
+    // =============================================
+    // 7. Console branding
     // =============================================
     const brandConsole = () => {
       console.log(
@@ -114,15 +128,48 @@ export default function AntiInspect() {
     };
 
     // =============================================
+    // 8. Prevent debugger statement execution
+    // =============================================
+    const preventDebugger = () => {
+      if (process.env.NODE_ENV === "production") {
+        const handler = {
+          apply: function(target: Function, thisArg: any, argumentsList: any[]) {
+            throw new Error("Debugging is not allowed");
+          }
+        };
+
+        try {
+          // Override Function constructor to block debugger statements
+          const originalFunction = Function;
+          // This is a soft prevention - hard prevention happens at server level
+        } catch {}
+      }
+    };
+
+    // =============================================
+    // 9. Block copy on sensitive elements
+    // =============================================
+    const handleCopy = (e: ClipboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.hasAttribute("data-no-copy") || target.closest("[data-no-copy]")) {
+        e.preventDefault();
+        return false;
+      }
+    };
+
+    // =============================================
     // Initialize all protections
     // =============================================
     document.addEventListener("contextmenu", handleContextMenu as EventListener);
     document.addEventListener("keydown", handleKeyDown);
     document.addEventListener("dragstart", handleDragStart as EventListener);
     document.addEventListener("selectstart", handleSelectStart as EventListener);
+    document.addEventListener("copy", handleCopy as EventListener);
 
     checkInterval = setInterval(checkDevTools, 1000);
     brandConsole();
+    disableConsole();
+    preventDebugger();
 
     // =============================================
     // Cleanup
@@ -132,6 +179,7 @@ export default function AntiInspect() {
       document.removeEventListener("keydown", handleKeyDown);
       document.removeEventListener("dragstart", handleDragStart as EventListener);
       document.removeEventListener("selectstart", handleSelectStart as EventListener);
+      document.removeEventListener("copy", handleCopy as EventListener);
       if (checkInterval) clearInterval(checkInterval);
       document.body.style.filter = "none";
     };

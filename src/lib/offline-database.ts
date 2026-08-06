@@ -14,6 +14,32 @@ export function generateId(): string {
   return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
 }
 
+// Convert camelCase keys to snake_case for Supabase columns
+function toSnakeCase(obj: any): any {
+  if (!obj || typeof obj !== "object") return obj;
+  if (Array.isArray(obj)) return obj.map(toSnakeCase);
+
+  const result: any = {};
+  for (const [key, value] of Object.entries(obj)) {
+    const snakeKey = key.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+    result[snakeKey] = value;
+  }
+  return result;
+}
+
+// Convert snake_case keys to camelCase for UI display
+function toCamelCase(obj: any): any {
+  if (!obj || typeof obj !== "object") return obj;
+  if (Array.isArray(obj)) return obj.map(toCamelCase);
+
+  const result: any = {};
+  for (const [key, value] of Object.entries(obj)) {
+    const camelKey = key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
+    result[camelKey] = value;
+  }
+  return result;
+}
+
 export async function getDocs(
   collectionName: string,
   filters?: { field: string; op: string; value: any }[],
@@ -43,12 +69,15 @@ export async function getDocs(
       const { data, error } = await query.order("created_at", { ascending: false });
       if (error) throw error;
 
-      if (data && data.length > 0) {
+      // Convert snake_case columns to camelCase for UI
+      const converted = (data || []).map(toCamelCase);
+
+      if (converted && converted.length > 0) {
         const { putManyToIDB } = await import("@/lib/offline-db");
-        await putManyToIDB(collectionName as any, data);
+        await putManyToIDB(collectionName as any, converted);
       }
 
-      return data || [];
+      return converted;
     } catch {
       return await getAllFromIDB(collectionName as any);
     }
@@ -98,7 +127,9 @@ export async function getDoc(collectionName: string, id: string): Promise<any | 
       if (error) throw error;
 
       if (data) {
-        await putToIDB(collectionName as any, data);
+        const converted = toCamelCase(data);
+        await putToIDB(collectionName as any, converted);
+        return converted;
       }
 
       return data;
@@ -124,7 +155,9 @@ export async function addDoc(collectionName: string, data: any): Promise<any> {
 
   if (isOnline()) {
     try {
-      const { error } = await supabase.from(collectionName).insert(doc);
+      // Convert camelCase to snake_case for Supabase columns
+      const supabaseDoc = toSnakeCase(doc);
+      const { error } = await supabase.from(collectionName).insert(supabaseDoc);
       if (error) throw error;
       return doc;
     } catch {
@@ -163,9 +196,11 @@ export async function updateDoc(
 
   if (isOnline()) {
     try {
+      // Convert camelCase to snake_case for Supabase columns
+      const supabaseData = toSnakeCase(updateData);
       const { error } = await supabase
         .from(collectionName)
-        .update(updateData)
+        .update(supabaseData)
         .eq("id", id);
       if (error) throw error;
       return;

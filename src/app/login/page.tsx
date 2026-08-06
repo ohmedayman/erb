@@ -99,6 +99,12 @@ export default function LoginPage() {
       }));
       localStorage.setItem("isLoggedIn", "true");
 
+      // Admin goes straight to admin panel — no extra queries
+      if (isAdmin) {
+        router.push("/admin");
+        return;
+      }
+
       // Track login activity (non-blocking)
       trackUserActivity({
         userId: data.user.id,
@@ -107,7 +113,7 @@ export default function LoginPage() {
         eventType: "login",
       }).catch(() => {});
 
-      // Check subscription status FIRST (for everyone, including admin emails)
+      // Check subscription status for regular users
       let orders: any[] | null = null;
       try {
         const res = await supabase

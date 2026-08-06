@@ -97,18 +97,58 @@ const testimonials = [
   { name: "محمد حسن", role: "صاحب سوبر ماركت", company: "سوبر ماركت هاني", rating: 5, text: "أكتر حاجة عجبتني إن التقارير بتاعته واضحة وبتبينلي إيه اللي بيتباع وإيه اللي واقف. بقى عندي رؤية كاملة على الشغل." },
 ];
 
-const pricingPlan = {
-  name: "StockFlow Pro",
-  monthlyPrice: "250",
-  yearlyPrice: "3,000",
-  desc: "الباقة الكاملة لإدارة مخزنك — كل اللي محتاجه في مكان واحد",
-  features: [
-    "مخازن غير محدودة", "منتجات غير محدودة", "أوردرات غير محدودة",
-    "فاتور وإيصالات احترافية", "نقطة بيع (POS)", "إدارة الزبائن والموردين",
-    "تقارير أرباح وخسائر", "إدارة الموظفين والرواتب", "حسابات تكاليف الشحن",
-    "Installments (أقساط)", "طباعة باركود", "تصدير تقارير PDF", "دعم فني على مدار الساعة",
-  ],
-};
+const pricingPlans = [
+  {
+    id: "starter",
+    name: "StockFlow Starter",
+    price: "3,000",
+    monthly: "500",
+    upfront: "1,500",
+    installment: "500 × 3",
+    desc: "ابدأ بإدارة متجرك بالمميزات الأساسية",
+    badge: "الأساسية",
+    color: "from-blue-500 to-blue-600",
+    borderColor: "border-blue-200",
+    features: [
+      "منتجات غير محدودة", "فواتير وأوردرات", "زبائن وموردين", "تقارير وتحليلات",
+    ],
+  },
+  {
+    id: "growth",
+    name: "StockFlow Growth",
+    price: "6,000",
+    monthly: "1,000",
+    upfront: "3,000",
+    installment: "1,000 × 3",
+    desc: "مميزات متقدمة لإدارة أعمالك بكفاءة",
+    badge: "الأكثر طلباً",
+    color: "from-orange-500 to-orange-600",
+    borderColor: "border-orange-500",
+    features: [
+      "منتجات غير محدودة", "فواتير وأوردرات", "زبائن وموردين", "تقارير وتحليلات",
+      "المصروفات والقيود", "إدارة الموظفين", "المستودعات", "حركات المخزون",
+      "إشعارات فورية", "إدارة الموردين",
+    ],
+  },
+  {
+    id: "enterprise",
+    name: "StockFlow Enterprise",
+    price: "9,000",
+    monthly: "1,500",
+    upfront: "4,500",
+    installment: "1,500 × 3",
+    desc: "كل المميزات بدون حدود",
+    badge: "المتقدمة",
+    color: "from-purple-500 to-purple-600",
+    borderColor: "border-purple-200",
+    features: [
+      "منتجات غير محدودة", "فواتير وأوردرات", "زبائن وموردين", "تقارير وتحليلات",
+      "المصروفات والقيود", "إدارة الموظفين", "المستودعات", "حركات المخزون",
+      "إشعارات فورية", "إدارة الموردين", "تحليلات متقدمة", "الأقساط والحسابات",
+      "تقييمات العملاء", "إدارة الفريق",
+    ],
+  },
+];
 
 const moreFeatures = [
   { icon: Shield, title: "حماية وأمان", desc: "بياناتك في أمان تام مع تشفير كامل" },
@@ -571,79 +611,71 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto">
           <AnimateOnScroll className="text-center max-w-2xl mx-auto mb-16">
             <div className="inline-flex items-center gap-2 bg-orange-50 text-orange-600 px-4 py-2 rounded-full text-sm font-semibold mb-4 border border-orange-100">
-              <CreditCard className="w-4 h-4" /> سعر واحد بسيط
+              <CreditCard className="w-4 h-4" /> باقات مرنة لكل احتياج
             </div>
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">خطة واحدة — كل اللي محتاجه</h2>
-            <p className="mt-4 text-lg text-gray-500">ادفع سنوي ووفر — السعر الشهري أقل بكتير</p>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">اختار الباقة المناسبة ليك</h2>
+            <p className="mt-4 text-lg text-gray-500">3 باقات بأسعار مصرية — ادفع مقدم وقسط الباقي</p>
           </AnimateOnScroll>
 
-          <AnimateOnScroll className="max-w-2xl mx-auto">
-            <div className="rounded-3xl border-2 border-orange-500 bg-white shadow-2xl shadow-orange-500/10 relative overflow-hidden">
-              <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-orange-500 to-orange-600 py-2.5 text-center">
-                <span className="text-white text-sm font-bold">الباقة الشاملة</span>
-              </div>
-              <div className="pt-14 px-8 pb-8">
-                <h3 className="text-2xl font-bold text-gray-900">{pricingPlan.name}</h3>
-                <p className="text-sm text-gray-500 mt-1">{pricingPlan.desc}</p>
-                <div className="mt-6 bg-orange-50 rounded-2xl p-6 border border-orange-100">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-sm font-medium text-orange-700">الاشتراك السنوي</span>
-                    <span className="bg-green-100 text-green-700 text-xs font-bold px-2.5 py-1 rounded-full">وفّر 250 ج.م</span>
-                  </div>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-5xl font-bold text-gray-900">{pricingPlan.yearlyPrice}</span>
-                    <span className="text-lg text-gray-500 font-medium">ج.م / سنة</span>
-                  </div>
-                  <p className="text-sm text-orange-600 mt-2 font-medium">= {pricingPlan.monthlyPrice} ج.م / شهرياً</p>
-                </div>
-                <div className="mt-4 bg-gray-50 rounded-xl p-4 border border-gray-200">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="text-sm font-medium text-gray-700">الاشتراك الشهري</span>
-                      <p className="text-xs text-gray-500 mt-0.5">ادفع كل شهر</p>
+          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            {pricingPlans.map((plan, i) => (
+              <AnimateOnScroll key={plan.id} delay={i * 0.15}>
+                <div className={`rounded-3xl border-2 ${plan.borderColor} bg-white shadow-xl relative overflow-hidden h-full flex flex-col ${plan.id === "growth" ? "ring-2 ring-orange-500/20 shadow-orange-500/10 scale-[1.02]" : ""}`}>
+                  {plan.badge && (
+                    <div className={`absolute top-0 left-0 right-0 bg-gradient-to-r ${plan.color} py-2.5 text-center`}>
+                      <span className="text-white text-sm font-bold">{plan.badge}</span>
                     </div>
-                    <div className="text-left">
-                      <span className="text-2xl font-bold text-gray-900">500</span>
-                      <span className="text-sm text-gray-500 font-medium"> ج.م/شهر</span>
+                  )}
+                  <div className={`pt-14 px-6 pb-6 flex flex-col flex-1`}>
+                    <h3 className="text-xl font-bold text-gray-900">{plan.name}</h3>
+                    <p className="text-sm text-gray-500 mt-1 mb-4">{plan.desc}</p>
+
+                    <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100 mb-4">
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-4xl font-bold text-gray-900">{plan.price}</span>
+                        <span className="text-sm text-gray-500 font-medium">ج.م / سنة</span>
+                      </div>
+                      <p className="text-xs text-gray-400 mt-1">= {plan.monthly} ج.م / شهرياً</p>
                     </div>
+
+                    <div className="bg-gray-50 rounded-xl p-3 border border-gray-200 mb-4 text-sm space-y-1">
+                      <div className="flex justify-between"><span className="text-gray-500">المقدم</span><span className="font-bold text-gray-900">{plan.upfront} ج.م</span></div>
+                      <div className="flex justify-between"><span className="text-gray-500">القسط الشهري</span><span className="text-gray-700">{plan.installment}</span></div>
+                    </div>
+
+                    <div className="flex-1">
+                      <h4 className="text-xs font-bold text-gray-900 mb-3 uppercase tracking-wide">الباقة تشمل:</h4>
+                      <ul className="space-y-2">
+                        {plan.features.map((f, j) => (
+                          <li key={j} className="flex items-center gap-2 text-sm text-gray-600">
+                            <CheckCircle className="w-3.5 h-3.5 text-green-500 shrink-0" /> {f}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <Link href="/signup" className={`mt-6 block text-center py-3.5 rounded-2xl font-bold bg-gradient-to-r ${plan.color} text-white hover:opacity-90 shadow-lg transition-all`}>
+                      ابدأ الآن
+                    </Link>
                   </div>
                 </div>
-                <div className="mt-8">
-                  <h4 className="text-sm font-bold text-gray-900 mb-4">الباقة تشمل:</h4>
-                  <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {pricingPlan.features.map((f, j) => (
-                      <li key={j} className="flex items-center gap-2.5 text-sm text-gray-600">
-                        <CheckCircle className="w-4 h-4 text-orange-500 shrink-0" /> {f}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <Link href="/signup" className="mt-8 block text-center py-4 rounded-2xl font-bold text-lg bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:from-orange-600 hover:to-orange-700 shadow-lg shadow-orange-500/25 transition-all">
-                  ابدأ الآن — مجاناً
-                </Link>
-                <p className="text-center text-xs text-gray-400 mt-3">تجربة مجانية 14 يوم — بدون بطاقة ائتمان</p>
-              </div>
-            </div>
-          </AnimateOnScroll>
+              </AnimateOnScroll>
+            ))}
+          </div>
 
           <AnimateOnScroll className="mt-16 max-w-3xl mx-auto">
-            <h3 className="text-xl font-bold text-gray-900 text-center mb-8">ليه الاشتراك السنوي أحسن؟</h3>
             <div className="grid sm:grid-cols-3 gap-6">
               {[
-                { old: "500 ج.م/شهر", neww: "250 ج.م/شهر", title: "وفّر 250 جنيه كل شهر" },
-                { old: "6,000 ج.م/سنة", neww: "3,000 ج.م/سنة", title: "وفّر 3,000 جنيه في السنة" },
-                { old: "كل شهر", neww: "مرة واحدة", title: "ادفع مرة واحدة وارتاح" },
+                { icon: Shield, title: "دفع آمن", desc: "دفع مؤمن عبر فودافون كاش أو فوري" },
+                { icon: Clock, title: "تأكيد سريع", desc: "هنتواصل معاك خلال 24 ساعة" },
+                { icon: Zap, title: "دخول فوري", desc: "ابدأ شغل بعد التأكيد مباشرة" },
               ].map((item, i) => (
                 <div key={i} className="bg-white rounded-2xl p-6 border border-gray-200 text-center hover-lift">
                   <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mx-auto mb-3">
-                    <CheckCircle className="w-6 h-6 text-orange-500" />
+                    <item.icon className="w-6 h-6 text-orange-500" />
                   </div>
-                  <h4 className="font-bold text-gray-900 mb-2">{item.title}</h4>
-                  <p className="text-sm text-gray-500">
-                    <span className="line-through text-gray-400">{item.old}</span>
-                    {" → "}
-                    <span className="text-orange-600 font-bold">{item.neww}</span>
-                  </p>
+                  <h4 className="font-bold text-gray-900 mb-1">{item.title}</h4>
+                  <p className="text-sm text-gray-500">{item.desc}</p>
                 </div>
               ))}
             </div>

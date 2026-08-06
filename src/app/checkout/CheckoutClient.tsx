@@ -46,7 +46,7 @@ const PLANS = [
     maxProducts: 100,
     maxCustomers: 50,
     maxOrders: 100,
-    maxFeatures: 4,
+    maxFeatures: 7,
     color: "from-blue-500 to-blue-600",
     badge: "الأساسية",
     description: "100 منتج — 50 زبون — 100 أوردر شهرياً",

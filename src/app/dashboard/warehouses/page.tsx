@@ -11,6 +11,13 @@ import {
   User,
 } from "lucide-react";
 import { getDocsFromCollection, addDocToCollection, updateDocInCollection, deleteDocFromCollection } from "@/lib/localdb";
+import { toast } from "@/components/Toast";
+import { exportToExcel } from "@/lib/excel";
+import { Download } from "lucide-react";
+
+const Skeleton = ({ className }: { className?: string }) => (
+  <div className={`animate-pulse bg-muted rounded ${className}`} />
+);
 
 export default function WarehousesPage() {
   const [warehouses, setWarehouses] = useState<any[]>([]);
@@ -51,32 +58,47 @@ export default function WarehousesPage() {
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
-    const user = JSON.parse(localStorage.getItem("user") || "{}");
-    await addDocToCollection("warehouses", { ...newWarehouse, capacity: parseInt(newWarehouse.capacity) || 0, storeId: user.storeId });
-    setShowModal(false);
-    setNewWarehouse({
-      name: "",
-      code: "",
-      address: "",
-      city: "",
-      capacity: "",
-      manager: "",
-      phone: "",
-    });
-    fetchWarehouses();
+    try {
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      await addDocToCollection("warehouses", { ...newWarehouse, capacity: parseInt(newWarehouse.capacity) || 0, storeId: user.storeId });
+      setShowModal(false);
+      setNewWarehouse({
+        name: "",
+        code: "",
+        address: "",
+        city: "",
+        capacity: "",
+        manager: "",
+        phone: "",
+      });
+      fetchWarehouses();
+      toast.success("تم إضافة المستودع بنجاح");
+    } catch {
+      toast.error("فيه مشكلة حصلت");
+    }
   };
 
   const handleEdit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await updateDocInCollection("warehouses", editingWarehouse.id, { ...editingWarehouse, capacity: parseInt(editingWarehouse.capacity) || 0 });
-    setEditingWarehouse(null);
-    fetchWarehouses();
+    try {
+      await updateDocInCollection("warehouses", editingWarehouse.id, { ...editingWarehouse, capacity: parseInt(editingWarehouse.capacity) || 0 });
+      setEditingWarehouse(null);
+      fetchWarehouses();
+      toast.success("تم تحديث المستودع بنجاح");
+    } catch {
+      toast.error("فيه مشكلة حصلت");
+    }
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm("متأكد من حذف المستودع ده؟")) return;
-    await deleteDocFromCollection("warehouses", id);
-    fetchWarehouses();
+    try {
+      await deleteDocFromCollection("warehouses", id);
+      fetchWarehouses();
+      toast.success("تم حذف المستودع");
+    } catch {
+      toast.error("فيه مشكلة حصلت");
+    }
   };
 
   const openModal = (warehouse?: any) => {

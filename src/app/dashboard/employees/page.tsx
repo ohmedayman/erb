@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { getDocsFromCollection, addDocToCollection } from "@/lib/localdb";
 import { exportToExcel } from "@/lib/excel";
+import { toast } from "@/components/Toast";
 import ExcelImport from "@/components/ExcelImport";
 
 const Skeleton = ({ className }: { className?: string }) => (
@@ -81,22 +82,27 @@ export default function EmployeesPage() {
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
-    const user = JSON.parse(localStorage.getItem("user") || "{}");
-    await addDocToCollection("employees", { ...newEmployee, storeId: user.storeId });
-    setShowModal(false);
-    setNewEmployee({
-      name: "",
-      email: "",
-      phone: "",
-      position: "",
-      department: "",
-      salary: "",
-      hireDate: new Date().toISOString().split("T")[0],
-      status: "active",
-      bankAccount: "",
-      nationalId: "",
-    });
-    fetchEmployees();
+    try {
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      await addDocToCollection("employees", { ...newEmployee, storeId: user.storeId });
+      setShowModal(false);
+      setNewEmployee({
+        name: "",
+        email: "",
+        phone: "",
+        position: "",
+        department: "",
+        salary: "",
+        hireDate: new Date().toISOString().split("T")[0],
+        status: "active",
+        bankAccount: "",
+        nationalId: "",
+      });
+      fetchEmployees();
+      toast.success("تم إضافة الموظف بنجاح");
+    } catch {
+      toast.error("فيه مشكلة حصلت");
+    }
   };
 
   const formatCurrency = (amount: number) => {

@@ -187,7 +187,7 @@ export default function AdminOrdersPage() {
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pr-10 pl-4 py-2.5 rounded-xl border border-border bg-white text-foreground text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
+            className="w-full pr-10 pl-4 py-2.5 rounded-xl border border-border bg-card text-foreground text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
             placeholder="دور بالاسم، الإيميل، أو رقم العملية..."
           />
         </div>
@@ -380,7 +380,7 @@ export default function AdminOrdersPage() {
                   <textarea
                     value={adminNote}
                     onChange={(e) => setAdminNote(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-border bg-white text-foreground text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
+                    className="w-full px-4 py-3 rounded-xl border border-border bg-card text-foreground text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
                     rows={3}
                     placeholder="اضف ملاحظة (اختياري)..."
                   />

@@ -448,7 +448,7 @@ export default function ExpensesPage() {
                   onChange={(e) =>
                     setNewExpense({ ...newExpense, description: e.target.value })
                   }
-                  className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
                   required
                 />
               </div>
@@ -466,7 +466,7 @@ export default function ExpensesPage() {
                     onChange={(e) =>
                       setNewExpense({ ...newExpense, amount: e.target.value })
                     }
-                    className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
                     required
                   />
                 </div>
@@ -479,7 +479,7 @@ export default function ExpensesPage() {
                     onChange={(e) =>
                       setNewExpense({ ...newExpense, category: e.target.value })
                     }
-                    className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
                   >
                     <option value="rent">إيجار</option>
                     <option value="utilities">مرافق</option>
@@ -504,7 +504,7 @@ export default function ExpensesPage() {
                         paymentMethod: e.target.value,
                       })
                     }
-                    className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
                   >
                     <option value="cash">كاش</option>
                     <option value="card">كارت</option>
@@ -521,7 +521,7 @@ export default function ExpensesPage() {
                     onChange={(e) =>
                       setNewExpense({ ...newExpense, date: e.target.value })
                     }
-                    className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
                     required
                   />
                 </div>
@@ -540,7 +540,7 @@ export default function ExpensesPage() {
                       receiptNumber: e.target.value,
                     })
                   }
-                  className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
                 />
               </div>
 
@@ -554,7 +554,7 @@ export default function ExpensesPage() {
                     setNewExpense({ ...newExpense, notes: e.target.value })
                   }
                   rows={3}
-                  className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
+                  className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
                 />
               </div>
 

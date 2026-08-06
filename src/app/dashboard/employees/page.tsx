@@ -354,7 +354,7 @@ export default function EmployeesPage() {
                   onChange={(e) =>
                     setNewEmployee({ ...newEmployee, name: e.target.value })
                   }
-                  className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
                   required
                 />
               </div>
@@ -370,7 +370,7 @@ export default function EmployeesPage() {
                     onChange={(e) =>
                       setNewEmployee({ ...newEmployee, email: e.target.value })
                     }
-                    className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
                   />
                 </div>
                 <div>
@@ -383,7 +383,7 @@ export default function EmployeesPage() {
                     onChange={(e) =>
                       setNewEmployee({ ...newEmployee, phone: e.target.value })
                     }
-                    className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
                   />
                 </div>
               </div>
@@ -402,7 +402,7 @@ export default function EmployeesPage() {
                         position: e.target.value,
                       })
                     }
-                    className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
                     required
                   />
                 </div>
@@ -419,7 +419,7 @@ export default function EmployeesPage() {
                         department: e.target.value,
                       })
                     }
-                    className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
                     required
                   />
                 </div>
@@ -438,7 +438,7 @@ export default function EmployeesPage() {
                     onChange={(e) =>
                       setNewEmployee({ ...newEmployee, salary: e.target.value })
                     }
-                    className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
                     required
                   />
                 </div>
@@ -455,7 +455,7 @@ export default function EmployeesPage() {
                         hireDate: e.target.value,
                       })
                     }
-                    className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
                     required
                   />
                 </div>
@@ -470,7 +470,7 @@ export default function EmployeesPage() {
                   onChange={(e) =>
                     setNewEmployee({ ...newEmployee, status: e.target.value })
                   }
-                  className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
                 >
                   <option value="active">نشط</option>
                   <option value="on-leave">إجازة</option>
@@ -492,7 +492,7 @@ export default function EmployeesPage() {
                         bankAccount: e.target.value,
                       })
                     }
-                    className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
                   />
                 </div>
                 <div>
@@ -508,7 +508,7 @@ export default function EmployeesPage() {
                         nationalId: e.target.value,
                       })
                     }
-                    className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
                   />
                 </div>
               </div>

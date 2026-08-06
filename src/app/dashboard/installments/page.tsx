@@ -343,7 +343,7 @@ export default function InstallmentsPage() {
                         invoiceNumber: e.target.value,
                       })
                     }
-                    className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
                     required
                   />
                 </div>
@@ -360,7 +360,7 @@ export default function InstallmentsPage() {
                         invoiceId: e.target.value,
                       })
                     }
-                    className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
                     required
                   />
                 </div>
@@ -379,7 +379,7 @@ export default function InstallmentsPage() {
                       customerName: e.target.value,
                     })
                   }
-                  className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
                   required
                 />
               </div>
@@ -400,7 +400,7 @@ export default function InstallmentsPage() {
                         totalAmount: e.target.value,
                       })
                     }
-                    className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
                     required
                   />
                 </div>
@@ -418,7 +418,7 @@ export default function InstallmentsPage() {
                         numberOfInstallments: e.target.value,
                       })
                     }
-                    className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
                     required
                   />
                 </div>
@@ -438,7 +438,7 @@ export default function InstallmentsPage() {
                         startDate: e.target.value,
                       })
                     }
-                    className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
                     required
                   />
                 </div>
@@ -454,7 +454,7 @@ export default function InstallmentsPage() {
                         status: e.target.value,
                       })
                     }
-                    className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
                   >
                     <option value="active">قيد السداد</option>
                     <option value="completed">مكتمل</option>
@@ -476,7 +476,7 @@ export default function InstallmentsPage() {
                     })
                   }
                   rows={3}
-                  className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
+                  className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
                 />
               </div>
 

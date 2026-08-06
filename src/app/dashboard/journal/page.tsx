@@ -300,7 +300,7 @@ export default function JournalPage() {
                     onChange={(e) =>
                       setNewEntry({ ...newEntry, date: e.target.value })
                     }
-                    className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
                     required
                   />
                 </div>
@@ -317,7 +317,7 @@ export default function JournalPage() {
                         description: e.target.value,
                       })
                     }
-                    className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
                     required
                   />
                 </div>
@@ -353,7 +353,7 @@ export default function JournalPage() {
                         onChange={(e) =>
                           updateLine(index, "accountCode", e.target.value)
                         }
-                        className="w-full px-3 py-2 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
+                        className="w-full px-3 py-2 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
                         required
                       >
                         <option value="">اختر حساب</option>
@@ -379,7 +379,7 @@ export default function JournalPage() {
                         onChange={(e) =>
                           updateLine(index, "debit", e.target.value)
                         }
-                        className="w-full px-3 py-2 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
+                        className="w-full px-3 py-2 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
                       />
                     </div>
                     <div className="col-span-3">
@@ -397,7 +397,7 @@ export default function JournalPage() {
                         onChange={(e) =>
                           updateLine(index, "credit", e.target.value)
                         }
-                        className="w-full px-3 py-2 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
+                        className="w-full px-3 py-2 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
                       />
                     </div>
                     <div className="col-span-2 flex justify-center">

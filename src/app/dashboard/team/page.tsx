@@ -115,15 +115,15 @@ export default function TeamPage() {
             <form onSubmit={handleAdd} className="p-6 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1.5">الاسم</label>
-                <input type="text" value={newMember.name} onChange={(e) => setNewMember({ ...newMember, name: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" required />
+                <input type="text" value={newMember.name} onChange={(e) => setNewMember({ ...newMember, name: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" required />
               </div>
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1.5">البريد الإلكتروني</label>
-                <input type="email" value={newMember.email} onChange={(e) => setNewMember({ ...newMember, email: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" required />
+                <input type="email" value={newMember.email} onChange={(e) => setNewMember({ ...newMember, email: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" required />
               </div>
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1.5">الدور</label>
-                <select value={newMember.role} onChange={(e) => setNewMember({ ...newMember, role: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50">
+                <select value={newMember.role} onChange={(e) => setNewMember({ ...newMember, role: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50">
                   <option value="Staff">موظف</option><option value="Manager">مدير قسم</option><option value="Admin">مدير</option>
                 </select>
               </div>

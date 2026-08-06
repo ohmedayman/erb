@@ -238,7 +238,7 @@ export default function LoyaltyPage() {
                     step="0.5"
                     value={settings.cashbackRate}
                     onChange={(e) => setSettings({ ...settings, cashbackRate: parseFloat(e.target.value) || 0 })}
-                    className="w-full pl-8 pr-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    className="w-full pl-8 pr-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
                   />
                   <Percent className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 </div>
@@ -255,7 +255,7 @@ export default function LoyaltyPage() {
                   min="0"
                   value={settings.minPurchase}
                   onChange={(e) => setSettings({ ...settings, minPurchase: parseFloat(e.target.value) || 0 })}
-                  className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
                 />
                 <p className="text-xs text-muted-foreground mt-1">الفواتير الأقل من هذا المبلغ لا تحصل على كاش باك</p>
               </div>
@@ -301,7 +301,7 @@ export default function LoyaltyPage() {
                   min="1"
                   value={settings.pointsRate}
                   onChange={(e) => setSettings({ ...settings, pointsRate: parseInt(e.target.value) || 10 })}
-                  className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
                 />
                 <p className="text-xs text-muted-foreground mt-1">
                   مثال: 1 نقطة كل {settings.pointsRate} ج.م — فاتورة 1000 ج.م = {Math.floor(1000 / settings.pointsRate)} نقطة
@@ -317,7 +317,7 @@ export default function LoyaltyPage() {
                   step="0.01"
                   value={settings.pointsValue}
                   onChange={(e) => setSettings({ ...settings, pointsValue: parseFloat(e.target.value) || 0.10 })}
-                  className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
                 />
                 <p className="text-xs text-muted-foreground mt-1">
                   100 نقطة × {settings.pointsValue} ج.م = {(100 * settings.pointsValue).toFixed(2)} ج.م خصم
@@ -333,7 +333,7 @@ export default function LoyaltyPage() {
                 min="0"
                 value={settings.welcomeBonus}
                 onChange={(e) => setSettings({ ...settings, welcomeBonus: parseInt(e.target.value) || 0 })}
-                className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
+                className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
               />
               <p className="text-xs text-muted-foreground mt-1">نقاط مجانية عند تسجيل الزبون</p>
             </div>
@@ -366,7 +366,7 @@ export default function LoyaltyPage() {
                   ...settings,
                   tierThresholds: { ...settings.tierThresholds, silver: parseInt(e.target.value) || 5000 }
                 })}
-                className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
+                className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
               />
             </div>
             <div>
@@ -379,7 +379,7 @@ export default function LoyaltyPage() {
                   ...settings,
                   tierThresholds: { ...settings.tierThresholds, gold: parseInt(e.target.value) || 15000 }
                 })}
-                className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
+                className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
               />
             </div>
             <div>
@@ -392,7 +392,7 @@ export default function LoyaltyPage() {
                   ...settings,
                   tierThresholds: { ...settings.tierThresholds, platinum: parseInt(e.target.value) || 30000 }
                 })}
-                className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
+                className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
               />
             </div>
           </div>

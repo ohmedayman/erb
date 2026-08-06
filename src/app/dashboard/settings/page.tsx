@@ -149,22 +149,22 @@ export default function SettingsPage() {
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div className="sm:col-span-2">
                     <label className="block text-sm font-medium text-foreground mb-1.5">اسم المحل</label>
-                    <input type="text" value={storeData?.name || ""} onChange={(e) => updateField("name", e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" />
+                    <input type="text" value={storeData?.name || ""} onChange={(e) => updateField("name", e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" />
                   </div>
                   <div className="sm:col-span-2">
                     <label className="block text-sm font-medium text-foreground mb-1.5">الوصف</label>
-                    <textarea value={storeData?.description || ""} onChange={(e) => updateField("description", e.target.value)} rows={3} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none" />
+                    <textarea value={storeData?.description || ""} onChange={(e) => updateField("description", e.target.value)} rows={3} className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-1.5">الموقع الإلكتروني</label>
                     <div className="relative">
                       <Globe className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <input type="url" value={storeData?.website || ""} onChange={(e) => updateField("website", e.target.value)} className="w-full pr-10 pl-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="https://mystore.com" />
+                      <input type="url" value={storeData?.website || ""} onChange={(e) => updateField("website", e.target.value)} className="w-full pr-10 pl-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="https://mystore.com" />
                     </div>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-1.5">الصنف</label>
-                    <select value={storeData?.category || "Electronics"} onChange={(e) => updateField("category", e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50">
+                    <select value={storeData?.category || "Electronics"} onChange={(e) => updateField("category", e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50">
                       <option>إلكترونيات</option><option>أثاث</option><option>ملابس</option><option>أغذية ومشروبات</option><option>صناعي</option><option>أخرى</option>
                     </select>
                   </div>
@@ -182,20 +182,20 @@ export default function SettingsPage() {
               <div className="p-6 space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-1.5">الاسم الكامل</label>
-                  <input type="text" value={storeData?.ownerName || ""} onChange={(e) => updateField("ownerName", e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" />
+                  <input type="text" value={storeData?.ownerName || ""} onChange={(e) => updateField("ownerName", e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-1.5">البريد الإلكتروني</label>
                   <div className="relative">
                     <Mail className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <input type="email" value={storeData?.ownerEmail || ""} onChange={(e) => updateField("ownerEmail", e.target.value)} className="w-full pr-10 pl-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" />
+                    <input type="email" value={storeData?.ownerEmail || ""} onChange={(e) => updateField("ownerEmail", e.target.value)} className="w-full pr-10 pl-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" />
                   </div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-1.5">رقم الهاتف</label>
                   <div className="relative">
                     <Phone className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <input type="tel" value={storeData?.ownerPhone || ""} onChange={(e) => updateField("ownerPhone", e.target.value)} className="w-full pr-10 pl-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="010 1234 5678" />
+                    <input type="tel" value={storeData?.ownerPhone || ""} onChange={(e) => updateField("ownerPhone", e.target.value)} className="w-full pr-10 pl-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="010 1234 5678" />
                   </div>
                 </div>
               </div>
@@ -211,26 +211,26 @@ export default function SettingsPage() {
               <div className="p-6 space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-1.5">العنوان</label>
-                  <input type="text" value={storeData?.address || ""} onChange={(e) => updateField("address", e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="شارع التحرير" />
+                  <input type="text" value={storeData?.address || ""} onChange={(e) => updateField("address", e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="شارع التحرير" />
                 </div>
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-1.5">المدينة</label>
-                    <input type="text" value={storeData?.city || ""} onChange={(e) => updateField("city", e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" />
+                    <input type="text" value={storeData?.city || ""} onChange={(e) => updateField("city", e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-1.5">المنطقة</label>
-                    <input type="text" value={storeData?.state || ""} onChange={(e) => updateField("state", e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" />
+                    <input type="text" value={storeData?.state || ""} onChange={(e) => updateField("state", e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" />
                   </div>
                 </div>
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-1.5">الرمز البريدي</label>
-                    <input type="text" value={storeData?.zipCode || ""} onChange={(e) => updateField("zipCode", e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" />
+                    <input type="text" value={storeData?.zipCode || ""} onChange={(e) => updateField("zipCode", e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-1.5">الدولة</label>
-                    <select value={storeData?.country || ""} onChange={(e) => updateField("country", e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50">
+                    <select value={storeData?.country || ""} onChange={(e) => updateField("country", e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50">
                       <option>مصر</option><option>المملكة العربية السعودية</option><option>الإمارات</option><option>الولايات المتحدة</option><option>المملكة المتحدة</option><option>كندا</option><option>ألمانيا</option><option>فرنسا</option>
                     </select>
                   </div>
@@ -249,14 +249,14 @@ export default function SettingsPage() {
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-1.5">العملة</label>
-                    <select value={storeData?.currency || "EGP"} onChange={(e) => updateField("currency", e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50">
+                    <select value={storeData?.currency || "EGP"} onChange={(e) => updateField("currency", e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50">
                       <option value="EGP">EGP - جنيه مصري</option><option value="SAR">SAR - ريال سعودي</option><option value="AED">AED - درهم إماراتي</option><option value="USD">USD - دولار أمريكي</option><option value="EUR">EUR - يورو</option><option value="GBP">GBP - جنيه إسترليني</option>
                     </select>
                   </div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-1.5">المنطقة الزمنية</label>
-                  <select value={storeData?.timezone || "Africa/Cairo"} onChange={(e) => updateField("timezone", e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50">
+                  <select value={storeData?.timezone || "Africa/Cairo"} onChange={(e) => updateField("timezone", e.target.value)} className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50">
                     <option value="Africa/Cairo">القاهرة (GMT+2)</option><option value="Asia/Riyadh">الرياض (GMT+3)</option><option value="Asia/Dubai">دبي (GMT+4)</option><option value="Europe/London">لندن (GMT+0)</option><option value="America/New_York">الوقت الشرقي (GMT-5)</option><option value="America/Chicago">الوقت المركزي (GMT-6)</option><option value="America/Denver">وقت الجبال (GMT-7)</option><option value="America/Los_Angeles">الوقت الهادئ (GMT-8)</option>
                   </select>
                 </div>
@@ -284,7 +284,7 @@ export default function SettingsPage() {
                     </div>
                     <button onClick={() => updateField(item.key, !storeData[item.key])}
                       className={`relative w-11 h-6 rounded-full transition-colors ${storeData[item.key] ? "bg-primary" : "bg-border"}`}>
-                      <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${storeData[item.key] ? "translate-x-5" : ""}`} />
+                      <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-card rounded-full shadow transition-transform ${storeData[item.key] ? "translate-x-5" : ""}`} />
                     </button>
                   </div>
                 ))}
@@ -301,15 +301,15 @@ export default function SettingsPage() {
               <div className="p-6 space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-1.5">كلمة السر الحالية</label>
-                  <input type="password" value={passwords.current} onChange={(e) => setPasswords({ ...passwords, current: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="أدخل كلمة السر الحالية" />
+                  <input type="password" value={passwords.current} onChange={(e) => setPasswords({ ...passwords, current: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="أدخل كلمة السر الحالية" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-1.5">كلمة السر الجديدة</label>
-                  <input type="password" value={passwords.new} onChange={(e) => setPasswords({ ...passwords, new: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="8 أحرف على الأقل" />
+                  <input type="password" value={passwords.new} onChange={(e) => setPasswords({ ...passwords, new: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="8 أحرف على الأقل" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-1.5">تأكيد كلمة السر الجديدة</label>
-                  <input type="password" value={passwords.confirm} onChange={(e) => setPasswords({ ...passwords, confirm: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="أكد كلمة السر الجديدة" />
+                  <input type="password" value={passwords.confirm} onChange={(e) => setPasswords({ ...passwords, confirm: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="أكد كلمة السر الجديدة" />
                 </div>
                 {passwords.new && passwords.confirm && passwords.new !== passwords.confirm && (
                   <div className="flex items-center gap-2 text-red-500 text-sm"><AlertCircle className="w-4 h-4" /> كلمتين السر مش متطابقين</div>

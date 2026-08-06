@@ -371,7 +371,7 @@ export default function AccountsPage() {
                   onChange={(e) =>
                     setNewAccount({ ...newAccount, name: e.target.value })
                   }
-                  className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
                   required
                 />
               </div>
@@ -386,7 +386,7 @@ export default function AccountsPage() {
                     onChange={(e) =>
                       setNewAccount({ ...newAccount, type: e.target.value })
                     }
-                    className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
                   >
                     <option value="asset">أصول</option>
                     <option value="liability">التزامات</option>
@@ -407,7 +407,7 @@ export default function AccountsPage() {
                         parentCode: e.target.value,
                       })
                     }
-                    className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
                   >
                     <option value="">بدون حساب أب</option>
                     {accounts
@@ -432,7 +432,7 @@ export default function AccountsPage() {
                   onChange={(e) =>
                     setNewAccount({ ...newAccount, balance: e.target.value })
                   }
-                  className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
                 />
               </div>
 
@@ -446,7 +446,7 @@ export default function AccountsPage() {
                     setNewAccount({ ...newAccount, notes: e.target.value })
                   }
                   rows={3}
-                  className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
+                  className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
                 />
               </div>
 

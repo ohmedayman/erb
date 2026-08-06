@@ -223,7 +223,7 @@ export default function PurchaseOrdersPage() {
                   onChange={(e) =>
                     setNewOrder({ ...newOrder, supplierName: e.target.value })
                   }
-                  className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
                   required
                 />
               </div>
@@ -238,7 +238,7 @@ export default function PurchaseOrdersPage() {
                     onChange={(e) =>
                       setNewOrder({ ...newOrder, items: e.target.value })
                     }
-                    className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
                     required
                   />
                 </div>
@@ -253,7 +253,7 @@ export default function PurchaseOrdersPage() {
                     onChange={(e) =>
                       setNewOrder({ ...newOrder, total: e.target.value })
                     }
-                    className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
                     required
                   />
                 </div>
@@ -268,7 +268,7 @@ export default function PurchaseOrdersPage() {
                   onChange={(e) =>
                     setNewOrder({ ...newOrder, expectedDate: e.target.value })
                   }
-                  className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
                 />
               </div>
               <div className="flex gap-3 pt-2">

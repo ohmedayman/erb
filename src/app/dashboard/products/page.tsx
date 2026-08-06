@@ -328,13 +328,13 @@ export default function ProductsPage() {
                         </div>
                         {/* Quick Actions */}
                         <div className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-                          <button onClick={() => { setBarcodeProduct(product); setBarcodeQty(1); }} className="w-8 h-8 bg-white/90 backdrop-blur-sm rounded-lg flex items-center justify-center hover:bg-white transition-colors shadow-sm" title="باركود">
+                          <button onClick={() => { setBarcodeProduct(product); setBarcodeQty(1); }} className="w-8 h-8 bg-card/90 backdrop-blur-sm rounded-lg flex items-center justify-center hover:bg-card transition-colors shadow-sm" title="باركود">
                             <Printer className="w-3.5 h-3.5 text-gray-700" />
                           </button>
-                          <button onClick={() => { setEditingProduct(product); setImagePreview(product.imageUrl || null); setShowModal(true); }} className="w-8 h-8 bg-white/90 backdrop-blur-sm rounded-lg flex items-center justify-center hover:bg-white transition-colors shadow-sm" title="تعديل">
+                          <button onClick={() => { setEditingProduct(product); setImagePreview(product.imageUrl || null); setShowModal(true); }} className="w-8 h-8 bg-card/90 backdrop-blur-sm rounded-lg flex items-center justify-center hover:bg-card transition-colors shadow-sm" title="تعديل">
                             <Edit className="w-3.5 h-3.5 text-gray-700" />
                           </button>
-                          <button onClick={() => handleDelete(product.id)} className="w-8 h-8 bg-white/90 backdrop-blur-sm rounded-lg flex items-center justify-center hover:bg-red-50 transition-colors shadow-sm" title="حذف">
+                          <button onClick={() => handleDelete(product.id)} className="w-8 h-8 bg-card/90 backdrop-blur-sm rounded-lg flex items-center justify-center hover:bg-red-50 transition-colors shadow-sm" title="حذف">
                             <Trash2 className="w-3.5 h-3.5 text-red-500" />
                           </button>
                         </div>
@@ -526,30 +526,30 @@ export default function ProductsPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1.5">اسم المنتج</label>
-                <input type="text" value={editingProduct?.name || newProduct.name} onChange={(e) => editingProduct ? setEditingProduct({ ...editingProduct, name: e.target.value }) : setNewProduct({ ...newProduct, name: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" required />
+                <input type="text" value={editingProduct?.name || newProduct.name} onChange={(e) => editingProduct ? setEditingProduct({ ...editingProduct, name: e.target.value }) : setNewProduct({ ...newProduct, name: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" required />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-1.5">الرمز (SKU)</label>
-                  <input type="text" value={editingProduct?.sku || newProduct.sku} onChange={(e) => editingProduct ? setEditingProduct({ ...editingProduct, sku: e.target.value }) : setNewProduct({ ...newProduct, sku: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" required />
+                  <input type="text" value={editingProduct?.sku || newProduct.sku} onChange={(e) => editingProduct ? setEditingProduct({ ...editingProduct, sku: e.target.value }) : setNewProduct({ ...newProduct, sku: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" required />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-1.5">الفئة</label>
-                  <input type="text" value={editingProduct?.category || newProduct.category} onChange={(e) => editingProduct ? setEditingProduct({ ...editingProduct, category: e.target.value }) : setNewProduct({ ...newProduct, category: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" required />
+                  <input type="text" value={editingProduct?.category || newProduct.category} onChange={(e) => editingProduct ? setEditingProduct({ ...editingProduct, category: e.target.value }) : setNewProduct({ ...newProduct, category: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" required />
                 </div>
               </div>
               <div className="grid grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-1.5">السعر</label>
-                  <input type="number" step="0.01" value={editingProduct?.price || newProduct.price} onChange={(e) => editingProduct ? setEditingProduct({ ...editingProduct, price: e.target.value }) : setNewProduct({ ...newProduct, price: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" required />
+                  <input type="number" step="0.01" value={editingProduct?.price || newProduct.price} onChange={(e) => editingProduct ? setEditingProduct({ ...editingProduct, price: e.target.value }) : setNewProduct({ ...newProduct, price: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" required />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-1.5">المخزون</label>
-                  <input type="number" value={editingProduct?.stock ?? newProduct.stock} onChange={(e) => editingProduct ? setEditingProduct({ ...editingProduct, stock: e.target.value }) : setNewProduct({ ...newProduct, stock: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" required />
+                  <input type="number" value={editingProduct?.stock ?? newProduct.stock} onChange={(e) => editingProduct ? setEditingProduct({ ...editingProduct, stock: e.target.value }) : setNewProduct({ ...newProduct, stock: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" required />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-1.5">الأدنى</label>
-                  <input type="number" value={editingProduct?.minStock ?? newProduct.minStock} onChange={(e) => editingProduct ? setEditingProduct({ ...editingProduct, minStock: e.target.value }) : setNewProduct({ ...newProduct, minStock: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" />
+                  <input type="number" value={editingProduct?.minStock ?? newProduct.minStock} onChange={(e) => editingProduct ? setEditingProduct({ ...editingProduct, minStock: e.target.value }) : setNewProduct({ ...newProduct, minStock: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" />
                 </div>
               </div>
               <div className="flex gap-3 pt-2">
@@ -578,7 +578,7 @@ export default function ProductsPage() {
                 <p className="text-xs text-muted-foreground font-mono">{barcodeProduct.sku}</p>
               </div>
 
-              <div className="bg-white rounded-xl border border-border p-4 flex justify-center">
+              <div className="bg-card rounded-xl border border-border p-4 flex justify-center">
                 <BarcodeSVG value={barcodeProduct.sku || "N/A"} width={2} height={70} />
               </div>
 
@@ -597,7 +597,7 @@ export default function ProductsPage() {
                     max="500"
                     value={barcodeQty}
                     onChange={(e) => setBarcodeQty(Math.max(1, Math.min(500, parseInt(e.target.value) || 1)))}
-                    className="w-24 text-center px-3 py-2.5 rounded-lg border border-border bg-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    className="w-24 text-center px-3 py-2.5 rounded-lg border border-border bg-card text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/50"
                   />
                   <button
                     onClick={() => setBarcodeQty(Math.min(500, barcodeQty + 1))}

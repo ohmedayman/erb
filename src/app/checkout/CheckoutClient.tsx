@@ -9,7 +9,7 @@ import {
   Loader2, Shield, Clock, ArrowLeft, Phone, Wallet, Banknote,
   FileText, Star, Zap, Users, Package, BarChart3, Settings,
   Receipt, Truck, Bell, AlertCircle, Upload, Image as ImageIcon,
-  ChevronLeft, Check, Lock
+  ChevronLeft, Check, Lock, Store, ShoppingCart
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { createAdminNotification } from "@/lib/admin-notifications";
@@ -19,18 +19,22 @@ import SEOHead from "@/components/SEOHead";
 const ALL_FEATURES = [
   { id: "products", label: "إدارة المنتجات", icon: Package, group: "basic" },
   { id: "orders", label: "فواتير وأوردرات", icon: FileText, group: "basic" },
-  { id: "customers", label: "الزبائن", icon: Users, group: "basic" },
-  { id: "reports", label: "التقارير", icon: BarChart3, group: "basic" },
-  { id: "expenses", label: "المصروفات والقيود", icon: Receipt, group: "mid" },
-  { id: "employees", label: "إدارة الموظفين", icon: Users, group: "mid" },
-  { id: "warehouses", label: "المستودعات", icon: Warehouse, group: "mid" },
+  { id: "customers", label: "الزبائن والعملاء", icon: Users, group: "basic" },
+  { id: "pos", label: "نقطة بيع (POS)", icon: ShoppingCart, group: "basic" },
+  { id: "reports", label: "تقارير المبيعات", icon: BarChart3, group: "basic" },
+  { id: "expenses", label: "المصروفات اليومية", icon: Receipt, group: "mid" },
+  { id: "employees", label: "إدارة الموظفين والرواتب", icon: Users, group: "mid" },
+  { id: "warehouses", label: "المستودعات المتعددة", icon: Warehouse, group: "mid" },
   { id: "stockMovements", label: "حركات المخزون", icon: Package, group: "mid" },
-  { id: "notifications", label: "إشعارات فورية", icon: Bell, group: "mid" },
   { id: "suppliers", label: "إدارة الموردين", icon: Truck, group: "mid" },
-  { id: "analytics", label: "تحليلات متقدمة", icon: BarChart3, group: "premium" },
-  { id: "installments", label: "الأقساط والحسابات", icon: CreditCard, group: "premium" },
-  { id: "ratings", label: "تقييمات العملاء", icon: Star, group: "premium" },
-  { id: "team", label: "إدارة الفريق", icon: Users, group: "premium" },
+  { id: "notifications", label: "إشعارات فورية", icon: Bell, group: "mid" },
+  { id: "profitLoss", label: "تقارير أرباح وخسائر", icon: BarChart3, group: "mid" },
+  { id: "analytics", label: "تحليلات مبيعات متقدمة", icon: BarChart3, group: "premium" },
+  { id: "installments", label: "نظام الأقساط والتقسيط", icon: CreditCard, group: "premium" },
+  { id: "ratings", label: "تقييمات وآراء العملاء", icon: Star, group: "premium" },
+  { id: "team", label: "إدارة الفريق والأدوار", icon: Users, group: "premium" },
+  { id: "multiStore", label: "نقاط بيع متعددة", icon: Store, group: "premium" },
+  { id: "audit", label: "سجل النشاطات (Audit)", icon: FileText, group: "premium" },
 ];
 
 const PLANS = [
@@ -504,7 +508,7 @@ export default function CheckoutPage() {
                     <h2 className="text-xl font-bold text-foreground mb-2">اختار طريقة الدفع</h2>
                     <p className="text-sm text-muted-foreground mb-6">ادفع مقدم {currentPlan.upfront.toLocaleString()} ج.م</p>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                       {PAYMENT_METHODS.map((method) => (
                         <button
                           key={method.id}

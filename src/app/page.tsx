@@ -102,50 +102,56 @@ const pricingPlans = [
     id: "starter",
     name: "StockFlow Starter",
     price: "3,000",
-    monthly: "500",
+    monthly: "250",
     upfront: "1,500",
     installment: "500 × 3",
     desc: "ابدأ بإدارة متجرك بالمميزات الأساسية",
     badge: "الأساسية",
     color: "from-blue-500 to-blue-600",
     borderColor: "border-blue-200",
+    limits: "100 منتج — 50 زبون — 100 أوردر",
     features: [
-      "منتجات غير محدودة", "فواتير وأوردرات", "زبائن وموردين", "تقارير وتحليلات",
+      "100 منتج", "50 زبون", "100 أوردر شهرياً",
+      "فواتير وإيصالات", "تقارير أساسية", "باركود للمنتجات",
     ],
   },
   {
     id: "growth",
     name: "StockFlow Growth",
     price: "6,000",
-    monthly: "1,000",
+    monthly: "500",
     upfront: "3,000",
     installment: "1,000 × 3",
     desc: "مميزات متقدمة لإدارة أعمالك بكفاءة",
     badge: "الأكثر طلباً",
     color: "from-orange-500 to-orange-600",
     borderColor: "border-orange-500",
+    limits: "500 منتج — 500 زبون — 1,000 أوردر",
     features: [
-      "منتجات غير محدودة", "فواتير وأوردرات", "زبائن وموردين", "تقارير وتحليلات",
-      "المصروفات والقيود", "إدارة الموظفين", "المستودعات", "حركات المخزون",
-      "إشعارات فورية", "إدارة الموردين",
+      "500 منتج", "500 زبون", "1,000 أوردر شهرياً",
+      "فواتير وإيصالات", "تقارير متقدمة", "باركود للمنتجات",
+      "إدارة المصروفات", "إدارة الموظفين", "المستودعات",
+      "حركات المخزون", "إدارة الموردين", "إشعارات فورية",
     ],
   },
   {
     id: "enterprise",
     name: "StockFlow Enterprise",
     price: "9,000",
-    monthly: "1,500",
+    monthly: "750",
     upfront: "4,500",
     installment: "1,500 × 3",
     desc: "كل المميزات بدون حدود",
     badge: "المتقدمة",
     color: "from-purple-500 to-purple-600",
     borderColor: "border-purple-200",
+    limits: "غير محدود — كل المميزات",
     features: [
-      "منتجات غير محدودة", "فواتير وأوردرات", "زبائن وموردين", "تقارير وتحليلات",
-      "المصروفات والقيود", "إدارة الموظفين", "المستودعات", "حركات المخزون",
-      "إشعارات فورية", "إدارة الموردين", "تحليلات متقدمة", "الأقساط والحسابات",
-      "تقييمات العملاء", "إدارة الفريق",
+      "منتجات غير محدودة", "زبائن غير محدودين", "أوردرات غير محدودة",
+      "فواتير وإيصالات", "تقارير متقدمة + PDF", "باركود للمنتجات",
+      "إدارة المصروفات", "إدارة الموظفين", "المستودعات",
+      "حركات المخزون", "إدارة الموردين", "إشعارات فورية",
+      "الأقساط والحسابات", "تقييمات العملاء", "إدارة الفريق",
     ],
   },
 ];
@@ -641,6 +647,10 @@ export default function HomePage() {
                     <div className="bg-gray-50 rounded-xl p-3 border border-gray-200 mb-4 text-sm space-y-1">
                       <div className="flex justify-between"><span className="text-gray-500">المقدم</span><span className="font-bold text-gray-900">{plan.upfront} ج.م</span></div>
                       <div className="flex justify-between"><span className="text-gray-500">القسط الشهري</span><span className="text-gray-700">{plan.installment}</span></div>
+                    </div>
+
+                    <div className={`rounded-xl p-3 border mb-4 text-center ${plan.id === "enterprise" ? "bg-purple-50 border-purple-200" : plan.id === "growth" ? "bg-orange-50 border-orange-200" : "bg-blue-50 border-blue-200"}`}>
+                      <p className={`text-sm font-bold ${plan.id === "enterprise" ? "text-purple-700" : plan.id === "growth" ? "text-orange-700" : "text-blue-700"}`}>{plan.limits}</p>
                     </div>
 
                     <div className="flex-1">

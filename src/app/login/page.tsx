@@ -135,14 +135,13 @@ export default function LoginPage() {
         }
 
         if (orders[0].status === "approved") {
-          // Approved — go to dashboard
-          if (!localStorage.getItem("user_prefs")) {
-            localStorage.setItem("user_prefs", JSON.stringify({
-              storeName: storeData?.name || "",
-              onboardingDone: true,
-            }));
+          // Approved — check if onboarding done
+          const prefs = JSON.parse(localStorage.getItem("user_prefs") || "null");
+          if (!prefs?.onboardingDone) {
+            router.push("/onboarding");
+          } else {
+            router.push("/dashboard");
           }
-          router.push("/dashboard");
           return;
         }
 

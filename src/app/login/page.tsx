@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Warehouse, Eye, EyeOff, Globe, Mail, Lock, Loader2, CheckCircle } from "lucide-react";
+import { Eye, EyeOff, Globe, Mail, Lock, Loader2, CheckCircle } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { trackUserActivity } from "@/lib/user-activity";
 import Image from "next/image";
@@ -24,6 +24,8 @@ export default function LoginPage() {
   const [resetLoading, setResetLoading] = useState(false);
   const [resetMessage, setResetMessage] = useState("");
   const [resetError, setResetError] = useState("");
+
+  const ADMIN_EMAILS = ["admin@stockflow.com", "m44408335@gmail.com", "admin@stockflow.vexonet.online"];
 
   const handleResetPassword = async () => {
     setResetLoading(true);
@@ -67,116 +69,104 @@ export default function LoginPage() {
       });
 
       if (error) {
-        setServerError("البريد أو الباسوورد غلط");
+        if (error.message.includes("Invalid login")) {
+          setServerError("البريد أو الباسوورد غلط");
+        } else if (error.message.includes("rate") || error.message.includes("too many")) {
+          setServerError("تم تجاوز حد المحاولات. حاول تاني بعد شوية");
+        } else {
+          setServerError("فيه مشكلة حصلت — حاول تاني");
+        }
         setLoading(false);
         return;
       }
 
-      if (data.user) {
-        const email = (data.user.email || "").toLowerCase();
-        const ADMIN_EMAILS = ["admin@stockflow.com", "m44408335@gmail.com", "admin@stockflow.vexonet.online"];
-        const isAdmin = ADMIN_EMAILS.includes(email);
-
-        localStorage.setItem("user", JSON.stringify({
-          id: data.user.id,
-          email: data.user.email,
-          fullName: data.user.user_metadata?.full_name || data.user.email,
-          name: data.user.user_metadata?.full_name || data.user.email,
-          role: isAdmin ? "admin" : "user",
-          storeId: data.user.id,
-        }));
-        localStorage.setItem("isLoggedIn", "true");
-
-        // Track login activity
-        trackUserActivity({
-          userId: data.user.id,
-          email: data.user.email || email,
-          name: data.user.user_metadata?.full_name || data.user.email,
-          eventType: "login",
-        }).catch(() => {});
-
-        // Check subscription status
-        let orders: any[] | null = null;
-        try {
-          const res = await supabase
-            .from("subscription_orders")
-            .select("id, status")
-            .eq("user_id", data.user.id)
-            .order("created_at", { ascending: false })
-            .limit(1);
-          orders = res.data;
-        } catch {
-          // Table might not exist
-        }
-
-        let storeData: any = null;
-        try {
-          const res = await supabase
-            .from("stores")
-            .select("id, name")
-            .eq("id", data.user.id)
-            .single();
-          storeData = res.data;
-        } catch {
-          // Table might not exist
-        }
-
-        if (storeData) {
-          localStorage.setItem("store", JSON.stringify({ id: storeData.id, name: storeData.name }));
-        }
-
-        // Determine subscription status for auth cookie
-        let subStatus = "pending";
-        if (!orders || orders.length === 0) {
-          subStatus = "none";
-        } else if (orders[0].status === "approved") {
-          subStatus = "approved";
-        } else if (orders[0].status === "pending") {
-          subStatus = "pending";
-        } else {
-          subStatus = "rejected";
-        }
-
-        // Set auth cookie BEFORE any redirect
-        await fetch("/api/auth/session", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            userId: data.user.id,
-            email: data.user.email,
-            subscriptionStatus: subStatus,
-          }),
-        });
-
-        if (isAdmin) {
-          window.location.href = "/admin";
-          return;
-        }
-
-        if (!orders || orders.length === 0) {
-          window.location.href = "/checkout";
-          return;
-        }
-
-        if (orders[0].status === "pending") {
-          setServerError("طلبك قيد المراجعة من الإدارة. هتتقبل في أقرب وقت! 🕐");
-          setLoading(false);
-          return;
-        }
-
-        if (orders[0].status === "approved") {
-          const prefs = JSON.parse(localStorage.getItem("user_prefs") || "null");
-          if (!prefs?.onboardingDone) {
-            window.location.href = "/onboarding";
-          } else {
-            window.location.href = "/dashboard";
-          }
-          return;
-        }
-
-        setServerError("تم رفض طلب اشتراكك. تواصل مع الدعم على 01028707543");
+      if (!data.user) {
+        setServerError("فيه مشكلة حصلت — حاول تاني");
         setLoading(false);
+        return;
       }
+
+      const userEmail = (data.user.email || "").toLowerCase();
+      const isAdmin = ADMIN_EMAILS.includes(userEmail);
+
+      // Save user to localStorage
+      localStorage.setItem("user", JSON.stringify({
+        id: data.user.id,
+        email: data.user.email,
+        fullName: data.user.user_metadata?.full_name || data.user.email,
+        name: data.user.user_metadata?.full_name || data.user.email,
+        role: isAdmin ? "admin" : "user",
+        storeId: data.user.id,
+      }));
+      localStorage.setItem("isLoggedIn", "true");
+
+      // Track login activity (non-blocking)
+      trackUserActivity({
+        userId: data.user.id,
+        email: data.user.email || userEmail,
+        name: data.user.user_metadata?.full_name || data.user.email,
+        eventType: "login",
+      }).catch(() => {});
+
+      // Admin goes straight to admin panel
+      if (isAdmin) {
+        router.push("/admin");
+        return;
+      }
+
+      // Check subscription status
+      let orders: any[] | null = null;
+      try {
+        const res = await supabase
+          .from("subscription_orders")
+          .select("id, status")
+          .eq("user_id", data.user.id)
+          .order("created_at", { ascending: false })
+          .limit(1);
+        orders = res.data;
+      } catch {
+        // Table might not exist
+      }
+
+      // Save store data
+      try {
+        const res = await supabase
+          .from("stores")
+          .select("id, name")
+          .eq("id", data.user.id)
+          .single();
+        if (res.data) {
+          localStorage.setItem("store", JSON.stringify({ id: res.data.id, name: res.data.name }));
+        }
+      } catch {}
+
+      // No orders → go to checkout
+      if (!orders || orders.length === 0) {
+        router.push("/checkout");
+        return;
+      }
+
+      // Pending order → show waiting message
+      if (orders[0].status === "pending") {
+        setServerError("طلبك قيد المراجعة من الإدارة. هتتقبل في أقرب وقت! 🕐");
+        setLoading(false);
+        return;
+      }
+
+      // Approved → go to dashboard or onboarding
+      if (orders[0].status === "approved") {
+        const prefs = JSON.parse(localStorage.getItem("user_prefs") || "null");
+        if (!prefs?.onboardingDone) {
+          router.push("/onboarding");
+        } else {
+          router.push("/dashboard");
+        }
+        return;
+      }
+
+      // Rejected
+      setServerError("تم رفض طلب اشتراكك. تواصل مع الدعم على 01028707543");
+      setLoading(false);
     } catch {
       setServerError("فيه مشكلة حصلت — حاول تاني");
       setLoading(false);
@@ -192,8 +182,8 @@ export default function LoginPage() {
     >
       <SEOHead
         title="تسجيل الدخول - StockFlow"
-        description="ادخل على حسابك في StockFlow نظام إدارة المخازن الاحترافي. سجل دخولك وابدأ إدارة مخزونك ومنتجاتك وعملاءك."
-        keywords="تسجيل دخول, login,StockFlow, إدارة مخازن, دخول النظام"
+        description="ادخل على حسابك في StockFlow نظام إدارة المخازن الاحترافي."
+        keywords="تسجيل دخول, login,StockFlow, إدارة مخازن"
         canonical="https://stockflow.vexonet.online/login"
       />
       <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-orange-50 via-orange-50/50 to-blue-50 overflow-hidden">
@@ -259,7 +249,11 @@ export default function LoginPage() {
                     initial={{ opacity: 0, x: 30 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: 30 }}
-                    className="mt-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm"
+                    className={`mt-4 px-4 py-3 rounded-lg text-sm ${
+                      serverError.includes("قيد المراجعة") || serverError.includes("تم إرسال")
+                        ? "bg-blue-50 border border-blue-200 text-blue-600"
+                        : "bg-red-50 border border-red-200 text-red-600"
+                    }`}
                   >
                     {serverError}
                   </motion.div>
@@ -285,12 +279,7 @@ export default function LoginPage() {
                   </div>
                   <AnimatePresence>
                     {fieldErrors.email && (
-                      <motion.p
-                        initial={{ opacity: 0, x: 15 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: 15 }}
-                        className="mt-1.5 text-red-500 text-xs"
-                      >
+                      <motion.p initial={{ opacity: 0, x: 15 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 15 }} className="mt-1.5 text-red-500 text-xs">
                         {fieldErrors.email}
                       </motion.p>
                     )}
@@ -322,12 +311,7 @@ export default function LoginPage() {
                   </div>
                   <AnimatePresence>
                     {fieldErrors.password && (
-                      <motion.p
-                        initial={{ opacity: 0, x: 15 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: 15 }}
-                        className="mt-1.5 text-red-500 text-xs"
-                      >
+                      <motion.p initial={{ opacity: 0, x: 15 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 15 }} className="mt-1.5 text-red-500 text-xs">
                         {fieldErrors.password}
                       </motion.p>
                     )}

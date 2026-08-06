@@ -40,14 +40,21 @@ function toCamelCase(obj: any): any {
   return result;
 }
 
+// Convert camelCase collection name to snake_case table name
+function toTableName(name: string): string {
+  return name.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+}
+
 export async function getDocs(
   collectionName: string,
   filters?: { field: string; op: string; value: any }[],
   storeId?: string
 ): Promise<any[]> {
+  const tableName = toTableName(collectionName);
+
   if (isOnline()) {
     try {
-      let query = supabase.from(collectionName).select("*");
+      let query = supabase.from(tableName).select("*");
 
       if (storeId) {
         query = query.eq("store_id", storeId);
@@ -55,13 +62,15 @@ export async function getDocs(
 
       if (filters) {
         for (const f of filters) {
+          // Convert camelCase filter field to snake_case for Supabase
+          const snakeField = f.field.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
           switch (f.op) {
-            case "==": query = query.eq(f.field, f.value); break;
-            case "!=": query = query.neq(f.field, f.value); break;
-            case ">": query = query.gt(f.field, f.value); break;
-            case "<": query = query.lt(f.field, f.value); break;
-            case ">=": query = query.gte(f.field, f.value); break;
-            case "<=": query = query.lte(f.field, f.value); break;
+            case "==": query = query.eq(snakeField, f.value); break;
+            case "!=": query = query.neq(snakeField, f.value); break;
+            case ">": query = query.gt(snakeField, f.value); break;
+            case "<": query = query.lt(snakeField, f.value); break;
+            case ">=": query = query.gte(snakeField, f.value); break;
+            case "<=": query = query.lte(snakeField, f.value); break;
           }
         }
       }
@@ -116,10 +125,12 @@ export async function getDocs(
 }
 
 export async function getDoc(collectionName: string, id: string): Promise<any | null> {
+  const tableName = toTableName(collectionName);
+
   if (isOnline()) {
     try {
       const { data, error } = await supabase
-        .from(collectionName)
+        .from(tableName)
         .select("*")
         .eq("id", id)
         .single();
@@ -142,6 +153,7 @@ export async function getDoc(collectionName: string, id: string): Promise<any | 
 }
 
 export async function addDoc(collectionName: string, data: any): Promise<any> {
+  const tableName = toTableName(collectionName);
   const id = data.id || generateId();
   const now = new Date().toISOString();
   const doc = {
@@ -157,7 +169,7 @@ export async function addDoc(collectionName: string, data: any): Promise<any> {
     try {
       // Convert camelCase to snake_case for Supabase columns
       const supabaseDoc = toSnakeCase(doc);
-      const { error } = await supabase.from(collectionName).insert(supabaseDoc);
+      const { error } = await supabase.from(tableName).insert(supabaseDoc);
       if (error) throw error;
       return doc;
     } catch {
@@ -186,6 +198,7 @@ export async function updateDoc(
   id: string,
   data: any
 ): Promise<void> {
+  const tableName = toTableName(collectionName);
   const now = new Date().toISOString();
   const updateData = { ...data, updated_at: now };
 
@@ -199,7 +212,7 @@ export async function updateDoc(
       // Convert camelCase to snake_case for Supabase columns
       const supabaseData = toSnakeCase(updateData);
       const { error } = await supabase
-        .from(collectionName)
+        .from(tableName)
         .update(supabaseData)
         .eq("id", id);
       if (error) throw error;
@@ -226,12 +239,13 @@ export async function updateDoc(
 }
 
 export async function deleteDoc(collectionName: string, id: string): Promise<void> {
+  const tableName = toTableName(collectionName);
   await deleteFromIDB(collectionName as any, id);
 
   if (isOnline()) {
     try {
       const { error } = await supabase
-        .from(collectionName)
+        .from(tableName)
         .delete()
         .eq("id", id);
       if (error) throw error;

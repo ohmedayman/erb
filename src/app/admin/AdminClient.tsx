@@ -22,6 +22,7 @@ import ExpensesManager from "./components/ExpensesManager";
 import EmployeesManager from "./components/EmployeesManager";
 import ActivityLogManager from "./components/ActivityLogManager";
 import SettingsManager from "./components/SettingsManager";
+import SecurityDashboard from "./components/SecurityDashboard";
 
 const ADMIN_EMAILS = ["admin@stockflow.com", "m44408335@gmail.com", "admin@stockflow.vexonet.online"];
 
@@ -38,6 +39,7 @@ const SIDEBAR_ITEMS = [
   { id: "expenses", label: "المصروفات", icon: Wallet },
   { id: "employees", label: "الموظفين", icon: UserCog },
   { id: "activity", label: "سجل النشاطات", icon: Activity },
+  { id: "security", label: "الأمان", icon: Shield },
   { id: "settings", label: "الإعدادات", icon: Settings },
 ];
 
@@ -350,6 +352,7 @@ export default function AdminClient() {
               {activeTab === "expenses" && <ExpensesManager expenses={expenses} stores={stores} onEdit={(item) => setEditItem({ table: "expenses", item })} onDelete={(item) => setDeleteConfirm({ table: "expenses", id: item.id })} />}
               {activeTab === "employees" && <EmployeesManager employees={employees} stores={stores} onEdit={(item) => setEditItem({ table: "employees", item })} onDelete={(item) => setDeleteConfirm({ table: "employees", id: item.id })} />}
               {activeTab === "activity" && <ActivityLogManager logs={activityLogs} stores={stores} />}
+              {activeTab === "security" && <SecurityDashboard />}
               {activeTab === "settings" && <SettingsManager />}
             </>
           )}

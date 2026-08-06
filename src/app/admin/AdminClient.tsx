@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { isAdminEmail } from "@/lib/admin-config";
+import { createAdminNotification } from "@/lib/admin-notifications";
 import Overview from "./components/Overview";
 import StoresManager from "./components/StoresManager";
 import UsersManager from "./components/UsersManager";
@@ -24,6 +25,7 @@ import EmployeesManager from "./components/EmployeesManager";
 import ActivityLogManager from "./components/ActivityLogManager";
 import SettingsManager from "./components/SettingsManager";
 import SecurityDashboard from "./components/SecurityDashboard";
+import NotificationBell from "./components/NotificationBell";
 
 const SIDEBAR_ITEMS = [
   { id: "overview", label: "لوحة التحكم", icon: Home },
@@ -172,6 +174,16 @@ export default function AdminClient() {
 
       setSubscriptionOrders(subscriptionOrders.map(o => o.id === orderId ? { ...o, status: "approved", admin_note: adminNote || "تم التأكيد", expires_at: expiresAt.toISOString() } : o));
       setSelectedOrder(null); setAdminNote("");
+
+      // Notify
+      createAdminNotification({
+        type: "approved",
+        title: "تم اعتماد طلب اشتراك",
+        message: `تم اعتماد طلب ${order?.user_name || "مستخدم"} بنجاح`,
+        user_name: order?.user_name || "",
+        user_email: order?.user_email || "",
+        metadata: { order_id: orderId },
+      }).catch(() => {});
     } catch (e: any) { alert("خطأ: " + e.message); }
     finally { setActionLoading(null); }
   };
@@ -196,6 +208,16 @@ export default function AdminClient() {
 
       setSubscriptionOrders(subscriptionOrders.map(o => o.id === orderId ? { ...o, status: "rejected", admin_note: adminNote || "مرفوض" } : o));
       setSelectedOrder(null); setAdminNote("");
+
+      // Notify
+      createAdminNotification({
+        type: "rejected",
+        title: "تم رفض طلب اشتراك",
+        message: `تم رفض طلب ${order?.user_name || "مستخدم"}`,
+        user_name: order?.user_name || "",
+        user_email: order?.user_email || "",
+        metadata: { order_id: orderId },
+      }).catch(() => {});
     } catch (e: any) { alert("خطأ: " + e.message); }
     finally { setActionLoading(null); }
   };
@@ -352,6 +374,7 @@ export default function AdminClient() {
             </div>
           </div>
           <div className="flex items-center gap-3 mr-auto">
+            <NotificationBell />
             <span className="text-slate-400 text-xs hidden md:block">
               {new Date().toLocaleDateString("ar-EG", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
             </span>

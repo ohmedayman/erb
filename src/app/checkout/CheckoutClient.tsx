@@ -11,6 +11,7 @@ import {
   Receipt, Truck, Bell, AlertCircle, Upload, Image as ImageIcon
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { createAdminNotification } from "@/lib/admin-notifications";
 import Image from "next/image";
 import SEOHead from "@/components/SEOHead";
 
@@ -238,6 +239,16 @@ export default function CheckoutPage() {
         .from("registered_users")
         .update({ subscription_status: "pending" })
         .eq("id", user.id);
+
+      // Notify admin about new payment order
+      createAdminNotification({
+        type: "subscription",
+        title: "طلب اشتراك جديد",
+        message: `${userName} دفع ${PLAN.price.toLocaleString()} ج.م — طريقة الدفع: ${PAYMENT_METHODS.find(m => m.id === selectedMethod)?.name || selectedMethod}`,
+        user_name: userName,
+        user_email: user.email || "",
+        metadata: { order_id: data.id, amount: PLAN.price, method: selectedMethod },
+      }).catch(() => {});
 
       setOrderId(data.id);
       setOrderSuccess(true);

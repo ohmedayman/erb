@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Warehouse, Eye, EyeOff, Globe, CheckCircle, Mail, Lock, User, Loader2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { trackUserActivity } from "@/lib/user-activity";
+import { createAdminNotification } from "@/lib/admin-notifications";
 import Image from "next/image";
 import SEOHead from "@/components/SEOHead";
 
@@ -148,6 +149,15 @@ export default function SignupPage() {
           email: data.user.email || formData.email,
           name: formData.name.trim(),
           eventType: "signup",
+        }).catch(() => {});
+
+        // Notify admin
+        createAdminNotification({
+          type: "signup",
+          title: "عميل جديد سجل في الموقع",
+          message: `${formData.name.trim()} سجل بـ ${data.user.email}`,
+          user_name: formData.name.trim(),
+          user_email: data.user.email || "",
         }).catch(() => {});
 
         router.push("/checkout");

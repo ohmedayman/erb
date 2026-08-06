@@ -400,11 +400,6 @@ img, svg, canvas, video, audio {
   user-select: none;
   -webkit-user-select: none;
   -webkit-touch-callout: none;
-  pointer-events: none;
-}
-
-a img, button img {
-  pointer-events: auto;
 }
 
 .no-copy, .copy-protected {
@@ -424,7 +419,7 @@ a img, button img {
 }
 
 /* Disable drag on everything */
-img, svg, canvas, video, audio, a {
+a {
   -webkit-user-drag: none;
 }
 

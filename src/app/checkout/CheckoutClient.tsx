@@ -8,12 +8,75 @@ import {
   Warehouse, CreditCard, Building2, Smartphone, CheckCircle, Copy,
   Loader2, Shield, Clock, ArrowLeft, Phone, Wallet, Banknote,
   FileText, Star, Zap, Users, Package, BarChart3, Settings,
-  Receipt, Truck, Bell, AlertCircle, Upload, Image as ImageIcon
+  Receipt, Truck, Bell, AlertCircle, Upload, Image as ImageIcon,
+  ChevronLeft, Check, Lock
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { createAdminNotification } from "@/lib/admin-notifications";
 import Image from "next/image";
 import SEOHead from "@/components/SEOHead";
+
+const ALL_FEATURES = [
+  { id: "products", label: "منتجات غير محدودة", icon: Package, group: "basic" },
+  { id: "orders", label: "فواتير وأوردرات", icon: FileText, group: "basic" },
+  { id: "customers", label: "زبائن وموردين", icon: Users, group: "basic" },
+  { id: "reports", label: "تقارير وتحليلات", icon: BarChart3, group: "basic" },
+  { id: "expenses", label: "المصروفات والقيود", icon: Receipt, group: "mid" },
+  { id: "employees", label: "إدارة الموظفين", icon: Users, group: "mid" },
+  { id: "warehouses", label: "المستودعات", icon: Warehouse, group: "mid" },
+  { id: "stockMovements", label: "حركات المخزون", icon: Package, group: "mid" },
+  { id: "notifications", label: "إشعارات فورية", icon: Bell, group: "mid" },
+  { id: "suppliers", label: "إدارة الموردين", icon: Truck, group: "mid" },
+  { id: "analytics", label: "تحليلات متقدمة", icon: BarChart3, group: "premium" },
+  { id: "installments", label: "الأقساط والحسابات", icon: CreditCard, group: "premium" },
+  { id: "ratings", label: "تقييمات العملاء", icon: Star, group: "premium" },
+  { id: "team", label: "إدارة الفريق", icon: Users, group: "premium" },
+];
+
+const PLANS = [
+  {
+    id: "starter",
+    name: "StockFlow Starter",
+    price: 3000,
+    upfront: 1500,
+    installment: 500,
+    installments: 3,
+    duration: "سنوي",
+    maxFeatures: 5,
+    color: "from-blue-500 to-blue-600",
+    badge: "الأساسية",
+    description: "ابدأ بإدارة متجرك بالمميزات الأساسية",
+    allowedGroups: ["basic"],
+  },
+  {
+    id: "growth",
+    name: "StockFlow Growth",
+    price: 6000,
+    upfront: 3000,
+    installment: 1000,
+    installments: 3,
+    duration: "سنوي",
+    maxFeatures: 10,
+    color: "from-orange-500 to-orange-600",
+    badge: "الأكثر طلباً",
+    description: "مميزات متقدمة لإدارة أعمالك بكفاءة",
+    allowedGroups: ["basic", "mid"],
+  },
+  {
+    id: "enterprise",
+    name: "StockFlow Enterprise",
+    price: 9000,
+    upfront: 4500,
+    installment: 1500,
+    installments: 3,
+    duration: "سنوي",
+    maxFeatures: 14,
+    color: "from-purple-500 to-purple-600",
+    badge: "المتقدمة",
+    description: "كل المميزات بدون حدود",
+    allowedGroups: ["basic", "mid", "premium"],
+  },
+];
 
 const PAYMENT_METHODS = [
   {
@@ -29,7 +92,6 @@ const PAYMENT_METHODS = [
       "افتح تطبيق فودافون كاش",
       "اختر 'تحويل للمحفضة'",
       "ابعت على الرقم: 01028707543",
-      "ادفع مبلغ 1,500 ج.م (المقدم)",
       "احتفظ برقم العملية"
     ],
     accountName: "محمد ا*** ي***",
@@ -49,7 +111,6 @@ const PAYMENT_METHODS = [
       "افتح تطبيق البنك بتاعك",
       "اختر InstaPay",
       "ابعت على الرقم: 01028707543",
-      "ادفع مبلغ 1,500 ج.م (المقدم)",
       "احتفظ برقم العملية"
     ],
     accountName: "محمد ا*** ي***",
@@ -64,67 +125,41 @@ const PAYMENT_METHODS = [
     bgColor: "bg-blue-50",
     borderColor: "border-blue-200",
     textColor: "text-blue-600",
-    description: "ادفع عن طريق فوري من أي فرع قريب منك",
+    description: "ادفع من أي فرع فوري",
     instructions: [
-      "روح لأي فرع فوري قريب منك",
+      "روح لأقرب فرع فوري",
       "قولهم عايز تدفع لـ StockFlow",
-      "ادفع مبلغ 1,500 ج.م (المقدم)",
-      "احتفظ بالرقم المرجعي",
-      "ادخل الرقم المرجعي هنا"
+      "ادفع المبلغ المطلوب",
+      "احتفظ بالإيصال"
     ],
     accountName: "محمد ا*** ي***",
     accountNumber: "01028707543",
-    notes: "الدفع الفوري — التأكيد خلال 5 دقائق"
+    notes: "الدفع من أي فرع فوري في مصر"
   },
   {
     id: "bank_transfer",
-    name: "حوالة بنكية",
+    name: "تحويل بنكي",
     icon: Building2,
     color: "from-green-500 to-green-600",
     bgColor: "bg-green-50",
     borderColor: "border-green-200",
     textColor: "text-green-600",
-    description: "حوالة بنكية مباشرة على الحساب",
+    description: "تحويل مباشر لحساب بنكي",
     instructions: [
-      "روح لأي فرع بنكي",
-      "اعمل حوالة بنكية على الحساب",
-      "ادفع مبلغ 1,500 ج.م (المقدم)",
-      "اسم الحساب: محمد ا*** ي***",
-      "احتفظ بسند الحوالة"
+      "افتح تطبيق البنك أو روح الفرع",
+      "حوّل على الحساب:",
+      "احتفظ بصورة التحويل"
     ],
-    accountName: "محمد ا*** ي***",
-    accountNumber: "01028707543",
-    notes: "الحوالة البنكية — التأكيد خلال 24 ساعة"
-  }
+    accountName: "محمد احمد ياسر",
+    accountNumber: "الحساب يتواصل عليه بعد التسجيل",
+    notes: "التحويل قد ياخد 24 ساعة"
+  },
 ];
-
-const PLAN = {
-  id: "plan-pro",
-  name: "StockFlow Pro",
-  price: 3000,
-  upfront: 1500,
-  installment: 500,
-  installments: 3,
-  duration: "سنوي",
-  features: [
-    "منتجات غير محدودة",
-    "زبائن وموردين",
-    "فواتير وأوردرات",
-    "تقارير وتحليلات",
-    "شحن وتوصيل",
-    "باركود وطباعة",
-    "إشعارات فورية",
-    "إعدادات كاملة",
-    "نقاط بيع POS",
-    "إدارة الموظفين",
-    "الأقساط والحسابات",
-    "المصروفات والقيود اليومية",
-  ]
-};
 
 export default function CheckoutPage() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
   const [transactionId, setTransactionId] = useState("");
   const [userName, setUserName] = useState("");
@@ -136,6 +171,15 @@ export default function CheckoutPage() {
   const [orderId, setOrderId] = useState("");
   const [screenshot, setScreenshot] = useState<File | null>(null);
   const [screenshotPreview, setScreenshotPreview] = useState<string | null>(null);
+  const [idCard, setIdCard] = useState<File | null>(null);
+  const [idCardPreview, setIdCardPreview] = useState<string | null>(null);
+  const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
+
+  const currentPlan = PLANS.find(p => p.id === selectedPlan);
+  const selectedMethodData = PAYMENT_METHODS.find(m => m.id === selectedMethod);
+  const availableFeatures = currentPlan
+    ? ALL_FEATURES.filter(f => currentPlan.allowedGroups.includes(f.group))
+    : [];
 
   useEffect(() => {
     const stored = JSON.parse(localStorage.getItem("user") || "null");
@@ -146,6 +190,15 @@ export default function CheckoutPage() {
     setUser(stored);
     setUserName(stored.name || stored.fullName || "");
   }, [router]);
+
+  const toggleFeature = (id: string) => {
+    if (!currentPlan) return;
+    setSelectedFeatures(prev => {
+      if (prev.includes(id)) return prev.filter(f => f !== id);
+      if (prev.length >= currentPlan.maxFeatures) return prev;
+      return [...prev, id];
+    });
+  };
 
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -166,21 +219,29 @@ export default function CheckoutPage() {
     reader.readAsDataURL(file);
   };
 
-  const uploadScreenshot = async (): Promise<string | null> => {
-    if (!screenshot || !user) return null;
+  const handleIdCardChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      alert("الصورة كبيرة جداً. الحد الأقصى 5 ميجا");
+      return;
+    }
+    setIdCard(file);
+    const reader = new FileReader();
+    reader.onload = (ev) => setIdCardPreview(ev.target?.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  const uploadFile = async (file: File, bucket: string): Promise<string | null> => {
     try {
-      const fileExt = screenshot.name.split(".").pop();
+      const fileExt = file.name.split(".").pop();
       const fileName = `${user.id}_${Date.now()}.${fileExt}`;
-      const { error } = await supabase.storage
-        .from("payment-screenshots")
-        .upload(fileName, screenshot);
+      const { error } = await supabase.storage.from(bucket).upload(fileName, file);
       if (error) {
         console.error("Upload error:", error);
         return null;
       }
-      const { data } = supabase.storage
-        .from("payment-screenshots")
-        .getPublicUrl(fileName);
+      const { data } = supabase.storage.from(bucket).getPublicUrl(fileName);
       return data.publicUrl;
     } catch {
       return null;
@@ -188,11 +249,14 @@ export default function CheckoutPage() {
   };
 
   const handleSubmitOrder = async () => {
-    if (!selectedMethod || !transactionId || !userPhone) return;
+    if (!selectedMethod || !transactionId || !userPhone || !currentPlan) return;
+    if (!idCard) {
+      alert("صورة بطاقة الهوية مطلوبة");
+      return;
+    }
 
     setLoading(true);
     try {
-      // Check if user already has a pending order
       const { data: existingOrders } = await supabase
         .from("subscription_orders")
         .select("id, status")
@@ -206,10 +270,14 @@ export default function CheckoutPage() {
         return;
       }
 
-      // Upload screenshot if provided
       let screenshotUrl = null;
       if (screenshot) {
-        screenshotUrl = await uploadScreenshot();
+        screenshotUrl = await uploadFile(screenshot, "payment-screenshots");
+      }
+
+      let idCardUrl = null;
+      if (idCard) {
+        idCardUrl = await uploadFile(idCard, "payment-screenshots");
       }
 
       const orderData = {
@@ -217,17 +285,19 @@ export default function CheckoutPage() {
         user_name: userName,
         user_email: user.email,
         user_phone: userPhone,
-        plan_name: PLAN.name,
-        plan_price: PLAN.price,
-        plan_duration: PLAN.duration,
+        plan_name: currentPlan.name,
+        plan_price: currentPlan.price,
+        plan_duration: currentPlan.duration,
         payment_method: selectedMethod,
-        payment_details: PAYMENT_METHODS.find(m => m.id === selectedMethod)?.notes || "",
+        payment_details: selectedMethodData?.notes || "",
         transaction_id: transactionId,
         screenshot_url: screenshotUrl,
+        id_card_url: idCardUrl,
+        selected_features: selectedFeatures,
         status: "pending",
       };
 
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("subscription_orders")
         .insert(orderData)
         .select()
@@ -240,17 +310,16 @@ export default function CheckoutPage() {
         .update({ subscription_status: "pending" })
         .eq("id", user.id);
 
-      // Notify admin about new payment order
       createAdminNotification({
         type: "subscription",
         title: "طلب اشتراك جديد",
-        message: `${userName} دفع ${PLAN.price.toLocaleString()} ج.م — طريقة الدفع: ${PAYMENT_METHODS.find(m => m.id === selectedMethod)?.name || selectedMethod}`,
+        message: `${userName} اشترك في ${currentPlan.name} — ${currentPlan.price.toLocaleString()} ج.م`,
         user_name: userName,
         user_email: user.email || "",
-        metadata: { order_id: data.id, amount: PLAN.price, method: selectedMethod },
+        metadata: { plan: currentPlan.id, amount: currentPlan.price },
       }).catch(() => {});
 
-      setOrderId(data.id);
+      setOrderId(orderData as any);
       setOrderSuccess(true);
     } catch (err: any) {
       console.error("Error creating order:", err);
@@ -262,92 +331,56 @@ export default function CheckoutPage() {
   if (orderSuccess) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-blue-50 flex items-center justify-center p-4">
-        <SEOHead
-          title="تم استلام طلبك - StockFlow"
-          description="تم استلام طلب الدفع بتاعك بنجاح. الادمن هيتأكد من الدفع ونبعتلك إشعار."
-          canonical="https://stockflow.vexonet.online/checkout"
-        />
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="bg-white rounded-3xl shadow-2xl border border-border p-8 max-w-lg w-full text-center"
-        >
-          <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <CheckCircle className="w-12 h-12 text-green-600" />
+        <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-white rounded-3xl shadow-2xl p-8 max-w-md text-center">
+          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <CheckCircle className="w-10 h-10 text-green-600" />
           </div>
-          <h1 className="text-2xl font-bold text-foreground mb-3">تم استلام طلبك!</h1>
-          <p className="text-muted-foreground mb-2">طلب الدفع بتاعك تحت المراجعة</p>
-          <div className="bg-muted rounded-xl p-4 my-6 text-right">
-            <p className="text-sm text-muted-foreground">رقم الطلب</p>
-            <p className="text-lg font-bold text-foreground font-mono">{orderId.slice(0, 8).toUpperCase()}</p>
+          <h1 className="text-2xl font-bold text-foreground mb-2">تم إرسال طلبك بنجاح!</h1>
+          <p className="text-muted-foreground mb-6">هنتواصل معاك خلال 24 ساعة لتأكيد الاشتراك</p>
+          <div className="bg-muted rounded-xl p-4 mb-6 text-sm">
+            <p className="text-muted-foreground">رقم الطلب</p>
+            <p className="font-mono font-bold text-foreground">{orderId}</p>
           </div>
-          <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 mb-4 text-right">
-            <p className="text-sm font-medium text-orange-800 mb-1">المبلغ المدفوع: 1,500 ج.م (المقدم)</p>
-            <p className="text-xs text-orange-600">القسط الشهري: 500 ج.م × 3 شهور</p>
-          </div>
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6 text-right">
-            <div className="flex items-center gap-2 mb-2">
-              <Clock className="w-4 h-4 text-blue-600" />
-              <p className="text-sm font-medium text-blue-800">إيه اللي هيحصل بعدين؟</p>
-            </div>
-            <ul className="text-sm text-blue-700 space-y-1.5">
-              <li>• الادمن هيتأكد من الدفع</li>
-              <li>• هنبعتلك إشعار على البريد</li>
-              <li>• بعد التأكيد هتقدر تدخل النظام</li>
-              <li>• الأقساط الباقية (500 × 2) هتتحط في النظام</li>
-            </ul>
-          </div>
-          <Link
-            href="/login"
-            className="inline-flex items-center gap-2 bg-primary text-white px-8 py-3 rounded-xl font-medium hover:bg-primary-hover transition-all"
-          >
-            رجوع لتسجيل الدخول
+          <Link href="/login" className="inline-flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-medium hover:bg-primary-hover transition-all">
+            رجوع للتسجيل الدخول
           </Link>
         </motion.div>
       </div>
     );
   }
 
-  const selectedMethodData = PAYMENT_METHODS.find(m => m.id === selectedMethod);
+  const steps = [
+    { num: 1, label: "اختيار الباقة" },
+    { num: 2, label: "اختيار المميزات" },
+    { num: 3, label: "الدفع" },
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-blue-50">
-      <SEOHead
-        title="اختيار طريقة الدفع - StockFlow Pro"
-        description="ادفع مقدم 1,500 ج.م واشتغل على StockFlow Pro. الباقي يتقسط على 3 شهور 500 ج.م شهرياً."
-        keywords="اشتراك, دفع, StockFlow Pro, قسط, management system"
-        canonical="https://stockflow.vexonet.online/checkout"
-      />
+      <SEOHead title="اختيار الاشتراك | StockFlow" description="اختار باقة الاشتراك المناسبة لمتجرك" />
 
       {/* Header */}
-      <div className="bg-white/80 backdrop-blur-sm border-b border-border sticky top-0 z-40">
-        <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5">
-            <Image src="/favicon.svg" alt="StockFlow" width={36} height={36} />
-            <span className="text-lg font-bold text-foreground">Stock<span className="text-primary">Flow</span></span>
+      <div className="bg-white border-b border-border">
+        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2">
+            <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center">
+              <Warehouse className="w-5 h-5 text-white" />
+            </div>
+            <span className="font-bold text-foreground text-lg">StockFlow</span>
           </Link>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Shield className="w-4 h-4 text-green-500" />
-            <span>دفع آمن ومؤمن</span>
-          </div>
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 py-8">
-        {/* Progress Steps */}
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        {/* Steps */}
         <div className="flex items-center justify-center gap-2 mb-8">
-          {[1, 2].map((s) => (
-            <div key={s} className="flex items-center gap-2">
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all ${
-                step >= s
-                  ? "bg-primary text-white shadow-lg shadow-primary/25"
-                  : "bg-muted text-muted-foreground"
-              }`}>
-                {step > s ? <CheckCircle className="w-5 h-5" /> : s}
+          {steps.map((s, i) => (
+            <div key={s.num} className="flex items-center gap-2">
+              <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all ${step >= s.num ? "bg-primary text-white" : "bg-muted text-muted-foreground"}`}>
+                {step > s.num ? <CheckCircle className="w-4 h-4" /> : s.num}
+                <span className="hidden sm:inline">{s.label}</span>
               </div>
-              {s < 2 && (
-                <div className={`w-16 h-1 rounded-full transition-all ${step > s ? "bg-primary" : "bg-muted"}`} />
-              )}
+              {i < steps.length - 1 && <div className={`w-12 h-1 rounded-full transition-all ${step > s.num ? "bg-primary" : "bg-muted"}`} />}
             </div>
           ))}
         </div>
@@ -355,93 +388,119 @@ export default function CheckoutPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Step 1: Plan Details */}
+
+            {/* Step 1: Plan Selection */}
             {step === 1 && (
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
                 <div className="bg-white rounded-2xl shadow-lg border border-border p-6">
-                  <h2 className="text-xl font-bold text-foreground mb-2">StockFlow Pro</h2>
-                  <p className="text-sm text-muted-foreground mb-6">نظام إدارة المخازن الكامل</p>
+                  <h2 className="text-xl font-bold text-foreground mb-2">اختار الباقة المناسبة</h2>
+                  <p className="text-sm text-muted-foreground mb-6">كل باقة ليها عدد مميزات معينة تقدر تختارها</p>
 
-                  <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl p-6 text-white mb-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <div>
-                        <h3 className="text-lg font-bold">اشتراك سنوي</h3>
-                        <p className="text-orange-100 text-sm">ادفع مقدم والباقي يتقسط</p>
-                      </div>
-                      <Star className="w-8 h-8 text-orange-200" />
-                    </div>
-                    <div className="border-t border-orange-400/30 pt-4">
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-3xl font-bold">1,500</span>
-                        <span className="text-orange-200">ج.م مقدم</span>
-                      </div>
-                      <p className="text-orange-200 text-sm mt-1">+ 500 ج.م شهرياً لمدة 3 شهور</p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-3 mb-6">
-                    <h4 className="font-medium text-foreground">مميزات الاشتراك:</h4>
-                    <div className="grid grid-cols-2 gap-2">
-                      {PLAN.features.map((text, i) => (
-                        <div key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <CheckCircle className="w-4 h-4 text-green-500 shrink-0" />
-                          <span>{text}</span>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    {PLANS.map((plan) => (
+                      <button
+                        key={plan.id}
+                        onClick={() => { setSelectedPlan(plan.id); setSelectedFeatures([]); }}
+                        className={`relative p-5 rounded-2xl border-2 text-right transition-all hover:shadow-lg ${selectedPlan === plan.id ? "border-primary shadow-lg ring-2 ring-primary/20" : "border-border hover:border-primary/30"}`}
+                      >
+                        {plan.badge && (
+                          <span className={`absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-xs font-bold text-white bg-gradient-to-r ${plan.color}`}>
+                            {plan.badge}
+                          </span>
+                        )}
+                        <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${plan.color} flex items-center justify-center mb-3`}>
+                          <Star className="w-6 h-6 text-white" />
                         </div>
-                      ))}
-                    </div>
+                        <h3 className="font-bold text-foreground mb-1">{plan.name}</h3>
+                        <p className="text-xs text-muted-foreground mb-3">{plan.description}</p>
+                        <div className="flex items-baseline gap-1 mb-3">
+                          <span className="text-2xl font-bold text-foreground">{plan.price.toLocaleString()}</span>
+                          <span className="text-sm text-muted-foreground">ج.م</span>
+                        </div>
+                        <div className="text-xs text-muted-foreground space-y-1">
+                          <p>مقدم: {plan.upfront.toLocaleString()} ج.م</p>
+                          <p>قسط شهري: {plan.installment.toLocaleString()} ج.م × {plan.installments}</p>
+                          <p className="font-medium text-primary">مميزات: {plan.maxFeatures}</p>
+                        </div>
+                      </button>
+                    ))}
                   </div>
 
-                  <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 mb-6">
-                    <h4 className="font-medium text-orange-800 mb-2">جدول الدفع:</h4>
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-orange-700">المقدم (الآن)</span>
-                        <span className="font-bold text-orange-800">1,500 ج.م</span>
-                      </div>
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-orange-700">الشهر الأول</span>
-                        <span className="font-medium text-orange-700">500 ج.م</span>
-                      </div>
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-orange-700">الشهر الثاني</span>
-                        <span className="font-medium text-orange-700">500 ج.م</span>
-                      </div>
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-orange-700">الشهر الثالث</span>
-                        <span className="font-medium text-orange-700">500 ج.م</span>
-                      </div>
-                      <div className="border-t border-orange-200 pt-2 flex items-center justify-between">
-                        <span className="font-medium text-orange-800">الإجمالي</span>
-                        <span className="text-lg font-bold text-orange-800">3,000 ج.م</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => setStep(2)}
-                    className="w-full bg-primary text-white py-3 rounded-xl font-medium hover:bg-primary-hover transition-all shadow-lg shadow-primary/25 flex items-center justify-center gap-2"
-                  >
-                    اختار طريقة الدفع
-                    <ArrowLeft className="w-5 h-5" />
-                  </button>
+                  {selectedPlan && (
+                    <button
+                      onClick={() => setStep(2)}
+                      className="mt-6 w-full bg-primary text-white py-3 rounded-xl font-medium hover:bg-primary-hover transition-all shadow-lg shadow-primary/25 flex items-center justify-center gap-2"
+                    >
+                      اختار المميزات
+                      <ArrowLeft className="w-5 h-5" />
+                    </button>
+                  )}
                 </div>
               </motion.div>
             )}
 
-            {/* Step 2: Payment */}
-            {step === 2 && (
+            {/* Step 2: Feature Selection */}
+            {step === 2 && currentPlan && (
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+                <div className="bg-white rounded-2xl shadow-lg border border-border p-6">
+                  <div className="flex items-center justify-between mb-2">
+                    <h2 className="text-xl font-bold text-foreground">اختار المميزات</h2>
+                    <span className="text-sm font-medium text-primary">{selectedFeatures.length}/{currentPlan.maxFeatures}</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-6">تقدر تختار {currentPlan.maxFeatures} ميزة من المميزات المتاحة في باقتك</p>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {availableFeatures.map((feature) => {
+                      const Icon = feature.icon;
+                      const isSelected = selectedFeatures.includes(feature.id);
+                      const isDisabled = !isSelected && selectedFeatures.length >= currentPlan.maxFeatures;
+                      return (
+                        <button
+                          key={feature.id}
+                          onClick={() => toggleFeature(feature.id)}
+                          disabled={isDisabled}
+                          className={`flex items-center gap-3 p-4 rounded-xl border-2 text-right transition-all ${isSelected ? "border-primary bg-primary/5" : isDisabled ? "border-border opacity-50 cursor-not-allowed" : "border-border hover:border-primary/30"}`}
+                        >
+                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${isSelected ? "bg-primary text-white" : "bg-muted"}`}>
+                            {isSelected ? <Check className="w-5 h-5" /> : <Icon className="w-5 h-5 text-muted-foreground" />}
+                          </div>
+                          <span className={`text-sm font-medium ${isSelected ? "text-primary" : "text-foreground"}`}>{feature.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div className="flex gap-3 mt-6">
+                    <button onClick={() => setStep(1)} className="px-6 py-3 rounded-xl border border-border text-muted-foreground hover:bg-muted transition-all">
+                      رجوع
+                    </button>
+                    <button
+                      onClick={() => setStep(3)}
+                      disabled={selectedFeatures.length === 0}
+                      className="flex-1 bg-primary text-white py-3 rounded-xl font-medium hover:bg-primary-hover transition-all disabled:opacity-50 shadow-lg shadow-primary/25 flex items-center justify-center gap-2"
+                    >
+                      متابعة للدفع
+                      <ArrowLeft className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Step 3: Payment */}
+            {step === 3 && currentPlan && (
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
                 {!selectedMethod ? (
                   <div className="bg-white rounded-2xl shadow-lg border border-border p-6">
                     <h2 className="text-xl font-bold text-foreground mb-2">اختار طريقة الدفع</h2>
-                    <p className="text-sm text-muted-foreground mb-6">ادفع المقدم 1,500 ج.م</p>
+                    <p className="text-sm text-muted-foreground mb-6">ادفع مقدم {currentPlan.upfront.toLocaleString()} ج.م</p>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {PAYMENT_METHODS.map((method) => (
                         <button
                           key={method.id}
                           onClick={() => setSelectedMethod(method.id)}
-                          className={`p-4 rounded-xl border-2 text-right transition-all hover:border-primary/50 hover:bg-primary/5`}
+                          className="p-4 rounded-xl border-2 text-right transition-all hover:border-primary/50 hover:bg-primary/5"
                         >
                           <div className="flex items-center gap-3">
                             <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${method.color} flex items-center justify-center`}>
@@ -456,10 +515,7 @@ export default function CheckoutPage() {
                       ))}
                     </div>
 
-                    <button
-                      onClick={() => setStep(1)}
-                      className="mt-4 px-6 py-3 rounded-xl border border-border text-muted-foreground hover:bg-muted transition-all"
-                    >
+                    <button onClick={() => setStep(2)} className="mt-4 px-6 py-3 rounded-xl border border-border text-muted-foreground hover:bg-muted transition-all">
                       رجوع
                     </button>
                   </div>
@@ -476,10 +532,10 @@ export default function CheckoutPage() {
                         </div>
                       </div>
 
-                      <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl p-4 text-white text-center mb-6">
-                        <p className="text-orange-200 text-sm">المبلغ المطلوب (المقدم)</p>
-                        <p className="text-3xl font-bold">1,500 ج.م</p>
-                        <p className="text-orange-200 text-xs mt-1">+ 500 ج.م شهرياً لمدة 3 شهور</p>
+                      <div className={`bg-gradient-to-br ${currentPlan.color} rounded-xl p-4 text-white text-center mb-6`}>
+                        <p className="text-white/70 text-sm">المبلغ المطلوب (المقدم)</p>
+                        <p className="text-3xl font-bold">{currentPlan.upfront.toLocaleString()} ج.م</p>
+                        <p className="text-white/70 text-xs mt-1">+ {currentPlan.installment.toLocaleString()} ج.م شهرياً لمدة {currentPlan.installments} شهور</p>
                       </div>
 
                       <div className="bg-muted rounded-xl p-4 mb-6 text-right">
@@ -493,10 +549,7 @@ export default function CheckoutPage() {
                             <span className="text-sm text-muted-foreground">رقم الحساب:</span>
                             <div className="flex items-center gap-2">
                               <span className="text-sm font-mono font-medium text-foreground">{selectedMethodData.accountNumber}</span>
-                              <button
-                                onClick={() => handleCopy(selectedMethodData.accountNumber)}
-                                className="p-1 rounded hover:bg-background transition-colors"
-                              >
+                              <button onClick={() => handleCopy(selectedMethodData.accountNumber)} className="p-1 rounded hover:bg-background transition-colors">
                                 {copied ? <CheckCircle className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4 text-muted-foreground" />}
                               </button>
                             </div>
@@ -523,67 +576,62 @@ export default function CheckoutPage() {
                       <div className="space-y-4">
                         <div>
                           <label className="block text-sm font-medium text-foreground mb-1.5">الاسم الكامل</label>
-                          <input
-                            type="text"
-                            value={userName}
-                            onChange={(e) => setUserName(e.target.value)}
+                          <input type="text" value={userName} onChange={(e) => setUserName(e.target.value)}
                             className="w-full px-4 py-3 rounded-xl border border-border bg-white text-foreground text-right focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
-                            placeholder="الاسم كما هو في الحساب البنكي"
-                          />
+                            placeholder="الاسم كما هو في الحساب البنكي" />
                         </div>
 
                         <div>
                           <label className="block text-sm font-medium text-foreground mb-1.5">رقم الموبايل</label>
-                          <input
-                            type="tel"
-                            value={userPhone}
-                            onChange={(e) => setUserPhone(e.target.value)}
+                          <input type="tel" value={userPhone} onChange={(e) => setUserPhone(e.target.value)}
                             className="w-full px-4 py-3 rounded-xl border border-border bg-white text-foreground text-right focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
-                            placeholder="01XXXXXXXXX"
-                          />
+                            placeholder="01XXXXXXXXX" />
                         </div>
 
                         <div>
                           <label className="block text-sm font-medium text-foreground mb-1.5">رقم العملية / الرقم المرجعي</label>
-                          <input
-                            type="text"
-                            value={transactionId}
-                            onChange={(e) => setTransactionId(e.target.value)}
+                          <input type="text" value={transactionId} onChange={(e) => setTransactionId(e.target.value)}
                             className="w-full px-4 py-3 rounded-xl border border-border bg-white text-foreground text-right focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
-                            placeholder="الرقم اللي استلمته بعد الدفع"
-                          />
+                            placeholder="الرقم اللي استلمته بعد الدفع" />
                           <p className="mt-1 text-xs text-muted-foreground">مهم جداً — ده اللي هنتحقق بيه من الدفع</p>
                         </div>
 
+                        {/* ID Card Upload */}
+                        <div>
+                          <label className="block text-sm font-medium text-foreground mb-1.5">
+                            صورة بطاقة الهوية <span className="text-red-500">*</span>
+                          </label>
+                          <div className="relative">
+                            <input type="file" accept="image/*" onChange={handleIdCardChange} className="hidden" id="idcard-upload" />
+                            <label htmlFor="idcard-upload" className="flex items-center justify-center gap-2 w-full px-4 py-4 rounded-xl border-2 border-dashed border-border bg-muted/30 hover:bg-muted/50 cursor-pointer transition-all">
+                              {idCardPreview ? (
+                                <div className="relative w-full">
+                                  <img src={idCardPreview} alt="بطاقة الهوية" className="w-full max-h-40 object-contain rounded-lg" />
+                                  <button type="button" onClick={(e) => { e.preventDefault(); setIdCard(null); setIdCardPreview(null); }}
+                                    className="absolute top-2 left-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600">✕</button>
+                                </div>
+                              ) : (
+                                <>
+                                  <Lock className="w-5 h-5 text-muted-foreground" />
+                                  <span className="text-sm text-muted-foreground">اضغط لرفع صورة بطاقة الهوية (الوجه الأمامي)</span>
+                                </>
+                              )}
+                            </label>
+                          </div>
+                          <p className="mt-1 text-xs text-muted-foreground">مطلوب — للتحقق من هويتك (حد أقصى 5 ميجا)</p>
+                        </div>
+
+                        {/* Screenshot Upload */}
                         <div>
                           <label className="block text-sm font-medium text-foreground mb-1.5">صورة الإيصال (اختياري)</label>
                           <div className="relative">
-                            <input
-                              type="file"
-                              accept="image/*"
-                              onChange={handleScreenshotChange}
-                              className="hidden"
-                              id="screenshot-upload"
-                            />
-                            <label
-                              htmlFor="screenshot-upload"
-                              className="flex items-center justify-center gap-2 w-full px-4 py-4 rounded-xl border-2 border-dashed border-border bg-muted/30 hover:bg-muted/50 cursor-pointer transition-all"
-                            >
+                            <input type="file" accept="image/*" onChange={handleScreenshotChange} className="hidden" id="screenshot-upload" />
+                            <label htmlFor="screenshot-upload" className="flex items-center justify-center gap-2 w-full px-4 py-4 rounded-xl border-2 border-dashed border-border bg-muted/30 hover:bg-muted/50 cursor-pointer transition-all">
                               {screenshotPreview ? (
                                 <div className="relative w-full">
                                   <img src={screenshotPreview} alt="الإيصال" className="w-full max-h-40 object-contain rounded-lg" />
-                                  <button
-                                    type="button"
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      setScreenshot(null);
-                                      setScreenshotPreview(null);
-                                    }}
-                                    className="absolute top-2 left-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
-                                  >
-                                    <span className="sr-only">حذف</span>
-                                    ✕
-                                  </button>
+                                  <button type="button" onClick={(e) => { e.preventDefault(); setScreenshot(null); setScreenshotPreview(null); }}
+                                    className="absolute top-2 left-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600">✕</button>
                                 </div>
                               ) : (
                                 <>
@@ -598,27 +646,18 @@ export default function CheckoutPage() {
                       </div>
 
                       <div className="flex gap-3 mt-6">
-                        <button
-                          onClick={() => setSelectedMethod(null)}
-                          className="px-6 py-3 rounded-xl border border-border text-muted-foreground hover:bg-muted transition-all"
-                        >
+                        <button onClick={() => setSelectedMethod(null)} className="px-6 py-3 rounded-xl border border-border text-muted-foreground hover:bg-muted transition-all">
                           رجوع
                         </button>
                         <button
                           onClick={handleSubmitOrder}
-                          disabled={!transactionId || !userPhone || !userName || loading}
+                          disabled={!transactionId || !userPhone || !userName || !idCard || loading}
                           className="flex-1 bg-primary text-white py-3 rounded-xl font-medium hover:bg-primary-hover transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary/25 flex items-center justify-center gap-2"
                         >
                           {loading ? (
-                            <>
-                              <Loader2 className="w-5 h-5 animate-spin" />
-                              بيتم الإرسال...
-                            </>
+                            <><Loader2 className="w-5 h-5 animate-spin" /> بيتم الإرسال...</>
                           ) : (
-                            <>
-                              <CheckCircle className="w-5 h-5" />
-                              تأكيد الدفع — 1,500 ج.م
-                            </>
+                            <><CheckCircle className="w-5 h-5" /> تأكيد الدفع — {currentPlan.upfront.toLocaleString()} ج.م</>
                           )}
                         </button>
                       </div>
@@ -635,29 +674,37 @@ export default function CheckoutPage() {
               <h3 className="font-bold text-foreground mb-4">ملخص الطلب</h3>
               <div className="space-y-3">
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">الخطة</span>
-                  <span className="font-medium text-foreground">StockFlow Pro</span>
+                  <span className="text-muted-foreground">الباقة</span>
+                  <span className="font-medium text-foreground">{currentPlan?.name || "-"}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">المدة</span>
                   <span className="font-medium text-foreground">سنوي</span>
                 </div>
-                <div className="border-t border-border pt-3">
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="text-muted-foreground">المقدم</span>
-                    <span className="font-bold text-primary">1,500 ج.م</span>
+                {selectedFeatures.length > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">المميزات</span>
+                    <span className="font-medium text-primary">{selectedFeatures.length} ميزة</span>
                   </div>
-                  <div className="flex justify-between text-sm text-muted-foreground mb-1">
-                    <span>القسط الشهري</span>
-                    <span>500 ج.م × 3</span>
-                  </div>
-                  <div className="border-t border-border pt-2 mt-2">
-                    <div className="flex justify-between">
-                      <span className="font-medium text-foreground">الإجمالي</span>
-                      <span className="text-lg font-bold text-primary">3,000 ج.م</span>
+                )}
+                {currentPlan && (
+                  <div className="border-t border-border pt-3">
+                    <div className="flex justify-between text-sm mb-1">
+                      <span className="text-muted-foreground">المقدم</span>
+                      <span className="font-bold text-primary">{currentPlan.upfront.toLocaleString()} ج.م</span>
+                    </div>
+                    <div className="flex justify-between text-sm text-muted-foreground mb-1">
+                      <span>القسط الشهري</span>
+                      <span>{currentPlan.installment.toLocaleString()} ج.م × {currentPlan.installments}</span>
+                    </div>
+                    <div className="border-t border-border pt-2 mt-2">
+                      <div className="flex justify-between">
+                        <span className="font-medium text-foreground">الإجمالي</span>
+                        <span className="text-lg font-bold text-primary">{currentPlan?.price.toLocaleString()} ج.م</span>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
               </div>
 
               <div className="mt-6 space-y-2">

@@ -202,10 +202,11 @@ CREATE POLICY "Users can delete own suppliers" ON suppliers
 -- ============================================
 ALTER TABLE accounts ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "Users can manage own accounts" ON accounts;
+DROP POLICY IF EXISTS "Users can view own accounts" ON accounts;
 CREATE POLICY "Users can view own accounts" ON accounts
   FOR SELECT USING (store_id = public.get_user_id() OR public.is_admin());
 
+DROP POLICY IF EXISTS "Users can manage own accounts" ON accounts;
 CREATE POLICY "Users can manage own accounts" ON accounts
   FOR ALL USING (store_id = public.get_user_id() OR public.is_admin());
 
@@ -214,10 +215,11 @@ CREATE POLICY "Users can manage own accounts" ON accounts
 -- ============================================
 ALTER TABLE journal_entries ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "Users can manage own journal_entries" ON journal_entries;
+DROP POLICY IF EXISTS "Users can view own journal_entries" ON journal_entries;
 CREATE POLICY "Users can view own journal_entries" ON journal_entries
   FOR SELECT USING (store_id = public.get_user_id() OR public.is_admin());
 
+DROP POLICY IF EXISTS "Users can manage own journal_entries" ON journal_entries;
 CREATE POLICY "Users can manage own journal_entries" ON journal_entries
   FOR ALL USING (store_id = public.get_user_id() OR public.is_admin());
 
@@ -226,10 +228,11 @@ CREATE POLICY "Users can manage own journal_entries" ON journal_entries
 -- ============================================
 ALTER TABLE purchase_orders ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "Users can manage own purchase_orders" ON purchase_orders;
+DROP POLICY IF EXISTS "Users can view own purchase_orders" ON purchase_orders;
 CREATE POLICY "Users can view own purchase_orders" ON purchase_orders
   FOR SELECT USING (store_id = public.get_user_id() OR public.is_admin());
 
+DROP POLICY IF EXISTS "Users can manage own purchase_orders" ON purchase_orders;
 CREATE POLICY "Users can manage own purchase_orders" ON purchase_orders
   FOR ALL USING (store_id = public.get_user_id() OR public.is_admin());
 
@@ -238,10 +241,11 @@ CREATE POLICY "Users can manage own purchase_orders" ON purchase_orders
 -- ============================================
 ALTER TABLE stock_movements ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "Users can manage own stock_movements" ON stock_movements;
+DROP POLICY IF EXISTS "Users can view own stock_movements" ON stock_movements;
 CREATE POLICY "Users can view own stock_movements" ON stock_movements
   FOR SELECT USING (store_id = public.get_user_id() OR public.is_admin());
 
+DROP POLICY IF EXISTS "Users can manage own stock_movements" ON stock_movements;
 CREATE POLICY "Users can manage own stock_movements" ON stock_movements
   FOR ALL USING (store_id = public.get_user_id() OR public.is_admin());
 
@@ -250,10 +254,11 @@ CREATE POLICY "Users can manage own stock_movements" ON stock_movements
 -- ============================================
 ALTER TABLE shipments ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "Users can manage own shipments" ON shipments;
+DROP POLICY IF EXISTS "Users can view own shipments" ON shipments;
 CREATE POLICY "Users can view own shipments" ON shipments
   FOR SELECT USING (store_id = public.get_user_id() OR public.is_admin());
 
+DROP POLICY IF EXISTS "Users can manage own shipments" ON shipments;
 CREATE POLICY "Users can manage own shipments" ON shipments
   FOR ALL USING (store_id = public.get_user_id() OR public.is_admin());
 
@@ -262,10 +267,11 @@ CREATE POLICY "Users can manage own shipments" ON shipments
 -- ============================================
 ALTER TABLE returns ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "Users can manage own returns" ON returns;
+DROP POLICY IF EXISTS "Users can view own returns" ON returns;
 CREATE POLICY "Users can view own returns" ON returns
   FOR SELECT USING (store_id = public.get_user_id() OR public.is_admin());
 
+DROP POLICY IF EXISTS "Users can manage own returns" ON returns;
 CREATE POLICY "Users can manage own returns" ON returns
   FOR ALL USING (store_id = public.get_user_id() OR public.is_admin());
 
@@ -274,10 +280,11 @@ CREATE POLICY "Users can manage own returns" ON returns
 -- ============================================
 ALTER TABLE installments ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "Users can manage own installments" ON installments;
+DROP POLICY IF EXISTS "Users can view own installments" ON installments;
 CREATE POLICY "Users can view own installments" ON installments
   FOR SELECT USING (store_id = public.get_user_id() OR public.is_admin());
 
+DROP POLICY IF EXISTS "Users can manage own installments" ON installments;
 CREATE POLICY "Users can manage own installments" ON installments
   FOR ALL USING (store_id = public.get_user_id() OR public.is_admin());
 
@@ -286,10 +293,11 @@ CREATE POLICY "Users can manage own installments" ON installments
 -- ============================================
 ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "Users can manage own notifications" ON notifications;
+DROP POLICY IF EXISTS "Users can view own notifications" ON notifications;
 CREATE POLICY "Users can view own notifications" ON notifications
   FOR SELECT USING (store_id = public.get_user_id() OR public.is_admin());
 
+DROP POLICY IF EXISTS "Users can manage own notifications" ON notifications;
 CREATE POLICY "Users can manage own notifications" ON notifications
   FOR ALL USING (store_id = public.get_user_id() OR public.is_admin());
 
@@ -298,10 +306,11 @@ CREATE POLICY "Users can manage own notifications" ON notifications
 -- ============================================
 ALTER TABLE warehouses ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "Users can manage own warehouses" ON warehouses;
+DROP POLICY IF EXISTS "Users can view own warehouses" ON warehouses;
 CREATE POLICY "Users can view own warehouses" ON warehouses
   FOR SELECT USING (store_id = public.get_user_id() OR public.is_admin());
 
+DROP POLICY IF EXISTS "Users can manage own warehouses" ON warehouses;
 CREATE POLICY "Users can manage own warehouses" ON warehouses
   FOR ALL USING (store_id = public.get_user_id() OR public.is_admin());
 
@@ -310,10 +319,11 @@ CREATE POLICY "Users can manage own warehouses" ON warehouses
 -- ============================================
 ALTER TABLE team_members ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "Users can manage own team_members" ON team_members;
+DROP POLICY IF EXISTS "Users can view own team_members" ON team_members;
 CREATE POLICY "Users can view own team_members" ON team_members
   FOR SELECT USING (store_id = public.get_user_id() OR public.is_admin());
 
+DROP POLICY IF EXISTS "Users can manage own team_members" ON team_members;
 CREATE POLICY "Users can manage own team_members" ON team_members
   FOR ALL USING (store_id = public.get_user_id() OR public.is_admin());
 
@@ -322,10 +332,11 @@ CREATE POLICY "Users can manage own team_members" ON team_members
 -- ============================================
 ALTER TABLE activity_log ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "Users can manage own activity_log" ON activity_log;
+DROP POLICY IF EXISTS "Users can view own activity_log" ON activity_log;
 CREATE POLICY "Users can view own activity_log" ON activity_log
   FOR SELECT USING (store_id = public.get_user_id() OR public.is_admin());
 
+DROP POLICY IF EXISTS "Users can manage own activity_log" ON activity_log;
 CREATE POLICY "Users can manage own activity_log" ON activity_log
   FOR ALL USING (store_id = public.get_user_id() OR public.is_admin());
 

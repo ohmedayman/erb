@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { getDocsFromCollection, updateDocInCollection } from "@/lib/localdb";
 import { supabase } from "@/lib/supabase";
+import { toast } from "@/components/Toast";
 
 const tabs = [
   { id: "store", label: "معلومات المحل", icon: Store },
@@ -42,11 +43,16 @@ export default function SettingsPage() {
   }, []);
 
   const handleSave = async () => {
-    if (storeData?.id) {
-      await updateDocInCollection("stores", storeData.id, storeData);
+    try {
+      if (storeData?.id) {
+        await updateDocInCollection("stores", storeData.id, storeData);
+      }
+      toast.success("تم حفظ التغييرات بنجاح");
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch {
+      toast.error("فيه مشكلة حصلت أثناء الحفظ");
     }
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
   };
 
   const handlePasswordChange = async () => {

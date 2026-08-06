@@ -8,7 +8,8 @@ import {
   ShoppingCart, ArrowRight, CheckCircle, Star, Zap, Menu, X,
   Play, TrendingUp, Clock, HeadphonesIcon, Store, CreditCard,
   UserPlus, Settings, Rocket, ArrowLeft, Shield, Smartphone,
-  Globe, FileText, Truck, Barcode,
+  Globe, FileText, Truck, Barcode, MessageSquare, HelpCircle,
+  ChevronDown,
 } from "lucide-react";
 import Image from "next/image";
 import SEOHead from "@/components/SEOHead";
@@ -188,6 +189,7 @@ const moreFeatures = [
 
 export default function HomePage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
   const { scrollYProgress } = useScroll();
   const heroOpacity = useTransform(scrollYProgress, [0, 0.3], [1, 0]);
   const heroScale = useTransform(scrollYProgress, [0, 0.3], [1, 0.95]);
@@ -464,6 +466,20 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Trusted By */}
+      <section className="py-12 px-4 sm:px-6 lg:px-8 bg-white border-t border-gray-100">
+        <div className="max-w-5xl mx-auto">
+          <AnimateOnScroll>
+            <p className="text-center text-sm text-gray-400 mb-8 font-medium">شركات ومحلات بتثق في StockFlow</p>
+            <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-16 opacity-40">
+              {["محل أحمد للملابس", "شركة نور للإلكترونيات", "سوبر ماركت هاني", "دار الموبايلات", "متجر الزهراء"].map((name, i) => (
+                <span key={i} className="text-base sm:text-lg font-bold text-gray-900 whitespace-nowrap">{name}</span>
+              ))}
+            </div>
+          </AnimateOnScroll>
+        </div>
+      </section>
+
       {/* How It Works */}
       <section className="py-24 px-4 sm:px-6 lg:px-8 bg-white">
         <div className="max-w-5xl mx-auto">
@@ -705,6 +721,44 @@ export default function HomePage() {
               ))}
             </div>
           </AnimateOnScroll>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-white">
+        <div className="max-w-3xl mx-auto">
+          <AnimateOnScroll className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 bg-orange-50 text-orange-600 px-4 py-2 rounded-full text-sm font-semibold mb-4 border border-orange-100">
+              <HelpCircle className="w-4 h-4" /> أسئلة شائعة
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">عندك سؤال؟</h2>
+          </AnimateOnScroll>
+
+          {[
+            { q: "إزاي أبدأ استخدام StockFlow؟", a: "سجّل حسابك في 30 ثانية، اختار الباقة المناسبة، وابدأ إضافة منتجاتك ومعلومات محلك. خلاص، كده تقدر تشتغل!" },
+            { q: "هل فيه فترة تجربة مجانية؟", a: "أيوه! كل باقة فيها 14 يوم تجربة مجانية. جرّب النظام كله من غير أي التزام أو بطاقة ائتمان." },
+            { q: "البيانات بتاعتي في أمان؟", a: "أكيد! بياناتك محمية بتشفير AES-256 ونظام أمان متعدد الطبقات. السيرفرات على Supabase (AWS) مع نسخ احتياطي تلقائي." },
+            { q: "أقدر أشتغل أوفلاين؟", a: "أيوه! StockFlow PWA — يعني تقدر تضيف بيانات وأنت أوفلاين وهي بتتسجل تلقائي أونلاين." },
+            { q: "بشتغل على الموبايل؟", a: "طبعاً! الواجهة متجاوبة 100% وتشتغل على أي جهاز — موبايل، تابلت، أو كمبيوتر." },
+            { q: "إزاي أدفع؟", a: "الدفع عبر فودافون كاش أو فوري. بعد التأكيد، حسابك بيتشفع فوراً من غير انتظار." },
+          ].map((faq, i) => (
+            <AnimateOnScroll key={i} delay={i * 0.05}>
+              <div className="border border-gray-200 rounded-xl mb-3 overflow-hidden hover:border-orange-200 transition-colors">
+                <button
+                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  className="w-full flex items-center justify-between px-6 py-4 text-right"
+                >
+                  <span className="font-bold text-gray-900">{faq.q}</span>
+                  <ChevronDown className={`w-5 h-5 text-gray-500 transition-transform ${openFaq === i ? "rotate-180" : ""}`} />
+                </button>
+                {openFaq === i && (
+                  <div className="px-6 pb-4 text-gray-600 leading-relaxed text-sm">
+                    {faq.a}
+                  </div>
+                )}
+              </div>
+            </AnimateOnScroll>
+          ))}
         </div>
       </section>
 

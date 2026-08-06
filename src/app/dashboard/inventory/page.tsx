@@ -1,12 +1,18 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Package, AlertTriangle } from "lucide-react";
+import { Package, AlertTriangle, Search, Filter } from "lucide-react";
 import { getDocsFromCollection } from "@/lib/localdb";
+
+const Skeleton = ({ className }: { className?: string }) => (
+  <div className={`animate-pulse bg-muted rounded ${className}`} />
+);
 
 export default function InventoryPage() {
   const [inventory, setInventory] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
 
   useEffect(() => {
     const fetchInventory = async () => {
@@ -30,8 +36,15 @@ export default function InventoryPage() {
     fetchInventory();
   }, []);
 
+  const filtered = inventory.filter((item) => {
+    const matchesSearch = item.name?.toLowerCase().includes(search.toLowerCase()) || item.sku?.toLowerCase().includes(search.toLowerCase());
+    const matchesStatus = statusFilter === "all" || item.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
   const totalStock = inventory.reduce((a, b) => a + b.stock, 0);
   const lowItems = inventory.filter((i) => i.status === "Low" || i.status === "Critical").length;
+  const criticalItems = inventory.filter((i) => i.status === "Critical").length;
 
   const statusConfig: Record<string, { bg: string; text: string; label: string }> = {
     Healthy: { bg: "bg-green-50", text: "text-green-600", label: "سليم" },
@@ -46,7 +59,7 @@ export default function InventoryPage() {
         <p className="text-muted-foreground text-sm mt-1">مستويات المخزون على طول في كل المخازن</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
         <div className="bg-card rounded-xl border border-border p-5">
           <p className="text-sm text-muted-foreground">اجمالي وحدات المخزون</p>
           <p className="text-2xl font-bold text-foreground mt-1">{loading ? "..." : totalStock.toLocaleString("ar-EG")}</p>
@@ -56,8 +69,40 @@ export default function InventoryPage() {
           <p className="text-2xl font-bold text-yellow-600 mt-1">{loading ? "..." : lowItems}</p>
         </div>
         <div className="bg-card rounded-xl border border-border p-5">
+          <p className="text-sm text-muted-foreground">خطورة حرجة</p>
+          <p className="text-2xl font-bold text-red-600 mt-1">{loading ? "..." : criticalItems}</p>
+        </div>
+        <div className="bg-card rounded-xl border border-border p-5">
           <p className="text-sm text-muted-foreground">اجمالي المنتجات</p>
           <p className="text-2xl font-bold text-foreground mt-1">{loading ? "..." : inventory.length}</p>
+        </div>
+      </div>
+
+      <div className="bg-card rounded-xl border border-border p-4">
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1">
+            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="البحث بالاسم أو الكود..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-4 pr-10 py-2 bg-muted rounded-lg text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
+            />
+          </div>
+          <div className="relative">
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="appearance-none px-4 py-2 pl-8 bg-muted rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+            >
+              <option value="all">الكل</option>
+              <option value="Healthy">سليم</option>
+              <option value="Low">قليل</option>
+              <option value="Critical">خطر</option>
+            </select>
+            <Filter className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+          </div>
         </div>
       </div>
 
@@ -79,11 +124,26 @@ export default function InventoryPage() {
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={6} className="px-5 py-8 text-center text-muted-foreground text-sm">بيتحمّل...</td></tr>
-              ) : inventory.length === 0 ? (
-                <tr><td colSpan={6} className="px-5 py-8 text-center text-muted-foreground text-sm">مفيش بيانات مخزون</td></tr>
+                <tr><td colSpan={6} className="px-5 py-4">
+                  <div className="space-y-3">
+                    {[1, 2, 3, 4].map((i) => (
+                      <div key={i} className="flex items-center gap-3">
+                        <Skeleton className="h-9 w-9 rounded-lg shrink-0" />
+                        <Skeleton className="h-4 flex-1" />
+                        <Skeleton className="h-4 w-20" />
+                        <Skeleton className="h-4 w-24" />
+                        <Skeleton className="h-4 w-16" />
+                        <Skeleton className="h-5 w-16 rounded-full" />
+                      </div>
+                    ))}
+                  </div>
+                </td></tr>
+              ) : filtered.length === 0 ? (
+                <tr><td colSpan={6} className="px-5 py-8 text-center text-muted-foreground text-sm">
+                  {search ? "مفيش نتايج للبحث ده" : "مفيش بيانات مخزون"}
+                </td></tr>
               ) : (
-                inventory.map((item, i) => {
+                filtered.map((item, i) => {
                   const cfg = statusConfig[item.status] || statusConfig.Healthy;
                   return (
                     <tr key={i} className="border-b border-border last:border-0 hover:bg-muted/50 transition-colors">

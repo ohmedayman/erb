@@ -10,51 +10,33 @@ const COOKIE_NAME = "sf_auth";
 
 const ADMIN_EMAILS = ["admin@stockflow.com", "m44408335@gmail.com", "admin@stockflow.vexonet.online"];
 
-// Routes that require authentication
-const PROTECTED_ROUTES = ["/dashboard", "/admin", "/checkout", "/onboarding"];
-
-// Routes that require approved subscription
+const PROTECTED_ROUTES = ["/dashboard", "/admin", "/onboarding"];
 const SUBSCRIPTION_ROUTES = ["/dashboard"];
-
-// Routes that require admin access
 const ADMIN_ROUTES = ["/admin"];
+const PUBLIC_PREFIXES = ["/login", "/signup", "/checkout", "/privacy", "/terms", "/setup", "/api", "/_next", "/icons"];
 
-// Public routes that don't need auth
-const PUBLIC_ROUTES = ["/", "/login", "/signup", "/checkout", "/privacy", "/terms", "/setup", "/api/auth"];
-
-async function getAuthFromCookie(request: NextRequest) {
-  const token = request.cookies.get(COOKIE_NAME)?.value;
-  if (!token) return null;
-
-  try {
-    const { payload } = await jwtVerify(token, JWT_SECRET);
-    return payload as {
-      userId: string;
-      email: string;
-      role: string;
-      subscriptionStatus: string;
-    };
-  } catch {
-    return null;
-  }
-}
-
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Add security headers to all responses
+  // Security headers
   const response = NextResponse.next();
   response.headers.set("X-Frame-Options", "DENY");
   response.headers.set("X-Content-Type-Options", "nosniff");
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   response.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
 
-  // Skip auth for public routes
-  const isPublicRoute = PUBLIC_ROUTES.some((route) => pathname === route || pathname.startsWith(route + "/"));
-  if (isPublicRoute) return response;
-
-  // Skip static files
-  if (pathname.startsWith("/_next") || pathname.startsWith("/icons") || pathname === "/favicon.ico" || pathname === "/manifest.json" || pathname === "/sw.js" || pathname === "/sitemap.xml" || pathname === "/robots.txt") {
+  // Skip static files and public routes
+  if (
+    pathname.startsWith("/_next") ||
+    pathname.startsWith("/icons") ||
+    pathname === "/favicon.ico" ||
+    pathname === "/manifest.json" ||
+    pathname === "/sw.js" ||
+    pathname === "/sitemap.xml" ||
+    pathname === "/robots.txt" ||
+    pathname === "/" ||
+    PUBLIC_PREFIXES.some((p) => pathname.startsWith(p))
+  ) {
     return response;
   }
 
@@ -63,45 +45,45 @@ export function middleware(request: NextRequest) {
   if (!needsAuth) return response;
 
   // Get auth from cookie
-  const auth = getAuthFromCookie(request);
+  const token = request.cookies.get(COOKIE_NAME)?.value;
+  if (!token) {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
 
-  // We need to use a synchronous approach since middleware can't be async for cookies
-  // Actually middleware CAN be async in Next.js 13+
-  return (async () => {
-    const authData = await auth;
+  let authData: any;
+  try {
+    const { payload } = await jwtVerify(token, JWT_SECRET);
+    authData = payload;
+  } catch {
+    // Invalid token — clear cookie and redirect to login
+    const res = NextResponse.redirect(new URL("/login", request.url));
+    res.cookies.set(COOKIE_NAME, "", { maxAge: 0, path: "/" });
+    return res;
+  }
 
-    if (!authData) {
-      // Not logged in — redirect to login
-      const loginUrl = new URL("/login", request.url);
-      loginUrl.searchParams.set("redirect", pathname);
-      return NextResponse.redirect(loginUrl);
+  // Admin routes — must be admin email
+  const isAdminRoute = ADMIN_ROUTES.some((route) => pathname.startsWith(route));
+  if (isAdminRoute) {
+    const isAdmin = ADMIN_EMAILS.includes(authData.email?.toLowerCase?.()?.trim());
+    if (!isAdmin) {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
     }
+  }
 
-    // Check admin routes
-    const isAdminRoute = ADMIN_ROUTES.some((route) => pathname.startsWith(route));
-    if (isAdminRoute) {
-      const isAdmin = ADMIN_EMAILS.includes(authData.email.toLowerCase().trim());
-      if (!isAdmin) {
-        return NextResponse.redirect(new URL("/dashboard", request.url));
+  // Subscription routes — must have approved subscription
+  const needsSubscription = SUBSCRIPTION_ROUTES.some((route) => pathname.startsWith(route));
+  if (needsSubscription) {
+    const status = authData.subscriptionStatus;
+    if (status !== "active" && status !== "approved") {
+      if (status === "pending") {
+        // Redirect back to login to show pending message
+        return NextResponse.redirect(new URL("/login", request.url));
       }
+      return NextResponse.redirect(new URL("/checkout", request.url));
     }
+  }
 
-    // Check subscription routes
-    const needsSubscription = SUBSCRIPTION_ROUTES.some((route) => pathname.startsWith(route));
-    if (needsSubscription) {
-      const hasActiveSubscription = ["active", "approved"].includes(authData.subscriptionStatus);
-      if (!hasActiveSubscription) {
-        // Check if they have a pending order
-        if (authData.subscriptionStatus === "pending") {
-          return NextResponse.redirect(new URL("/login", request.url));
-        }
-        // No order — go to checkout
-        return NextResponse.redirect(new URL("/checkout", request.url));
-      }
-    }
-
-    return response;
-  })();
+  return response;
 }
 
 export const config = {

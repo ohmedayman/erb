@@ -143,7 +143,7 @@ export default function LoginPage() {
         }
 
         // Set auth cookie for middleware
-        await fetch("/api/auth/session", {
+        const sessionRes = await fetch("/api/auth/session", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -153,9 +153,15 @@ export default function LoginPage() {
           }),
         });
 
+        if (isAdmin) {
+          // Full page reload to ensure cookie is set before middleware runs
+          window.location.href = "/admin";
+          return;
+        }
+
         if (!orders || orders.length === 0) {
           // No subscription order — go to checkout
-          router.push("/checkout");
+          window.location.href = "/checkout";
           return;
         }
 
@@ -170,9 +176,9 @@ export default function LoginPage() {
           // Approved — check if onboarding done
           const prefs = JSON.parse(localStorage.getItem("user_prefs") || "null");
           if (!prefs?.onboardingDone) {
-            router.push("/onboarding");
+            window.location.href = "/onboarding";
           } else {
-            router.push("/dashboard");
+            window.location.href = "/dashboard";
           }
           return;
         }

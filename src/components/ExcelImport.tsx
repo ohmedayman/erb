@@ -83,8 +83,34 @@ export default function ExcelImport({
 
           const mappedData = jsonData.map((row: any) => {
             const mapped: any = {};
+            const rowKeys = Object.keys(row);
+
             columnMappings.forEach((mapping) => {
-              let value = row[mapping.excelColumn] ?? row[mapping.label] ?? "";
+              let value = "";
+
+              // 1. Try exact match on excelColumn
+              if (row[mapping.excelColumn] !== undefined && row[mapping.excelColumn] !== "") {
+                value = row[mapping.excelColumn];
+              }
+              // 2. Try exact match on label
+              else if (row[mapping.label] !== undefined && row[mapping.label] !== "") {
+                value = row[mapping.label];
+              }
+              // 3. Try case-insensitive match
+              else {
+                const searchTerms = [mapping.excelColumn, mapping.label, mapping.dbField].map(s => s.toLowerCase());
+                for (const key of rowKeys) {
+                  const keyLower = key.toLowerCase().trim();
+                  for (const term of searchTerms) {
+                    if (keyLower === term || keyLower.includes(term) || term.includes(keyLower)) {
+                      value = row[key];
+                      break;
+                    }
+                  }
+                  if (value !== "") break;
+                }
+              }
+
               if (mapping.transform) {
                 value = mapping.transform(value);
               }

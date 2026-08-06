@@ -261,12 +261,12 @@ export default function ProductsPage() {
           <ExcelImport
             title="المنتجات"
             columnMappings={[
-              { excelColumn: "الاسم", dbField: "name", label: "الاسم", required: true },
-              { excelColumn: "كود المنتج", dbField: "sku", label: "كود المنتج" },
-              { excelColumn: "الفئة", dbField: "category", label: "الفئة" },
-              { excelColumn: "السعر", dbField: "price", label: "السعر", required: true, transform: (v) => parseFloat(v) || 0 },
-              { excelColumn: "المخزون", dbField: "stock", label: "المخزون", transform: (v) => parseInt(v) || 0 },
-              { excelColumn: "الحد الأدنى", dbField: "minStock", label: "الحد الأدنى", transform: (v) => parseInt(v) || 10 },
+              { excelColumn: "الاسم", dbField: "name", label: "Name", required: true },
+              { excelColumn: "كود المنتج", dbField: "sku", label: "SKU" },
+              { excelColumn: "الفئة", dbField: "category", label: "Category" },
+              { excelColumn: "السعر", dbField: "price", label: "Price", required: true, transform: (v) => parseFloat(v) || 0 },
+              { excelColumn: "المخزون", dbField: "stock", label: "Stock", transform: (v) => parseInt(v) || 0 },
+              { excelColumn: "الحد الأدنى", dbField: "minStock", label: "Min Stock", transform: (v) => parseInt(v) || 10 },
             ]}
             sampleHeaders={["الاسم", "كود المنتج", "الفئة", "السعر", "المخزون", "الحد الأدنى"]}
             onImport={async (data) => {

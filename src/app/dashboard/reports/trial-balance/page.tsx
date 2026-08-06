@@ -9,6 +9,7 @@ import {
   Download,
 } from "lucide-react";
 import { getDocsFromCollection } from "@/lib/localdb";
+import { generateReportPDF } from "@/lib/pdf-export";
 
 interface TrialBalanceRow {
   code: string;
@@ -172,12 +173,22 @@ export default function TrialBalancePage() {
           <select
             value={selectedYear}
             onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-            className="px-3 py-2 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
+            className="px-3 py-2 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
           >
             {[2024, 2025, 2026].map((y) => (
               <option key={y} value={y}>{y}</option>
             ))}
           </select>
+          <button
+            onClick={() => {
+              if (rows.length > 0) {
+                generateReportPDF("ميزان المراجعة", rows.map(r => ({ name: r.name, code: r.code, debit: r.debit, credit: r.credit, type: r.type })), ["name", "code", "debit", "credit", "type"]);
+              }
+            }}
+            className="flex items-center gap-2 bg-red-500 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-red-600 transition-colors"
+          >
+            <Download className="w-4 h-4" /> PDF
+          </button>
           <button
             onClick={fetchData}
             className="flex items-center gap-2 bg-muted px-3 py-2 rounded-lg text-sm font-medium hover:bg-muted/80 transition-colors"

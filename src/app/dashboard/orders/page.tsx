@@ -313,7 +313,7 @@ export default function OrdersPage() {
                       {order.items} عناصر
                     </td>
                     <td className="px-5 py-3 text-sm font-medium text-foreground">
-                      ${order.total}
+                      {(order.total || 0).toLocaleString("ar-EG")} ج.م
                     </td>
                     <td className="px-5 py-3">
                       <span

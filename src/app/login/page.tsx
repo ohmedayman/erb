@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Eye, EyeOff, Globe, Mail, Lock, Loader2, CheckCircle, ArrowLeft, MessageCircle, Headphones, Shield } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, Loader2, CheckCircle, ArrowLeft, MessageCircle, Headphones, Shield } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { trackUserActivity } from "@/lib/user-activity";
 import Image from "next/image";

@@ -214,7 +214,7 @@ export default function AdminOrdersPage() {
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
       ) : filteredOrders.length === 0 ? (
-        <div className="text-center py-20 bg-white rounded-2xl border border-border">
+        <div className="text-center py-20 bg-card rounded-2xl border border-border">
           <Package className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
           <p className="text-lg font-medium text-foreground">مفيش طلبات</p>
           <p className="text-sm text-muted-foreground mt-1">مفيش طلبات دفع حالياً</p>
@@ -230,7 +230,7 @@ export default function AdminOrdersPage() {
                 key={order.id}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-white rounded-2xl border border-border p-5 hover:shadow-lg transition-all cursor-pointer"
+                className="bg-card rounded-2xl border border-border p-5 hover:shadow-lg transition-all cursor-pointer"
                 onClick={() => { setSelectedOrder(order); setShowDetail(true); setAdminNote(""); }}
               >
                 <div className="flex items-center justify-between">
@@ -272,7 +272,7 @@ export default function AdminOrdersPage() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
+              className="bg-card rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
             >
               <div className="p-6 border-b border-border">
                 <div className="flex items-center justify-between">

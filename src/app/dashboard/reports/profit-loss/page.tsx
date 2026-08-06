@@ -63,18 +63,31 @@ export default function ProfitLossPage() {
         const netProfit = grossProfit;
         const profitMargin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
 
+        const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
+        const monthlyBreakdown: MonthlyBreakdown[] = months.slice(0, 6).map((month, i) => {
+          const monthInvs = invoicesData.filter((inv: any) => new Date(inv.created_at || inv.createdAt).getMonth() === i);
+          const monthExps = expensesData.filter((exp: any) => new Date(exp.date || exp.created_at).getMonth() === i);
+          const revenue = monthInvs.reduce((s: number, inv: any) => s + (inv.total || 0), 0);
+          const expenses = monthExps.reduce((s: number, exp: any) => s + (exp.amount || 0), 0);
+          return { month, revenue, expenses, profit: revenue - expenses };
+        });
+
+        const expenseCategoriesRaw = expensesData.reduce((acc: any[], e: any) => {
+          const existing = acc.find((a) => a.key === e.category);
+          if (existing) { existing.amount += e.amount || 0; } else { acc.push({ key: e.category || "other", label: e.category || "أخرى", amount: e.amount || 0, percentage: 0 }); }
+          return acc;
+        }, []);
+        const totalExpensesForPct = expenseCategoriesRaw.reduce((s: number, c: any) => s + c.amount, 0);
+        expenseCategoriesRaw.forEach((c: any) => { c.percentage = totalExpensesForPct > 0 ? (c.amount / totalExpensesForPct) * 100 : 0; });
+
         setData({
           totalRevenue,
           totalExpenses,
           grossProfit,
           netProfit,
           profitMargin,
-          monthlyBreakdown: [],
-          expenseCategories: expensesData.reduce((acc: any[], e: any) => {
-            const existing = acc.find((a) => a.key === e.category);
-            if (existing) { existing.amount += e.amount || 0; } else { acc.push({ key: e.category || "other", label: e.category || "أخرى", amount: e.amount || 0, percentage: 0 }); }
-            return acc;
-          }, []),
+          monthlyBreakdown,
+          expenseCategories: expenseCategoriesRaw,
         });
       } catch {
       } finally {
@@ -139,7 +152,14 @@ export default function ProfitLossPage() {
           </p>
         </div>
         <button
-          onClick={() => { if (data?.monthlyBreakdown?.length) generateReportPDF("تقرير الأرباح والخسائر", data.monthlyBreakdown.map(m => ({ month: m.month, revenue: m.revenue, expenses: m.expenses, profit: m.profit })), ["month", "revenue", "expenses", "profit"]); }}
+          onClick={() => {
+            if (data) {
+              const reportData = data.monthlyBreakdown.length > 0
+                ? data.monthlyBreakdown.map(m => ({ month: m.month, revenue: m.revenue, expenses: m.expenses, profit: m.profit }))
+                : [{ month: "الإجمالي", revenue: data.totalRevenue, expenses: data.totalExpenses, profit: data.netProfit }];
+              generateReportPDF("تقرير الأرباح والخسائر", reportData, ["month", "revenue", "expenses", "profit"]);
+            }
+          }}
           className="flex items-center gap-2 bg-red-500 text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-red-600 transition-colors"
         >
           <Download className="w-4 h-4" />

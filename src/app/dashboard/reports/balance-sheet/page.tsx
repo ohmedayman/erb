@@ -7,8 +7,10 @@ import {
   TrendingDown,
   DollarSign,
   RefreshCw,
+  Download,
 } from "lucide-react";
 import { getDocsFromCollection } from "@/lib/localdb";
+import { generateReportPDF } from "@/lib/pdf-export";
 
 interface BalanceSheetData {
   currentAssets: { name: string; amount: number }[];
@@ -165,12 +167,28 @@ export default function BalanceSheetPage() {
           <select
             value={selectedYear}
             onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-            className="px-3 py-2 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
+            className="px-3 py-2 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
           >
             {[2024, 2025, 2026].map((y) => (
               <option key={y} value={y}>{y}</option>
             ))}
           </select>
+          <button
+            onClick={() => {
+              if (data) {
+                const allItems = [
+                  ...data.currentAssets.map(i => ({ name: i.name, amount: i.amount, type: "أصول متداولة" })),
+                  ...data.nonCurrentAssets.map(i => ({ name: i.name, amount: i.amount, type: "أصول غير متداولة" })),
+                  ...data.currentLiabilities.map(i => ({ name: i.name, amount: i.amount, type: "التزامات متداولة" })),
+                  ...data.equity.map(i => ({ name: i.name, amount: i.amount, type: "حقوق الملكية" })),
+                ];
+                generateReportPDF("الميزانية العمومية", allItems, ["name", "amount", "type"]);
+              }
+            }}
+            className="flex items-center gap-2 bg-red-500 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-red-600 transition-colors"
+          >
+            <Download className="w-4 h-4" /> PDF
+          </button>
           <button
             onClick={fetchData}
             className="flex items-center gap-2 bg-muted px-3 py-2 rounded-lg text-sm font-medium hover:bg-muted/80 transition-colors"

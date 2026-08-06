@@ -12,6 +12,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { getDocsFromCollection } from "@/lib/localdb";
+import { generateReportPDF } from "@/lib/pdf-export";
 
 interface CashFlowData {
   operating: { label: string; amount: number; type: "in" | "out" }[];
@@ -201,6 +202,17 @@ export default function CashFlowPage() {
         </div>
         <div className="flex items-center gap-2">
           <button
+            onClick={() => {
+              if (data) {
+                const allItems = [...data.operating, ...data.investing, ...data.financing];
+                generateReportPDF("قائمة التدفقات النقدية", allItems.map(i => ({ name: i.label, amount: i.amount, type: i.type === "in" ? "وارد" : "صادر" })), ["name", "amount", "type"]);
+              }
+            }}
+            className="flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-600 transition-colors"
+          >
+            <Download className="w-4 h-4" /> تصدير PDF
+          </button>
+          <button
             onClick={fetchData}
             className="flex items-center gap-2 bg-muted px-3 py-2 rounded-lg text-sm font-medium hover:bg-muted/80 transition-colors"
           >
@@ -229,7 +241,7 @@ export default function CashFlowPage() {
             <select
               value={selectedMonth}
               onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
-              className="px-3 py-1.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
+              className="px-3 py-1.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
             >
               {monthNames.map((name, i) => (
                 <option key={i} value={i}>{name}</option>
@@ -238,7 +250,7 @@ export default function CashFlowPage() {
             <select
               value={selectedYear}
               onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-              className="px-3 py-1.5 rounded-lg border border-border bg-white text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
+              className="px-3 py-1.5 rounded-lg border border-border bg-card text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
             >
               {[2024, 2025, 2026].map((y) => (
                 <option key={y} value={y}>{y}</option>

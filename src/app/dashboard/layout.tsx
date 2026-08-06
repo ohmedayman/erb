@@ -449,7 +449,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </div>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-t border-gray-200 safe-bottom">
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-xl border-t border-border safe-bottom">
         <div className="grid grid-cols-5 h-16">
           {[
             { href: "/dashboard", icon: LayoutDashboard, label: "البورد" },
@@ -465,13 +465,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 href={item.href}
                 className={`flex flex-col items-center justify-center gap-0.5 transition-colors ${
                   isActive
-                    ? "text-orange-500"
-                    : "text-gray-400 active:text-orange-400"
+                    ? "text-primary"
+                    : "text-muted-foreground"
                 }`}
               >
-                <item.icon className={`w-5 h-5 ${isActive ? "text-orange-500" : ""}`} />
+                <item.icon className={`w-5 h-5 ${isActive ? "text-primary" : ""}`} />
                 <span className="text-[10px] font-medium">{item.label}</span>
-                {isActive && <div className="w-1 h-1 rounded-full bg-orange-500 mt-0.5" />}
+                {isActive && <div className="w-1 h-1 rounded-full bg-primary mt-0.5" />}
               </Link>
             );
           })}

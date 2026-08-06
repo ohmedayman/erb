@@ -92,18 +92,30 @@ export default function LoginPage() {
         }
 
         // Check subscription status
-        const { data: orders } = await supabase
-          .from("subscription_orders")
-          .select("id, status")
-          .eq("user_id", data.user.id)
-          .order("created_at", { ascending: false })
-          .limit(1);
+        let orders: any[] | null = null;
+        try {
+          const res = await supabase
+            .from("subscription_orders")
+            .select("id, status")
+            .eq("user_id", data.user.id)
+            .order("created_at", { ascending: false })
+            .limit(1);
+          orders = res.data;
+        } catch {
+          // Table might not exist
+        }
 
-        const { data: storeData } = await supabase
-          .from("stores")
-          .select("id, name")
-          .eq("id", data.user.id)
-          .single();
+        let storeData: any = null;
+        try {
+          const res = await supabase
+            .from("stores")
+            .select("id, name")
+            .eq("id", data.user.id)
+            .single();
+          storeData = res.data;
+        } catch {
+          // Table might not exist
+        }
 
         if (storeData) {
           localStorage.setItem("store", JSON.stringify({ id: storeData.id, name: storeData.name }));

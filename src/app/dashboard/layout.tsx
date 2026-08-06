@@ -8,7 +8,7 @@ import {
   Users, Bell, Search, Menu, X, LogOut, ChevronDown, Truck, ClipboardList,
   FileText, BellRing, ArrowLeftRight, RotateCcw, Activity, Building2, TruckIcon,
   Receipt, CreditCard, UserCircle, Wallet, BookOpen, NotebookPen, UserCog, PieChart,
-  CalendarCheck, TrendingUp, Scale, FileSpreadsheet, Upload,
+  CalendarCheck, TrendingUp, Scale, FileSpreadsheet, Upload, Gift,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import Image from "next/image";
@@ -25,6 +25,7 @@ const allSidebarLinks: Record<string, { href: string; label: string; icon: any; 
   orders: { href: "/dashboard/orders", label: "الأوردرات", icon: ShoppingCart, group: "sales" },
   invoices: { href: "/dashboard/invoices", label: "الفواتير", icon: Receipt, group: "sales" },
   customers: { href: "/dashboard/customers", label: "الزبائن", icon: UserCircle, group: "sales" },
+  loyalty: { href: "/dashboard/loyalty", label: "نظام الولاء", icon: Gift, group: "sales" },
   inventory: { href: "/dashboard/inventory", label: "المخزون", icon: ClipboardList, group: "inventory" },
   stockMovements: { href: "/dashboard/stock-movements", label: "حركات المخزون", icon: ArrowLeftRight, group: "inventory" },
   warehouses: { href: "/dashboard/warehouses", label: "المستودعات", icon: Building2, group: "inventory" },
@@ -65,7 +66,7 @@ const featureToLinks: Record<string, string[]> = {
   products: ["products", "productImport"],
   orders: ["orders"],
   invoices: ["invoices", "installments"],
-  customers: ["customers"],
+  customers: ["customers", "loyalty"],
   inventory: ["inventory", "stockMovements", "warehouses", "suppliers", "purchaseOrders"],
   expenses: ["expenses", "accounts", "journal", "cashFlow", "balanceSheet", "trialBalance", "accountStatements"],
   employees: ["employees", "team"],

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search, Plus, X, Edit2, Download } from "lucide-react";
+import { Search, Plus, X, Edit2, Download, Star, Coins, Award, Gift } from "lucide-react";
 import { getDocsFromCollection, addDocToCollection, updateDocInCollection } from "@/lib/localdb";
 import { exportToExcel } from "@/lib/excel";
 import ExcelImport from "@/components/ExcelImport";
@@ -15,6 +15,10 @@ interface Customer {
   address: string;
   type: string;
   balance: number;
+  cashbackBalance: number;
+  points: number;
+  totalSpent: number;
+  loyaltyTier: string;
   createdAt: string;
 }
 
@@ -25,6 +29,13 @@ const Skeleton = ({ className }: { className?: string }) => (
 const typeConfig: Record<string, { label: string; class: string }> = {
   individual: { label: "فرد", class: "bg-blue-100 text-blue-700" },
   company: { label: "شركة", class: "bg-purple-100 text-purple-700" },
+};
+
+const tierConfig: Record<string, { label: string; class: string; icon: string }> = {
+  platinum: { label: "بلاتيني", class: "bg-purple-100 text-purple-700 border border-purple-200", icon: "💎" },
+  gold: { label: "ذهبي", class: "bg-yellow-100 text-yellow-700 border border-yellow-200", icon: "🥇" },
+  silver: { label: "فضي", class: "bg-gray-100 text-gray-700 border border-gray-200", icon: "🥈" },
+  bronze: { label: "برونزي", class: "bg-orange-100 text-orange-700 border border-orange-200", icon: "🥉" },
 };
 
 export default function CustomersPage() {
@@ -41,6 +52,10 @@ export default function CustomersPage() {
     address: "",
     type: "individual",
     balance: 0,
+    cashbackBalance: 0,
+    points: 0,
+    totalSpent: 0,
+    loyaltyTier: "bronze",
   });
 
   const fetchCustomers = async () => {
@@ -74,6 +89,10 @@ export default function CustomersPage() {
         address: customer.address,
         type: customer.type,
         balance: customer.balance,
+        cashbackBalance: customer.cashbackBalance || 0,
+        points: customer.points || 0,
+        totalSpent: customer.totalSpent || 0,
+        loyaltyTier: customer.loyaltyTier || "bronze",
       });
     } else {
       setEditingCustomer(null);
@@ -84,6 +103,10 @@ export default function CustomersPage() {
         address: "",
         type: "individual",
         balance: 0,
+        cashbackBalance: 0,
+        points: 0,
+        totalSpent: 0,
+        loyaltyTier: "bronze",
       });
     }
     setShowModal(true);
@@ -114,15 +137,20 @@ export default function CustomersPage() {
         <p className="text-muted-foreground text-sm mt-1">إدارة بيانات الزبائن وأرصدتهم</p>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
         {[
-          { label: "إجمالي الزبائن", value: customers.length, color: "text-foreground" },
-          { label: "أفراد", value: customers.filter((c) => c.type === "individual").length, color: "text-blue-600" },
-          { label: "شركات", value: customers.filter((c) => c.type === "company").length, color: "text-purple-600" },
+          { label: "إجمالي الزبائن", value: customers.length, color: "text-foreground", icon: null },
+          { label: "أفراد", value: customers.filter((c) => c.type === "individual").length, color: "text-blue-600", icon: null },
+          { label: "شركات", value: customers.filter((c) => c.type === "company").length, color: "text-purple-600", icon: null },
+          { label: "كاش باك معلق", value: `${customers.reduce((s, c) => s + (c.cashbackBalance || 0), 0).toLocaleString("ar-EG")} ج.م`, color: "text-green-600", icon: Coins },
+          { label: "إجمالي النقاط", value: customers.reduce((s, c) => s + (c.points || 0), 0).toLocaleString("ar-EG"), color: "text-yellow-600", icon: Star },
         ].map((s, i) => (
           <div key={i} className="bg-card rounded-xl border border-border p-4">
-            <p className="text-sm text-muted-foreground">{s.label}</p>
-            <p className={`text-2xl font-bold mt-1 ${s.color}`}>{loading ? "..." : s.value}</p>
+            <div className="flex items-center gap-2">
+              {s.icon && <s.icon className="w-4 h-4" />}
+              <p className="text-xs text-muted-foreground">{s.label}</p>
+            </div>
+            <p className={`text-lg font-bold mt-1 ${s.color}`}>{loading ? "..." : s.value}</p>
           </div>
         ))}
       </div>
@@ -179,79 +207,91 @@ export default function CustomersPage() {
               <tr className="border-b border-border bg-muted/50">
                 <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">الاسم</th>
                 <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">التليفون</th>
-                <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">الإيميل</th>
                 <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">النوع</th>
+                <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">المستوى</th>
                 <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">الرصيد</th>
-                <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">التاريخ</th>
+                <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">كاش باك</th>
+                <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">النقاط</th>
                 <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">إجراءات</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
-                <tr>
-                  <td colSpan={7} className="px-5 py-4">
-                    <div className="space-y-3">
-                      {[1, 2, 3, 4].map((i) => (
-                        <div key={i} className="flex items-center gap-3">
-                          <Skeleton className="h-4 flex-1" />
-                          <Skeleton className="h-4 w-28" />
-                          <Skeleton className="h-4 w-36" />
-                          <Skeleton className="h-5 w-14 rounded-full" />
-                          <Skeleton className="h-4 w-20" />
-                          <Skeleton className="h-4 w-24" />
-                          <Skeleton className="h-7 w-7 rounded" />
-                        </div>
-                      ))}
-                    </div>
-                  </td>
-                </tr>
+              <tr>
+                <td colSpan={8} className="px-5 py-4">
+                  <div className="space-y-3">
+                    {[1, 2, 3, 4].map((i) => (
+                      <div key={i} className="flex items-center gap-3">
+                        <Skeleton className="h-4 flex-1" />
+                        <Skeleton className="h-4 w-28" />
+                        <Skeleton className="h-5 w-14 rounded-full" />
+                        <Skeleton className="h-5 w-14 rounded-full" />
+                        <Skeleton className="h-4 w-20" />
+                        <Skeleton className="h-4 w-20" />
+                        <Skeleton className="h-4 w-16" />
+                        <Skeleton className="h-7 w-7 rounded" />
+                      </div>
+                    ))}
+                  </div>
+                </td>
+              </tr>
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-5 py-8 text-center text-muted-foreground text-sm">
+                  <td colSpan={8} className="px-5 py-8 text-center text-muted-foreground text-sm">
                     مفيش زبائن
                   </td>
                 </tr>
               ) : (
-                filtered.map((customer) => (
-                  <tr
-                    key={customer.id}
-                    className="border-b border-border last:border-0 hover:bg-muted/50 transition-colors"
-                  >
-                    <td className="px-5 py-3 text-sm font-medium text-foreground">
-                      {customer.name}
-                    </td>
-                    <td className="px-5 py-3 text-sm text-muted-foreground" dir="ltr">
-                      {customer.phone || "-"}
-                    </td>
-                    <td className="px-5 py-3 text-sm text-muted-foreground" dir="ltr">
-                      {customer.email || "-"}
-                    </td>
-                    <td className="px-5 py-3">
-                      <span
-                        className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          typeConfig[customer.type]?.class || ""
-                        }`}
-                      >
-                        {typeConfig[customer.type]?.label || customer.type}
-                      </span>
-                    </td>
-                    <td className="px-5 py-3 text-sm font-medium text-foreground">
-                      {(customer.balance || 0).toFixed(2)} ج.م
-                    </td>
-                    <td className="px-5 py-3 text-xs text-muted-foreground">
-                      {new Date(customer.createdAt).toLocaleDateString("ar-EG")}
-                    </td>
-                    <td className="px-5 py-3">
-                      <button
-                        onClick={() => openModal(customer)}
-                        className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
-                        title="عدّل"
-                      >
-                        <Edit2 className="w-4 h-4" />
-                      </button>
-                    </td>
-                  </tr>
-                ))
+                filtered.map((customer) => {
+                  const tier = tierConfig[customer.loyaltyTier] || tierConfig.bronze;
+                  return (
+                    <tr
+                      key={customer.id}
+                      className="border-b border-border last:border-0 hover:bg-muted/50 transition-colors"
+                    >
+                      <td className="px-5 py-3 text-sm font-medium text-foreground">
+                        {customer.name}
+                      </td>
+                      <td className="px-5 py-3 text-sm text-muted-foreground" dir="ltr">
+                        {customer.phone || "-"}
+                      </td>
+                      <td className="px-5 py-3">
+                        <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${typeConfig[customer.type]?.class || ""}`}>
+                          {typeConfig[customer.type]?.label || customer.type}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3">
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${tier.class}`}>
+                          {tier.icon} {tier.label}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3 text-sm font-medium text-foreground">
+                        {(customer.balance || 0).toLocaleString("ar-EG")} ج.م
+                      </td>
+                      <td className="px-5 py-3">
+                        <span className="inline-flex items-center gap-1 text-sm font-medium text-green-600">
+                          <Coins className="w-3.5 h-3.5" />
+                          {(customer.cashbackBalance || 0).toLocaleString("ar-EG")}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3">
+                        <span className="inline-flex items-center gap-1 text-sm font-medium text-yellow-600">
+                          <Star className="w-3.5 h-3.5" />
+                          {(customer.points || 0).toLocaleString("ar-EG")}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3">
+                        <button
+                          onClick={() => openModal(customer)}
+                          className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
+                          title="عدّل"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
@@ -355,6 +395,49 @@ export default function CustomersPage() {
                   dir="ltr"
                 />
               </div>
+              {editingCustomer && (
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-2 border-t border-border">
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-1 flex items-center gap-1">
+                      <Coins className="w-4 h-4 text-green-600" /> كاش باك
+                    </label>
+                    <input
+                      type="number"
+                      value={form.cashbackBalance}
+                      onChange={(e) => setForm({ ...form, cashbackBalance: parseFloat(e.target.value) || 0 })}
+                      className="w-full px-3 py-2 bg-muted rounded-lg text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      dir="ltr"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-1 flex items-center gap-1">
+                      <Star className="w-4 h-4 text-yellow-600" /> النقاط
+                    </label>
+                    <input
+                      type="number"
+                      value={form.points}
+                      onChange={(e) => setForm({ ...form, points: parseInt(e.target.value) || 0 })}
+                      className="w-full px-3 py-2 bg-muted rounded-lg text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      dir="ltr"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-1 flex items-center gap-1">
+                      <Award className="w-4 h-4 text-purple-600" /> المستوى
+                    </label>
+                    <select
+                      value={form.loyaltyTier}
+                      onChange={(e) => setForm({ ...form, loyaltyTier: e.target.value })}
+                      className="w-full px-3 py-2 bg-muted rounded-lg text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    >
+                      <option value="bronze">🥉 برونزي</option>
+                      <option value="silver">🥈 فضي</option>
+                      <option value="gold">🥇 ذهبي</option>
+                      <option value="platinum">💎 بلاتيني</option>
+                    </select>
+                  </div>
+                </div>
+              )}
               <div className="flex gap-3 pt-2">
                 <button
                   onClick={handleSubmit}

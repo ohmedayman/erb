@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search, Plus, X, Trash2, Printer, ChevronDown, Download } from "lucide-react";
-import { getDocsFromCollection, addDocToCollection } from "@/lib/localdb";
+import { Search, Plus, X, Trash2, Printer, ChevronDown, Download, Coins, Star } from "lucide-react";
+import { getDocsFromCollection, addDocToCollection, updateDocInCollection } from "@/lib/localdb";
 import { exportToExcel } from "@/lib/excel";
 import { toast } from "@/components/Toast";
 
@@ -162,6 +162,59 @@ export default function InvoicesPage() {
       setItems([{ name: "", sku: "", quantity: 1, price: 0, total: 0 }]);
       fetchInvoices();
       toast.success("تم إضافة الفاتورة بنجاح");
+
+      // Award loyalty cashback and points
+      try {
+        const filters = user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : [];
+        const loyaltyData = await getDocsFromCollection("loyaltySettings", filters);
+        const customersData = await getDocsFromCollection("customers", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
+
+        const settings = loyaltyData[0] || { cashbackEnabled: true, cashbackRate: 5, pointsEnabled: true, pointsRate: 10, pointsValue: 0.10, minPurchase: 100 };
+        const customer = customersData.find((c: any) => c.name === form.customerName || c.phone === form.customerPhone);
+
+        if (customer && sub >= (settings.minPurchase || 0)) {
+          const updates: any = {};
+
+          // Cashback
+          if (settings.cashbackEnabled && settings.cashbackRate > 0) {
+            const cashbackAmount = sub * (settings.cashbackRate / 100);
+            updates.cashbackBalance = (customer.cashbackBalance || 0) + cashbackAmount;
+            if (cashbackAmount > 0) {
+              toast.success(`كاش باك: +${cashbackAmount.toFixed(2)} ج.م لـ ${customer.name}`);
+            }
+          }
+
+          // Points
+          if (settings.pointsEnabled && settings.pointsRate > 0) {
+            const pointsEarned = Math.floor(sub / settings.pointsRate);
+            updates.points = (customer.points || 0) + pointsEarned;
+            if (pointsEarned > 0) {
+              toast.success(`نقاط: +${pointsEarned} نقطة لـ ${customer.name}`);
+            }
+          }
+
+          // Update total spent
+          updates.totalSpent = (customer.totalSpent || 0) + sub;
+
+          // Auto-tier calculation
+          const totalSpent = updates.totalSpent;
+          if (totalSpent >= (settings.tierThresholds?.platinum || 30000)) {
+            updates.loyaltyTier = "platinum";
+          } else if (totalSpent >= (settings.tierThresholds?.gold || 15000)) {
+            updates.loyaltyTier = "gold";
+          } else if (totalSpent >= (settings.tierThresholds?.silver || 5000)) {
+            updates.loyaltyTier = "silver";
+          } else {
+            updates.loyaltyTier = "bronze";
+          }
+
+          if (Object.keys(updates).length > 0) {
+            await updateDocInCollection("customers", customer.id, updates);
+          }
+        }
+      } catch (err) {
+        console.error("Loyalty error:", err);
+      }
 
       try {
         const { notifyPayment } = await import("@/lib/notifications");

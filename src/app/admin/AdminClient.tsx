@@ -340,8 +340,8 @@ export default function AdminClient() {
             </div>
           ) : (
             <>
-              {activeTab === "overview" && <Overview stats={stats} recentOrders={orders} stores={stores} />}
-              {activeTab === "stores" && <StoresManager stores={stores} onEdit={(item) => setEditItem({ table: "stores", item })} onDelete={(item) => setDeleteConfirm({ table: "stores", id: item.id })} />}
+              {activeTab === "overview" && <Overview stats={stats} recentOrders={orders} stores={stores} orders={orders} expenses={expenses} products={products} customers={customers} />}
+              {activeTab === "stores" && <StoresManager stores={stores} products={products} orders={orders} customers={customers} invoices={invoices} expenses={expenses} employees={employees} onEdit={(item) => setEditItem({ table: "stores", item })} onDelete={(item) => setDeleteConfirm({ table: "stores", id: item.id })} />}
               {activeTab === "users" && <UsersManager users={users} onEdit={(item) => setEditItem({ table: "registered_users", item })} onDelete={(item) => setDeleteConfirm({ table: "registered_users", id: item.id })} />}
               {activeTab === "subscriptions" && <SubscriptionsManager orders={subscriptionOrders} onApprove={handleApproveOrder} onReject={handleRejectOrder} onView={setSelectedOrder} />}
               {activeTab === "plans" && <PlansManager plans={plans} onEdit={(item) => setEditItem({ table: "subscription_plans", item })} onDelete={(item) => handleDeletePlan(item.id)} onCreate={handleCreatePlan} />}

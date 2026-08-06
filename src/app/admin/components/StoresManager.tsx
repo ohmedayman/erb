@@ -1,21 +1,31 @@
 "use client";
 
-import { Store, CheckCircle, XCircle } from "lucide-react";
+import { useState } from "react";
+import { Store, CheckCircle, XCircle, Eye } from "lucide-react";
 import DataTable from "./DataTable";
+import StoreDetail from "./StoreDetail";
 
 interface StoresManagerProps {
   stores: any[];
+  products: any[];
+  orders: any[];
+  customers: any[];
+  invoices: any[];
+  expenses: any[];
+  employees: any[];
   onEdit: (item: any) => void;
   onDelete: (item: any) => void;
 }
 
-export default function StoresManager({ stores, onEdit, onDelete }: StoresManagerProps) {
+export default function StoresManager({ stores, products, orders, customers, invoices, expenses, employees, onEdit, onDelete }: StoresManagerProps) {
+  const [selectedStore, setSelectedStore] = useState<any>(null);
+
   const columns = [
     {
       key: "name",
       label: "اسم المتجر",
       render: (item: any) => (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 cursor-pointer hover:bg-slate-700/30 p-1 rounded-lg transition-colors" onClick={() => setSelectedStore(item)}>
           <div className="w-8 h-8 rounded-lg bg-orange-500/20 flex items-center justify-center">
             <Store className="w-4 h-4 text-orange-400" />
           </div>
@@ -43,6 +53,15 @@ export default function StoresManager({ stores, onEdit, onDelete }: StoresManage
       label: "تاريخ الإنشاء",
       render: (item: any) => new Date(item.created_at).toLocaleDateString("ar-EG"),
     },
+    {
+      key: "actions",
+      label: "",
+      render: (item: any) => (
+        <button onClick={(e) => { e.stopPropagation(); setSelectedStore(item); }} className="p-1.5 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 transition-colors" title="عرض التفاصيل">
+          <Eye className="w-4 h-4" />
+        </button>
+      ),
+    },
   ];
 
   return (
@@ -61,6 +80,19 @@ export default function StoresManager({ stores, onEdit, onDelete }: StoresManage
           onDelete={onDelete}
         />
       </div>
+
+      {selectedStore && (
+        <StoreDetail
+          store={selectedStore}
+          products={products}
+          orders={orders}
+          customers={customers}
+          invoices={invoices}
+          expenses={expenses}
+          employees={employees}
+          onClose={() => setSelectedStore(null)}
+        />
+      )}
     </div>
   );
 }

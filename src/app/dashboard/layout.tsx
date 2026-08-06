@@ -14,6 +14,7 @@ import { supabase } from "@/lib/supabase";
 import Image from "next/image";
 import { OfflineIndicator, InstallPrompt, SyncStatus } from "@/app/components/PWAComponents";
 import { getUnreadCount, subscribeToNotifications, requestNotificationPermission } from "@/lib/notifications";
+import GlobalSearch from "@/components/GlobalSearch";
 
 const allSidebarLinks: Record<string, { href: string; label: string; icon: any; group?: string }> = {
   dashboard: { href: "/dashboard", label: "البورد", icon: LayoutDashboard, group: "main" },
@@ -268,14 +269,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </Link>
 
           <div className="flex-1 max-w-md">
-            <div className="relative">
-              <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder="دور على منتجات، طلبات..."
-                className="w-full pr-10 pl-4 py-2.5 bg-muted/60 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white focus:border-primary/30 border border-transparent transition-all"
-              />
-            </div>
+            <GlobalSearch />
           </div>
 
           <div className="flex items-center gap-2 mr-auto">

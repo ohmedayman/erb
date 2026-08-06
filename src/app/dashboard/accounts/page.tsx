@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import {
   BookOpen,
   Plus,
@@ -9,6 +10,12 @@ import {
   ChevronRight,
   DollarSign,
   X,
+  FileText,
+  Scale,
+  TrendingUp,
+  ArrowLeftRight,
+  BarChart3,
+  NotebookPen,
 } from "lucide-react";
 import { getDocsFromCollection, addDocToCollection } from "@/lib/localdb";
 
@@ -27,6 +34,15 @@ const typeColors: Record<string, string> = {
   revenue: "bg-purple-100 text-purple-700",
   expense: "bg-orange-100 text-orange-700",
 };
+
+const financePages = [
+  { href: "/dashboard/reports/cash-flow", label: "قائمة التدفقات النقدية", icon: ArrowLeftRight, color: "bg-green-100 text-green-600", desc: "تحليل حركة النقديات" },
+  { href: "/dashboard/reports/balance-sheet", label: "الميزانية العمومية", icon: Scale, color: "bg-blue-100 text-blue-600", desc: "الأصول = الالتزامات + حقوق الملكية" },
+  { href: "/dashboard/reports/trial-balance", label: "ميزان المراجعة", icon: BarChart3, color: "bg-purple-100 text-purple-600", desc: "التحقق من توازن القيود" },
+  { href: "/dashboard/reports/profit-loss", label: "الأرباح والخسائر", icon: TrendingUp, color: "bg-orange-100 text-orange-600", desc: "تحليل الأرباح والمصروفات" },
+  { href: "/dashboard/accounts/statements", label: "كشف حساب تفصيلي", icon: FileText, color: "bg-teal-100 text-teal-600", desc: "حركات حساب محدد" },
+  { href: "/dashboard/journal", label: "القيود اليومية", icon: NotebookPen, color: "bg-indigo-100 text-indigo-600", desc: "إدخال القيود المحاسبية" },
+];
 
 export default function AccountsPage() {
   const [accounts, setAccounts] = useState<any[]>([]);
@@ -48,11 +64,28 @@ export default function AccountsPage() {
     notes: "",
   });
 
+  const [totalAssets, setTotalAssets] = useState(0);
+  const [totalLiabilities, setTotalLiabilities] = useState(0);
+  const [totalEquity, setTotalEquity] = useState(0);
+  const [totalRevenue, setTotalRevenue] = useState(0);
+  const [totalExpenses, setTotalExpenses] = useState(0);
+
   const fetchAccounts = async () => {
     try {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
       const accounts = await getDocsFromCollection("accounts", user.storeId ? [{ field: "storeId", op: "==", value: user.storeId }] : []);
       setAccounts(accounts);
+
+      const byType = accounts.reduce((acc: Record<string, number>, a: any) => {
+        acc[a.type] = (acc[a.type] || 0) + (a.balance || 0);
+        return acc;
+      }, {});
+
+      setTotalAssets(byType.asset || 0);
+      setTotalLiabilities(byType.liability || 0);
+      setTotalEquity(byType.equity || 0);
+      setTotalRevenue(byType.revenue || 0);
+      setTotalExpenses(byType.expense || 0);
     } catch {
     } finally {
       setLoading(false);
@@ -105,13 +138,15 @@ export default function AccountsPage() {
     }).format(amount);
   };
 
+  const netProfit = totalRevenue - totalExpenses;
+
   return (
     <div className="space-y-6" dir="rtl">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">دليل الحسابات</h1>
+          <h1 className="text-2xl font-bold text-foreground">الحسابات المالية</h1>
           <p className="text-muted-foreground text-sm mt-1">
-            ادارة الحسابات المالية وشجرة الحسابات
+            ادارة الحسابات والتقارير المالية
           </p>
         </div>
         <button
@@ -122,6 +157,47 @@ export default function AccountsPage() {
         </button>
       </div>
 
+      {/* Quick Summary */}
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+        {[
+          { label: "الأصول", value: totalAssets, color: "text-green-600" },
+          { label: "الالتزامات", value: totalLiabilities, color: "text-red-600" },
+          { label: "حقوق الملكية", value: totalEquity, color: "text-blue-600" },
+          { label: "الإيرادات", value: totalRevenue, color: "text-purple-600" },
+          { label: "صافي الربح", value: netProfit, color: netProfit >= 0 ? "text-green-600" : "text-red-600" },
+        ].map((item) => (
+          <div key={item.label} className="bg-card rounded-xl border border-border p-4">
+            <p className="text-xs text-muted-foreground">{item.label}</p>
+            <p className={`text-lg font-bold mt-1 ${item.color}`}>{formatCurrency(item.value)}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Finance Navigation Cards */}
+      <div>
+        <h2 className="text-lg font-bold text-foreground mb-3">التقارير المالية</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {financePages.map((page) => (
+            <Link
+              key={page.href}
+              href={page.href}
+              className="bg-card rounded-xl border border-border p-5 hover:border-primary/30 hover:shadow-md transition-all group"
+            >
+              <div className="flex items-start gap-4">
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${page.color} group-hover:scale-110 transition-transform`}>
+                  <page.icon className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-foreground group-hover:text-primary transition-colors">{page.label}</h3>
+                  <p className="text-xs text-muted-foreground mt-1">{page.desc}</p>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* Search */}
       <div className="bg-card rounded-xl border border-border p-4">
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
@@ -137,117 +213,122 @@ export default function AccountsPage() {
         </div>
       </div>
 
-      <div className="bg-card rounded-xl border border-border overflow-hidden">
-        {loading ? (
-          <div className="px-5 py-8 text-center text-muted-foreground text-sm">
-            بيتحمّل...
-          </div>
-        ) : Object.keys(grouped).length === 0 ? (
-          <div className="px-5 py-8 text-center text-muted-foreground text-sm">
-            مفيش حسابات
-          </div>
-        ) : (
-          Object.keys(typeLabels).map((type) => {
-            const typeAccounts = grouped[type] || [];
-            if (typeAccounts.length === 0 && search) return null;
-            return (
-              <div key={type} className="border-b border-border last:border-0">
-                <button
-                  onClick={() => toggleType(type)}
-                  className="w-full flex items-center justify-between px-5 py-4 hover:bg-muted/50 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    {expandedTypes[type] ? (
-                      <ChevronDown className="w-4 h-4 text-muted-foreground" />
-                    ) : (
-                      <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                    )}
-                    <span
-                      className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        typeColors[type] || "bg-gray-100 text-gray-700"
-                      }`}
-                    >
-                      {typeLabels[type]}
+      {/* Chart of Accounts */}
+      <div>
+        <h2 className="text-lg font-bold text-foreground mb-3">دليل الحسابات</h2>
+        <div className="bg-card rounded-xl border border-border overflow-hidden">
+          {loading ? (
+            <div className="px-5 py-8 text-center text-muted-foreground text-sm">
+              بيتحمّل...
+            </div>
+          ) : Object.keys(grouped).length === 0 ? (
+            <div className="px-5 py-8 text-center text-muted-foreground text-sm">
+              مفيش حسابات
+            </div>
+          ) : (
+            Object.keys(typeLabels).map((type) => {
+              const typeAccounts = grouped[type] || [];
+              if (typeAccounts.length === 0 && search) return null;
+              return (
+                <div key={type} className="border-b border-border last:border-0">
+                  <button
+                    onClick={() => toggleType(type)}
+                    className="w-full flex items-center justify-between px-5 py-4 hover:bg-muted/50 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      {expandedTypes[type] ? (
+                        <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                      ) : (
+                        <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                      )}
+                      <span
+                        className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          typeColors[type] || "bg-gray-100 text-gray-700"
+                        }`}
+                      >
+                        {typeLabels[type]}
+                      </span>
+                      <span className="text-sm text-muted-foreground">
+                        ({typeAccounts.length} حساب)
+                      </span>
+                    </div>
+                    <span className="text-sm font-semibold text-foreground">
+                      {formatCurrency(
+                        typeAccounts.reduce(
+                          (sum, a) => sum + (a.balance || 0),
+                          0
+                        )
+                      )}
                     </span>
-                    <span className="text-sm text-muted-foreground">
-                      ({typeAccounts.length} حساب)
-                    </span>
-                  </div>
-                  <span className="text-sm font-semibold text-foreground">
-                    {formatCurrency(
-                      typeAccounts.reduce(
-                        (sum, a) => sum + (a.balance || 0),
-                        0
-                      )
-                    )}
-                  </span>
-                </button>
-                {expandedTypes[type] && typeAccounts.length > 0 && (
-                  <div className="border-t border-border">
-                    <table className="w-full">
-                      <thead>
-                        <tr className="bg-muted/30">
-                          <th className="text-right text-xs font-medium text-muted-foreground px-5 py-2">
-                            الكود
-                          </th>
-                          <th className="text-right text-xs font-medium text-muted-foreground px-5 py-2">
-                            اسم الحساب
-                          </th>
-                          <th className="text-right text-xs font-medium text-muted-foreground px-5 py-2">
-                            الرصيد
-                          </th>
-                          <th className="text-right text-xs font-medium text-muted-foreground px-5 py-2">
-                            ملاحظات
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {typeAccounts.map((account) => (
-                          <tr
-                            key={account.id}
-                            className="border-t border-border last:border-0 hover:bg-muted/30 transition-colors"
-                          >
-                            <td className="px-5 py-3">
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-md bg-primary/10 text-primary text-xs font-mono font-medium">
-                                {account.code}
-                              </span>
-                            </td>
-                            <td className="px-5 py-3">
-                              <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 bg-muted rounded-lg flex items-center justify-center">
-                                  <BookOpen className="w-4 h-4 text-muted-foreground" />
-                                </div>
-                                <span className="text-sm font-medium text-foreground">
-                                  {account.name}
-                                </span>
-                              </div>
-                            </td>
-                            <td className="px-5 py-3">
-                              <span
-                                className={`text-sm font-semibold ${
-                                  account.balance >= 0
-                                    ? "text-green-600"
-                                    : "text-red-600"
-                                }`}
-                              >
-                                {formatCurrency(account.balance)}
-                              </span>
-                            </td>
-                            <td className="px-5 py-3 text-sm text-muted-foreground">
-                              {account.notes || "-"}
-                            </td>
+                  </button>
+                  {expandedTypes[type] && typeAccounts.length > 0 && (
+                    <div className="border-t border-border">
+                      <table className="w-full">
+                        <thead>
+                          <tr className="bg-muted/30">
+                            <th className="text-right text-xs font-medium text-muted-foreground px-5 py-2">
+                              الكود
+                            </th>
+                            <th className="text-right text-xs font-medium text-muted-foreground px-5 py-2">
+                              اسم الحساب
+                            </th>
+                            <th className="text-right text-xs font-medium text-muted-foreground px-5 py-2">
+                              الرصيد
+                            </th>
+                            <th className="text-right text-xs font-medium text-muted-foreground px-5 py-2">
+                              ملاحظات
+                            </th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
-            );
-          })
-        )}
+                        </thead>
+                        <tbody>
+                          {typeAccounts.map((account) => (
+                            <tr
+                              key={account.id}
+                              className="border-t border-border last:border-0 hover:bg-muted/30 transition-colors"
+                            >
+                              <td className="px-5 py-3">
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-md bg-primary/10 text-primary text-xs font-mono font-medium">
+                                  {account.code}
+                                </span>
+                              </td>
+                              <td className="px-5 py-3">
+                                <div className="flex items-center gap-3">
+                                  <div className="w-8 h-8 bg-muted rounded-lg flex items-center justify-center">
+                                    <BookOpen className="w-4 h-4 text-muted-foreground" />
+                                  </div>
+                                  <span className="text-sm font-medium text-foreground">
+                                    {account.name}
+                                  </span>
+                                </div>
+                              </td>
+                              <td className="px-5 py-3">
+                                <span
+                                  className={`text-sm font-semibold ${
+                                    account.balance >= 0
+                                      ? "text-green-600"
+                                      : "text-red-600"
+                                  }`}
+                                >
+                                  {formatCurrency(account.balance)}
+                                </span>
+                              </td>
+                              <td className="px-5 py-3 text-sm text-muted-foreground">
+                                {account.notes || "-"}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          )}
+        </div>
       </div>
 
+      {/* Total Balance */}
       <div className="bg-card rounded-xl border border-border p-5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -264,6 +345,7 @@ export default function AccountsPage() {
         </div>
       </div>
 
+      {/* Add Account Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-card rounded-2xl shadow-xl w-full max-w-lg border border-border">

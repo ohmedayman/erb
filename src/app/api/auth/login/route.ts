@@ -5,7 +5,7 @@ export async function POST(request: NextRequest) {
   try {
     // Rate limiting
     const ip = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
-    const rateLimit = checkRateLimit(`login:${ip}`);
+    const rateLimit = await checkRateLimit(`login:${ip}`);
     if (!rateLimit.allowed) {
       return NextResponse.json(
         { error: `تم تجاوز حد المحاولات. حاول تاني بعد ${rateLimit.retryAfter} ثانية` },

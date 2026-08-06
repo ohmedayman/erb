@@ -231,12 +231,20 @@ CREATE INDEX IF NOT EXISTS idx_audit_ip ON security_audit_log(ip_address);
 CREATE INDEX IF NOT EXISTS idx_audit_severity ON security_audit_log(severity);
 CREATE INDEX IF NOT EXISTS idx_audit_created ON security_audit_log(created_at DESC);
 
--- RLS: only admins can read, service role can insert
+-- RLS: only admins can read, authenticated users can insert their own logs
 ALTER TABLE security_audit_log ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Admins can read audit logs" ON security_audit_log
-  FOR SELECT USING (true);
+  FOR SELECT USING (
+    current_setting('request.jwt.claims', true)::json->>'email' IN (
+      'admin@stockflow.com',
+      'm44408335@gmail.com',
+      'admin@stockflow.vexonet.online'
+    )
+  );
 
-CREATE POLICY "System can insert audit logs" ON security_audit_log
-  FOR INSERT WITH CHECK (true);
+CREATE POLICY "Authenticated users can insert audit logs" ON security_audit_log
+  FOR INSERT WITH CHECK (
+    auth.uid() IS NOT NULL
+  );
 `;

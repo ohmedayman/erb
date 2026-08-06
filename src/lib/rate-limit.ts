@@ -1,237 +1,188 @@
 // ============================================
-// Advanced Rate Limiting & Brute Force Protection
-// Enterprise-grade security
+// Rate Limiting backed by Supabase
+// Works in serverless/production environments
 // ============================================
 
-interface RateLimitEntry {
-  count: number;
-  resetTime: number;
-  blocked: boolean;
-  blockExpiry: number;
-}
+import { supabase } from "./supabase";
 
-const rateLimitStore = new Map<string, RateLimitEntry>();
-const loginAttempts = new Map<string, { count: number; lastAttempt: number; blocked: boolean; blockExpiry: number }>();
-
-// Clean up expired entries every 5 minutes
-if (typeof window !== "undefined") {
-  setInterval(() => {
-    const now = Date.now();
-    for (const [key, entry] of rateLimitStore.entries()) {
-      if (now > entry.resetTime && !entry.blocked) {
-        rateLimitStore.delete(key);
-      } else if (entry.blocked && now > entry.blockExpiry) {
-        rateLimitStore.delete(key);
-      }
-    }
-    for (const [key, entry] of loginAttempts.entries()) {
-      if (entry.blocked && now > entry.blockExpiry) {
-        loginAttempts.delete(key);
-      }
-    }
-  }, 5 * 60 * 1000);
+interface RateLimitResult {
+  allowed: boolean;
+  retryAfter?: number;
+  remaining?: number;
+  attemptsRemaining?: number;
 }
 
 /**
- * General rate limiter
- * @param key - Unique identifier (e.g., IP + endpoint)
- * @param maxRequests - Maximum requests allowed
- * @param windowMs - Time window in milliseconds
+ * Check rate limit using Supabase (persists across server restarts)
  */
-export function checkRateLimit(
+export async function checkRateLimit(
   key: string,
   maxRequests: number = 60,
   windowMs: number = 60000
-): { allowed: boolean; retryAfter?: number; remaining?: number } {
-  const now = Date.now();
-  const entry = rateLimitStore.get(key);
+): Promise<RateLimitResult> {
+  try {
+    const now = Date.now();
+    const windowStart = new Date(now - windowMs).toISOString();
 
-  if (!entry || now > entry.resetTime) {
-    rateLimitStore.set(key, {
-      count: 1,
-      resetTime: now + windowMs,
-      blocked: false,
-      blockExpiry: 0,
+    // Count requests in the window
+    const { count, error } = await supabase
+      .from("rate_limit_log")
+      .select("id", { count: "exact", head: true })
+      .eq("key", key)
+      .gte("created_at", windowStart);
+
+    if (error) {
+      // If table doesn't exist, allow the request (fail open)
+      return { allowed: true, remaining: maxRequests - 1 };
+    }
+
+    const currentCount = count || 0;
+
+    if (currentCount >= maxRequests) {
+      return {
+        allowed: false,
+        retryAfter: Math.ceil(windowMs / 1000),
+        remaining: 0,
+      };
+    }
+
+    // Log this request
+    await supabase.from("rate_limit_log").insert({
+      key,
+      created_at: new Date().toISOString(),
     });
+
+    return {
+      allowed: true,
+      remaining: maxRequests - currentCount - 1,
+    };
+  } catch {
+    // Fail open - allow request if rate limiting fails
     return { allowed: true, remaining: maxRequests - 1 };
   }
-
-  if (entry.blocked) {
-    if (now < entry.blockExpiry) {
-      return {
-        allowed: false,
-        retryAfter: Math.ceil((entry.blockExpiry - now) / 1000),
-      };
-    }
-    entry.blocked = false;
-    entry.count = 0;
-    entry.resetTime = now + windowMs;
-  }
-
-  entry.count++;
-
-  if (entry.count > maxRequests) {
-    entry.blocked = true;
-    entry.blockExpiry = now + windowMs * 2; // Block for double the window
-    rateLimitStore.set(key, entry);
-    return {
-      allowed: false,
-      retryAfter: Math.ceil((entry.blockExpiry - now) / 1000),
-    };
-  }
-
-  rateLimitStore.set(key, entry);
-  return { allowed: true, remaining: maxRequests - entry.count };
 }
 
 /**
- * Login-specific rate limiter with progressive delays
- * Implements exponential backoff for brute force protection
+ * Login-specific rate limiter with progressive blocking
  */
-export function checkLoginRateLimit(
-  identifier: string // email or IP
-): { allowed: boolean; retryAfter?: number; attemptsRemaining?: number } {
-  const now = Date.now();
+export async function checkLoginRateLimit(
+  identifier: string
+): Promise<RateLimitResult> {
   const MAX_ATTEMPTS = 5;
   const WINDOW_MS = 15 * 60 * 1000; // 15 minutes
-  const BLOCK_DURATION = 30 * 60 * 1000; // 30 minutes block
+  const BLOCK_DURATION_MS = 30 * 60 * 1000; // 30 minutes
 
-  const entry = loginAttempts.get(identifier);
+  try {
+    const now = Date.now();
+    const windowStart = new Date(now - WINDOW_MS).toISOString();
 
-  if (!entry) {
-    loginAttempts.set(identifier, {
-      count: 1,
-      lastAttempt: now,
-      blocked: false,
-      blockExpiry: 0,
-    });
-    return { allowed: true, attemptsRemaining: MAX_ATTEMPTS - 1 };
-  }
+    // Check if currently blocked
+    const { data: blockedEntry } = await supabase
+      .from("rate_limit_log")
+      .select("blocked_until")
+      .eq("key", `login:${identifier}`)
+      .eq("is_block", true)
+      .gt("blocked_until", new Date().toISOString())
+      .limit(1)
+      .single();
 
-  // Check if blocked
-  if (entry.blocked) {
-    if (now < entry.blockExpiry) {
+    if (blockedEntry) {
+      const retryAfter = Math.ceil(
+        (new Date(blockedEntry.blocked_until).getTime() - now) / 1000
+      );
+      return { allowed: false, retryAfter };
+    }
+
+    // Count failed attempts in window
+    const { count, error } = await supabase
+      .from("rate_limit_log")
+      .select("id", { count: "exact", head: true })
+      .eq("key", `login:${identifier}`)
+      .gte("created_at", windowStart);
+
+    if (error) {
+      return { allowed: true, remaining: MAX_ATTEMPTS - 1 };
+    }
+
+    const attempts = count || 0;
+
+    if (attempts >= MAX_ATTEMPTS) {
+      // Block the user
+      const blockedUntil = new Date(now + BLOCK_DURATION_MS).toISOString();
+      await supabase.from("rate_limit_log").insert({
+        key: `login:${identifier}`,
+        is_block: true,
+        blocked_until: blockedUntil,
+        created_at: new Date().toISOString(),
+      });
+
       return {
         allowed: false,
-        retryAfter: Math.ceil((entry.blockExpiry - now) / 1000),
+        retryAfter: Math.ceil(BLOCK_DURATION_MS / 1000),
       };
     }
-    // Unblock
-    entry.blocked = false;
-    entry.count = 0;
-  }
 
-  // Reset window if enough time has passed
-  if (now - entry.lastAttempt > WINDOW_MS) {
-    entry.count = 0;
-  }
-
-  entry.count++;
-  entry.lastAttempt = now;
-
-  if (entry.count > MAX_ATTEMPTS) {
-    entry.blocked = true;
-    entry.blockExpiry = now + BLOCK_DURATION;
-    loginAttempts.set(identifier, entry);
     return {
-      allowed: false,
-      retryAfter: Math.ceil(BLOCK_DURATION / 1000),
+      allowed: true,
+      attemptsRemaining: MAX_ATTEMPTS - attempts,
     };
+  } catch {
+    return { allowed: true, attemptsRemaining: 5 };
   }
-
-  loginAttempts.set(identifier, entry);
-  return { allowed: true, attemptsRemaining: MAX_ATTEMPTS - entry.count };
 }
 
 /**
- * Reset login attempts (call after successful login)
+ * Log a failed login attempt
  */
-export function resetLoginAttempts(identifier: string): void {
-  loginAttempts.delete(identifier);
+export async function logLoginAttempt(
+  identifier: string,
+  success: boolean
+): Promise<void> {
+  try {
+    if (!success) {
+      await supabase.from("rate_limit_log").insert({
+        key: `login:${identifier}`,
+        created_at: new Date().toISOString(),
+      });
+    } else {
+      // Clear failed attempts on success
+      await supabase
+        .from("rate_limit_log")
+        .delete()
+        .eq("key", `login:${identifier}`)
+        .is("is_block", null);
+    }
+  } catch {
+    // Non-blocking
+  }
 }
 
 /**
- * API-specific rate limiter
- * Different limits for different endpoint types
+ * Reset rate limit for a key
  */
+export async function resetRateLimit(key: string): Promise<void> {
+  try {
+    await supabase.from("rate_limit_log").delete().eq("key", key);
+  } catch {
+    // Non-blocking
+  }
+}
+
 export const API_RATE_LIMITS = {
-  // Authentication endpoints
-  auth: { maxRequests: 5, windowMs: 15 * 60 * 1000 }, // 5 per 15 min
-
-  // Read endpoints
-  read: { maxRequests: 100, windowMs: 60 * 1000 }, // 100 per min
-
-  // Write endpoints
-  write: { maxRequests: 30, windowMs: 60 * 1000 }, // 30 per min
-
-  // Delete endpoints
-  delete: { maxRequests: 10, windowMs: 60 * 1000 }, // 10 per min
-
-  // File upload
-  upload: { maxRequests: 10, windowMs: 60 * 1000 }, // 10 per min
-
-  // Search endpoints
-  search: { maxRequests: 20, windowMs: 60 * 1000 }, // 20 per min
-
-  // Admin endpoints
-  admin: { maxRequests: 50, windowMs: 60 * 1000 }, // 50 per min
+  auth: { maxRequests: 5, windowMs: 15 * 60 * 1000 },
+  read: { maxRequests: 100, windowMs: 60 * 1000 },
+  write: { maxRequests: 30, windowMs: 60 * 1000 },
+  delete: { maxRequests: 10, windowMs: 60 * 1000 },
+  upload: { maxRequests: 10, windowMs: 60 * 1000 },
+  search: { maxRequests: 20, windowMs: 60 * 1000 },
+  admin: { maxRequests: 50, windowMs: 60 * 1000 },
 } as const;
 
-/**
- * Check rate limit for API endpoint type
- */
-export function checkApiRateLimit(
+export async function checkApiRateLimit(
   ip: string,
   endpointType: keyof typeof API_RATE_LIMITS
-): { allowed: boolean; retryAfter?: number } {
+): Promise<RateLimitResult> {
   const limits = API_RATE_LIMITS[endpointType];
   const key = `api:${endpointType}:${ip}`;
   return checkRateLimit(key, limits.maxRequests, limits.windowMs);
-}
-
-/**
- * Detect suspicious patterns
- */
-export function detectSuspiciousActivity(ip: string): {
-  suspicious: boolean;
-  reason?: string;
-} {
-  const now = Date.now();
-  const FIVE_MINUTES = 5 * 60 * 1000;
-
-  // Check for rapid requests from same IP
-  const requestKey = `requests:${ip}`;
-  const requestEntry = rateLimitStore.get(requestKey);
-
-  if (requestEntry && requestEntry.count > 200 && now - (requestEntry.resetTime - 60000) < FIVE_MINUTES) {
-    return { suspicious: true, reason: "Too many requests in short period" };
-  }
-
-  // Check for multiple failed login attempts
-  const loginKey = `login:${ip}`;
-  const loginEntry = loginAttempts.get(loginKey);
-
-  if (loginEntry && loginEntry.count > 10) {
-    return { suspicious: true, reason: "Multiple failed login attempts" };
-  }
-
-  return { suspicious: false };
-}
-
-/**
- * Get rate limit status for display
- */
-export function getRateLimitStatus(key: string): {
-  count: number;
-  resetIn: number;
-  blocked: boolean;
-} | null {
-  const entry = rateLimitStore.get(key);
-  if (!entry) return null;
-
-  return {
-    count: entry.count,
-    resetIn: Math.max(0, Math.ceil((entry.resetTime - Date.now()) / 1000)),
-    blocked: entry.blocked,
-  };
 }

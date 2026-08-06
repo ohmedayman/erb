@@ -9,12 +9,12 @@ const securityHeaders = [
   {
     key: "Content-Security-Policy",
     value: [
-      "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jotfor.ms https://www.jotfor.ms",
+      "default-src 'self' https: data: blob:",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' 'unsafe-dynamic' https://cdn.jotfor.ms https://www.jotfor.ms https://va.vercel-scripts.com",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      "img-src 'self' data: blob: https://*.supabase.co https://ipapi.co https://api.ipify.org",
-      "font-src 'self' https://fonts.gstatic.com",
-      "connect-src 'self' https://*.supabase.co https://ipapi.co https://api.ipify.org",
+      "img-src 'self' data: blob: https: http:",
+      "font-src 'self' https://fonts.gstatic.com https://fonts.googleapis.com",
+      "connect-src 'self' https://*.supabase.co https://ipapi.co https://api.ipify.org https://vitals.vercel-insights.com https://*.vercel.app",
       "frame-src 'self' https://cdn.jotfor.ms https://www.jotfor.ms",
       "object-src 'none'",
       "base-uri 'self'",
@@ -27,6 +27,9 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   productionBrowserSourceMaps: false,
   poweredByHeader: false,
+  images: {
+    unoptimized: true,
+  },
   async headers() {
     return [
       {

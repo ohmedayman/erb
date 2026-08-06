@@ -95,11 +95,6 @@ export default function LoginPage() {
           eventType: "login",
         }).catch(() => {});
 
-        if (isAdmin) {
-          router.push("/admin");
-          return;
-        }
-
         // Check subscription status
         let orders: any[] | null = null;
         try {
@@ -142,8 +137,8 @@ export default function LoginPage() {
           subStatus = "rejected";
         }
 
-        // Set auth cookie for middleware
-        const sessionRes = await fetch("/api/auth/session", {
+        // Set auth cookie BEFORE any redirect
+        await fetch("/api/auth/session", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -154,26 +149,22 @@ export default function LoginPage() {
         });
 
         if (isAdmin) {
-          // Full page reload to ensure cookie is set before middleware runs
           window.location.href = "/admin";
           return;
         }
 
         if (!orders || orders.length === 0) {
-          // No subscription order — go to checkout
           window.location.href = "/checkout";
           return;
         }
 
         if (orders[0].status === "pending") {
-          // Has pending order — show waiting message
           setServerError("طلبك قيد المراجعة من الإدارة. هتتقبل في أقرب وقت! 🕐");
           setLoading(false);
           return;
         }
 
         if (orders[0].status === "approved") {
-          // Approved — check if onboarding done
           const prefs = JSON.parse(localStorage.getItem("user_prefs") || "null");
           if (!prefs?.onboardingDone) {
             window.location.href = "/onboarding";
@@ -183,7 +174,6 @@ export default function LoginPage() {
           return;
         }
 
-        // Rejected or other
         setServerError("تم رفض طلب اشتراكك. تواصل مع الدعم على 01028707543");
         setLoading(false);
       }

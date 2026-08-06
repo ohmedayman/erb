@@ -285,3 +285,101 @@ input:focus, select:focus, textarea:focus {
   60% { content: '..'; }
   80%, 100% { content: '...'; }
 }
+
+/* Mobile Optimizations */
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+/* Better touch targets on mobile */
+@media (max-width: 1024px) {
+  button, a, [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Larger inputs on mobile */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="tel"],
+  select,
+  textarea {
+    font-size: 16px !important;
+    min-height: 48px;
+  }
+  
+  /* Disable hover effects on touch devices */
+  .hover\:bg-muted:hover,
+  .hover\:bg-primary-hover:hover,
+  .hover\:shadow-lg:hover {
+    background-color: inherit;
+    box-shadow: none;
+  }
+  
+  /* Active state feedback for touch */
+  a:active,
+  button:active {
+    transform: scale(0.97);
+    transition: transform 0.1s;
+  }
+}
+
+/* Pull to refresh indicator */
+.pull-indicator {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%) translateY(-100%);
+  z-index: 9999;
+  transition: transform 0.3s;
+}
+
+.pull-indicator.visible {
+  transform: translateX(-50%) translateY(20px);
+}
+
+/* Smooth scrolling on mobile */
+@supports (-webkit-touch-callout: none) {
+  .overflow-auto {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Hide scrollbar on mobile for cleaner look */
+@media (max-width: 1024px) {
+  .hide-scrollbar-mobile::-webkit-scrollbar {
+    display: none;
+  }
+  .hide-scrollbar-mobile {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+/* Mobile modal as bottom sheet */
+@media (max-width: 640px) {
+  .modal-mobile {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    top: auto;
+    max-height: 90vh;
+    border-radius: 1.5rem 1.5rem 0 0;
+    animation: slideUp 0.3s ease-out;
+  }
+  
+  .modal-mobile-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+  }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}

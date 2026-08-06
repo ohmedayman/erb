@@ -398,8 +398,38 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
         </header>
 
-        <main className="flex-1 p-4 lg:p-6 overflow-auto">{children}</main>
+        <main className="flex-1 p-4 lg:p-6 pb-24 lg:pb-6 overflow-auto">{children}</main>
       </div>
+
+      {/* Mobile Bottom Navigation */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-t border-gray-200 safe-bottom">
+        <div className="grid grid-cols-5 h-16">
+          {[
+            { href: "/dashboard", icon: LayoutDashboard, label: "البورد" },
+            { href: "/dashboard/products", icon: Package, label: "المنتجات" },
+            { href: "/dashboard/orders", icon: ShoppingCart, label: "الأوردرات" },
+            { href: "/dashboard/invoices", icon: Receipt, label: "الفواتير" },
+            { href: "/dashboard/customers", icon: Users, label: "الزبائن" },
+          ].map((item) => {
+            const isActive = pathname === item.href;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex flex-col items-center justify-center gap-0.5 transition-colors ${
+                  isActive
+                    ? "text-orange-500"
+                    : "text-gray-400 active:text-orange-400"
+                }`}
+              >
+                <item.icon className={`w-5 h-5 ${isActive ? "text-orange-500" : ""}`} />
+                <span className="text-[10px] font-medium">{item.label}</span>
+                {isActive && <div className="w-1 h-1 rounded-full bg-orange-500 mt-0.5" />}
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
     </div>
   );
 }

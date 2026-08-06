@@ -1,56 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
-import { verifyFirebaseToken } from "@/lib/auth";
-import { col } from "@/lib/firestore";
+import { NextResponse } from "next/server";
 
-export async function GET(request: NextRequest) {
-  const user = await verifyFirebaseToken(request);
-  if (!user) {
-    return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
-  }
-
-  const teamMembersCol = await col("teamMembers");
-  const snapshot = await teamMembersCol
-    .where("storeId", "==", user.storeId)
-    .get();
-
-  const members = snapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-  }));
-
-  return NextResponse.json(members);
+export async function GET() {
+  return NextResponse.json({ error: "API moved to Supabase client-side" }, { status: 501 });
 }
 
-export async function POST(request: NextRequest) {
-  const user = await verifyFirebaseToken(request);
-  if (!user) {
-    return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
-  }
-
-  const body = await request.json();
-  const { name, email, role } = body;
-
-  if (!name || !email) {
-    return NextResponse.json(
-      { error: "الاسم والبريد مطلوبين" },
-      { status: 400 }
-    );
-  }
-
-  const teamMembersCol = await col("teamMembers");
-  const docRef = await teamMembersCol.add({
-    name,
-    email,
-    role: role || "Staff",
-    status: "Active",
-    storeId: user.storeId,
-    joinedAt: new Date().toISOString(),
-    createdAt: new Date().toISOString(),
-  });
-
-  const created = await docRef.get();
-  return NextResponse.json(
-    { id: created.id, ...created.data() },
-    { status: 201 }
-  );
+export async function POST() {
+  return NextResponse.json({ error: "API moved to Supabase client-side" }, { status: 501 });
 }

@@ -12,6 +12,8 @@ import { toCamelCase } from "@/lib/offline-database";
 
 let isSyncing = false;
 let syncInterval: ReturnType<typeof setInterval> | null = null;
+let visibilityHandler: (() => void) | null = null;
+let onlineHandler: (() => void) | null = null;
 
 const COLLECTIONS_TO_SYNC = [
   "products",
@@ -134,16 +136,21 @@ export function startAutoSync(intervalMs = 30000): void {
 
   // Sync when page becomes visible (tab switch)
   if (typeof document !== "undefined") {
-    document.addEventListener("visibilitychange", async () => {
+    // Remove previous listeners to avoid memory leak
+    if (visibilityHandler) document.removeEventListener("visibilitychange", visibilityHandler);
+    if (onlineHandler) window.removeEventListener("online", onlineHandler);
+
+    visibilityHandler = async () => {
       if (document.visibilityState === "visible" && isOnline()) {
         await fullSync();
       }
-    });
+    };
+    document.addEventListener("visibilitychange", visibilityHandler);
 
-    // Sync when browser goes online
-    window.addEventListener("online", async () => {
+    onlineHandler = async () => {
       await fullSync();
-    });
+    };
+    window.addEventListener("online", onlineHandler);
   }
 }
 
@@ -151,6 +158,14 @@ export function stopAutoSync(): void {
   if (syncInterval) {
     clearInterval(syncInterval);
     syncInterval = null;
+  }
+  if (visibilityHandler && typeof document !== "undefined") {
+    document.removeEventListener("visibilitychange", visibilityHandler);
+    visibilityHandler = null;
+  }
+  if (onlineHandler && typeof window !== "undefined") {
+    window.removeEventListener("online", onlineHandler);
+    onlineHandler = null;
   }
 }
 

@@ -187,4 +187,6 @@ export type AdminTab =
   | "expenses"
   | "employees"
   | "activity"
+  | "security"
+  | "notifications"
   | "settings";

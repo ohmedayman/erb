@@ -102,8 +102,8 @@ export default function AdminClient() {
       setExpenses(expensesRes.data || []);
       setEmployees(employeesRes.data || []);
       setActivityLogs(activityRes.data || []);
-    } catch {
-      // silently fail
+    } catch (err) {
+      console.error("Admin data loading failed:", err);
     } finally {
       setLoading(false);
     }

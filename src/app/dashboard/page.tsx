@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Area, AreaChart } from "recharts";
 import { getDocsFromCollection } from "@/lib/localdb";
+import { DashboardSkeleton } from "@/components/Skeleton";
 
 const STATUS_MAP: Record<string, string> = {
   Delivered: "اتسلّم", Shipped: "اتشحن", Processing: "بيتعالج", Pending: "معلّق", Cancelled: "ملغي",
@@ -142,6 +143,9 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6" dir="rtl">
+      {loading ? (
+        <DashboardSkeleton />
+      ) : (<>
       {/* Welcome Header */}
       <div className="bg-gradient-to-l from-primary/10 via-orange-50/50 to-white rounded-2xl p-4 sm:p-6 border border-primary/10 shadow-sm">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
@@ -517,6 +521,7 @@ export default function DashboardPage() {
           ))}
         </div>
       </div>
+      </>)}
     </div>
   );
 }

@@ -166,7 +166,7 @@ export default function SignupPage() {
     >
       <SEOHead
         title="اعمل حساب جديد - StockFlow"
-        description="سجّل حساب جديد في StockFlow وابدأ إدارة مخزونك ومنتجاتك وعملاءك. نظام إدارة مخازن SaaS متكامل للشركات المصرية."
+        description="سجّل حساب جديد في StockFlow وابدأ إدارة مخزونك ومنتجاتك وعملاءك. نظام إدارة مخازن متكامل للشركات المصرية."
         keywords="حساب جديد, تسجيل, register, StockFlow, إدارة مخازن, نظام مجاني"
         canonical="https://stockflow.vexonet.online/signup"
       />

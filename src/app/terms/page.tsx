@@ -27,7 +27,7 @@ export default function TermsPage() {
           </section>
           <section>
             <h2 className="text-xl font-bold text-gray-900 mb-3">2. وصف الخدمة</h2>
-            <p className="text-gray-600">StockFlow هو نظام SaaS لإدارة المخازن والمخزون. الخدمة بتشمل: إدارة المنتجات، الأوردرات، الفواتير، الزبائن، المصروفات، التقارير، ونقاط البيع.</p>
+            <p className="text-gray-600">StockFlow هو نظام لإدارة المخازن والمخزون. الخدمة بتشمل: إدارة المنتجات، الأوردرات، الفواتير، الزبائن، المصروفات، التقارير، ونقاط البيع.</p>
           </section>
           <section>
             <h2 className="text-xl font-bold text-gray-900 mb-3">3. الحساب والتسجيل</h2>

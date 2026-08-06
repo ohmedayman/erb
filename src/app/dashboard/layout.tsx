@@ -13,7 +13,7 @@ import {
 import { supabase } from "@/lib/supabase";
 import Image from "next/image";
 import { OfflineIndicator, InstallPrompt, SyncStatus } from "@/app/components/PWAComponents";
-import { getUnreadCount, subscribeToNotifications, requestNotificationPermission } from "@/lib/notifications";
+import { getUnreadCount, markAsRead, markAllAsRead, subscribeToNotifications, requestNotificationPermission } from "@/lib/notifications";
 import GlobalSearch from "@/components/GlobalSearch";
 import { isAdminEmail } from "@/lib/admin-config";
 
@@ -352,7 +352,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                       {unreadCount > 0 && (
                         <button
                           onClick={async () => {
-                            const { markAllAsRead } = await import("@/lib/notifications");
                             await markAllAsRead();
                             setUnreadCount(0);
                             setRecentNotifs((prev) => prev.map((n) => ({ ...n, read: true })));
@@ -377,7 +376,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                             onClick={() => {
                               setShowNotifPanel(false);
                               if (!notif.read) {
-                                const { markAsRead } = require("@/lib/notifications");
                                 markAsRead(notif.id);
                                 setUnreadCount((prev) => Math.max(0, prev - 1));
                               }

@@ -15,7 +15,7 @@ export function generateId(): string {
 }
 
 // Convert camelCase keys to snake_case for Supabase columns
-function toSnakeCase(obj: any): any {
+export function toSnakeCase(obj: any): any {
   if (!obj || typeof obj !== "object") return obj;
   if (Array.isArray(obj)) return obj.map(toSnakeCase);
 
@@ -28,7 +28,7 @@ function toSnakeCase(obj: any): any {
 }
 
 // Convert snake_case keys to camelCase for UI display
-function toCamelCase(obj: any): any {
+export function toCamelCase(obj: any): any {
   if (!obj || typeof obj !== "object") return obj;
   if (Array.isArray(obj)) return obj.map(toCamelCase);
 
@@ -95,7 +95,7 @@ export async function getDocs(
   let data = await getAllFromIDB(collectionName as any);
 
   if (storeId) {
-    data = data.filter((item) => item.store_id === storeId);
+    data = data.filter((item) => (item.storeId || item.store_id) === storeId);
   }
 
   if (filters) {

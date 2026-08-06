@@ -1,20 +1,9 @@
 import { SignJWT, jwtVerify } from "jose";
 import bcrypt from "bcryptjs";
 import { NextRequest } from "next/server";
+import { JWT_SECRET, isAdminEmail } from "@/lib/admin-config";
 
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || "stockflow-change-this-in-production-2026"
-);
-
-const ADMIN_EMAILS = [
-  "admin@stockflow.com",
-  "m44408335@gmail.com",
-  "admin@stockflow.vexonet.online",
-];
-
-export function isAdminEmail(email: string): boolean {
-  return ADMIN_EMAILS.includes(email) || email.includes("admin");
-}
+export { isAdminEmail };
 
 export async function hashPassword(password: string): Promise<string> {
   return bcrypt.hash(password, 10);

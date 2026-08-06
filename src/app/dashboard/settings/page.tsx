@@ -3,9 +3,10 @@
 import { useState, useEffect } from "react";
 import {
   Store, User, Bell, Shield, Save, Camera, MapPin, Phone,
-  Mail, Globe, Building2, CheckCircle, AlertCircle,
+  Mail, Globe, Building2, CheckCircle, AlertCircle, Loader2,
 } from "lucide-react";
 import { getDocsFromCollection, updateDocInCollection } from "@/lib/localdb";
+import { supabase } from "@/lib/supabase";
 
 const tabs = [
   { id: "store", label: "معلومات المحل", icon: Store },
@@ -22,6 +23,8 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saved, setSaved] = useState(false);
   const [passwords, setPasswords] = useState({ current: "", new: "", confirm: "" });
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [passwordMsg, setPasswordMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   useEffect(() => {
     const fetchStore = async () => {
@@ -44,6 +47,32 @@ export default function SettingsPage() {
     }
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
+  };
+
+  const handlePasswordChange = async () => {
+    setPasswordMsg(null);
+    if (!passwords.current || !passwords.new) {
+      setPasswordMsg({ type: "error", text: "املأ كل الحقول" });
+      return;
+    }
+    if (passwords.new !== passwords.confirm) {
+      setPasswordMsg({ type: "error", text: "كلمتين السر مش متطابقين" });
+      return;
+    }
+    if (passwords.new.length < 6) {
+      setPasswordMsg({ type: "error", text: "كلمة السر لازم 6 أحرف على الأقل" });
+      return;
+    }
+    setPasswordLoading(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ password: passwords.new });
+      if (error) throw error;
+      setPasswordMsg({ type: "success", text: "تم تحديث كلمة السر بنجاح" });
+      setPasswords({ current: "", new: "", confirm: "" });
+    } catch (err: any) {
+      setPasswordMsg({ type: "error", text: err?.message || "حصلت مشكلة" });
+    }
+    setPasswordLoading(false);
   };
 
   const updateField = (field: string, value: any) => {
@@ -264,7 +293,15 @@ export default function SettingsPage() {
                 {passwords.new && passwords.confirm && passwords.new !== passwords.confirm && (
                   <div className="flex items-center gap-2 text-red-500 text-sm"><AlertCircle className="w-4 h-4" /> كلمتين السر مش متطابقين</div>
                 )}
-                <button className="px-5 py-2.5 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary-hover transition-colors">تحديث كلمة السر</button>
+                {passwordMsg && (
+                  <div className={`flex items-center gap-2 text-sm ${passwordMsg.type === "success" ? "text-green-600" : "text-red-500"}`}>
+                    {passwordMsg.type === "success" ? <CheckCircle className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+                    {passwordMsg.text}
+                  </div>
+                )}
+                <button onClick={handlePasswordChange} disabled={passwordLoading} className="px-5 py-2.5 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary-hover transition-colors disabled:opacity-50 flex items-center gap-2">
+                  {passwordLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> جاري التحديث...</> : "تحديث كلمة السر"}
+                </button>
                 <div className="pt-4 border-t border-border">
                   <h3 className="text-sm font-medium text-foreground mb-2">المصادقة الثنائية</h3>
                   <p className="text-xs text-muted-foreground mb-3">أضف طبقة أمان إضافية لحسابك</p>

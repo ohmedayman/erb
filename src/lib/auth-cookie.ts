@@ -1,9 +1,8 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
+import { JWT_SECRET, ADMIN_EMAILS, isAdminEmail } from "@/lib/admin-config";
 
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || "stockflow-secret-key-change-in-production-2026"
-);
+export { ADMIN_EMAILS, isAdminEmail };
 
 const COOKIE_NAME = "sf_auth";
 
@@ -54,14 +53,4 @@ export async function getAuthFromRequest(request: Request): Promise<AuthPayload 
 export async function clearAuthCookie() {
   const cookieStore = await cookies();
   cookieStore.delete(COOKIE_NAME);
-}
-
-export const ADMIN_EMAILS = [
-  "admin@stockflow.com",
-  "m44408335@gmail.com",
-  "admin@stockflow.vexonet.online",
-];
-
-export function isAdminEmail(email: string): boolean {
-  return ADMIN_EMAILS.includes(email.toLowerCase().trim());
 }

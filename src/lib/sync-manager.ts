@@ -8,6 +8,7 @@ import {
   getAllFromIDB,
   clearIDB,
 } from "@/lib/offline-db";
+import { toCamelCase } from "@/lib/offline-database";
 
 let isSyncing = false;
 let syncInterval: ReturnType<typeof setInterval> | null = null;
@@ -101,7 +102,7 @@ export async function pullFromServer(): Promise<void> {
 
         const { data, error } = await query.order("created_at", { ascending: false }).limit(500);
         if (!error && data) {
-          await putManyToIDB(collection as any, data);
+          await putManyToIDB(collection as any, data.map(toCamelCase));
         }
       } catch {
         // skip failed collections

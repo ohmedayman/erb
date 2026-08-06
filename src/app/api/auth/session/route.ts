@@ -1,13 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { SignJWT, jwtVerify } from "jose";
-
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || "stockflow-secret-key-change-in-production-2026"
-);
+import { JWT_SECRET, ADMIN_EMAILS } from "@/lib/admin-config";
 
 const COOKIE_NAME = "sf_auth";
-
-const ADMIN_EMAILS = ["admin@stockflow.com", "m44408335@gmail.com", "admin@stockflow.vexonet.online"];
 
 export async function POST(request: NextRequest) {
   try {

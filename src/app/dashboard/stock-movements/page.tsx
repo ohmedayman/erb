@@ -1,8 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ArrowDownCircle, ArrowUpCircle, ArrowLeftRight, Plus, X } from "lucide-react";
+import { ArrowDownCircle, ArrowUpCircle, ArrowLeftRight, Plus, X, Search, Download, Package } from "lucide-react";
 import { getDocsFromCollection, addDocToCollection } from "@/lib/localdb";
+import { exportToExcel } from "@/lib/excel";
+import { toast } from "@/components/Toast";
+
+const Skeleton = ({ className }: { className?: string }) => (
+  <div className={`animate-pulse bg-muted rounded ${className}`} />
+);
 
 const typeConfig: Record<string, { bg: string; text: string; label: string; icon: any }> = {
   "إدخال": { bg: "bg-green-50", text: "text-green-600", label: "إدخال", icon: ArrowDownCircle },
@@ -13,6 +19,8 @@ const typeConfig: Record<string, { bg: string; text: string; label: string; icon
 export default function StockMovementsPage() {
   const [movements, setMovements] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [typeFilter, setTypeFilter] = useState("all");
   const [showModal, setShowModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
@@ -41,12 +49,23 @@ export default function StockMovementsPage() {
     fetchMovements();
   }, []);
 
+  const filtered = movements.filter((m) => {
+    const matchesSearch = m.productName?.toLowerCase().includes(search.toLowerCase()) || m.sku?.toLowerCase().includes(search.toLowerCase());
+    const matchesType = typeFilter === "all" || m.type === typeFilter;
+    return matchesSearch && matchesType;
+  });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
     try {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
-      addDocToCollection("stockMovements", { ...form, storeId: user.storeId });
+      await addDocToCollection("stockMovements", {
+        ...form,
+        storeId: user.storeId,
+        movementNumber: `MOV-${Date.now().toString(36).toUpperCase()}`,
+        createdAt: new Date().toISOString(),
+      });
       setShowModal(false);
       setForm({
         productName: "",
@@ -59,7 +78,9 @@ export default function StockMovementsPage() {
         notes: "",
       });
       fetchMovements();
+      toast.success("تم إضافة الحركة بنجاح");
     } catch {
+      toast.error("فيه مشكلة حصلت");
     } finally {
       setSubmitting(false);
     }
@@ -67,17 +88,22 @@ export default function StockMovementsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-foreground">حركات المخزون</h1>
           <p className="text-muted-foreground text-sm mt-1">تتبع حركات الإدخال و الإخراج و النقل</p>
         </div>
-        <button
-          onClick={() => setShowModal(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
-        >
-          <Plus className="w-4 h-4" /> اضف حركة
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={() => exportToExcel(movements.map(m => ({ productName: m.productName, sku: m.sku, type: m.type, quantity: m.quantity, fromLocation: m.fromLocation, toLocation: m.toLocation, reference: m.reference, createdAt: m.createdAt })), "stock-movements", "حركات المخزون")} className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-xl text-sm font-medium hover:bg-green-600 transition-colors">
+            <Download className="w-4 h-4" /> تصدير
+          </button>
+          <button
+            onClick={() => setShowModal(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
+          >
+            <Plus className="w-4 h-4" /> اضف حركة
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -91,6 +117,33 @@ export default function StockMovementsPage() {
             <p className={`text-2xl font-bold mt-1 ${s.color}`}>{loading ? "..." : s.value}</p>
           </div>
         ))}
+      </div>
+
+      <div className="bg-card rounded-xl border border-border p-4">
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1">
+            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="البحث بالمنتج أو الكود..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-4 pr-10 py-2 bg-muted rounded-lg text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50"
+            />
+          </div>
+          <div className="relative">
+            <select
+              value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value)}
+              className="appearance-none px-4 py-2 pl-8 bg-muted rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+            >
+              <option value="all">الكل</option>
+              <option value="إدخال">إدخال</option>
+              <option value="إخراج">إخراج</option>
+              <option value="نقل">نقل</option>
+            </select>
+          </div>
+        </div>
       </div>
 
       <div className="bg-card rounded-xl border border-border overflow-hidden">
@@ -110,11 +163,28 @@ export default function StockMovementsPage() {
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={8} className="px-5 py-8 text-center text-muted-foreground text-sm">بيتحمّل...</td></tr>
-              ) : movements.length === 0 ? (
-                <tr><td colSpan={8} className="px-5 py-8 text-center text-muted-foreground text-sm">مفيش حركات مخزون</td></tr>
+                <tr><td colSpan={8} className="px-5 py-4">
+                  <div className="space-y-3">
+                    {[1, 2, 3, 4].map((i) => (
+                      <div key={i} className="flex items-center gap-3">
+                        <Skeleton className="h-4 flex-1" />
+                        <Skeleton className="h-4 w-20" />
+                        <Skeleton className="h-5 w-14 rounded-full" />
+                        <Skeleton className="h-4 w-16" />
+                        <Skeleton className="h-4 w-20" />
+                        <Skeleton className="h-4 w-20" />
+                        <Skeleton className="h-4 w-16" />
+                        <Skeleton className="h-4 w-20" />
+                      </div>
+                    ))}
+                  </div>
+                </td></tr>
+              ) : filtered.length === 0 ? (
+                <tr><td colSpan={8} className="px-5 py-12 text-center text-muted-foreground text-sm">
+                  {search ? "مفيش نتايج للبحث ده" : "مفيش حركات مخزون"}
+                </td></tr>
               ) : (
-                movements.map((m, i) => {
+                filtered.map((m, i) => {
                   const cfg = typeConfig[m.type] || typeConfig["إدخال"];
                   const Icon = cfg.icon;
                   return (

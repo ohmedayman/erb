@@ -6,9 +6,9 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Package, Users, Truck, CreditCard, Building2, Check, Zap,
-  User, PackageCheck, FileSignature, Receipt, Wrench, HandCoins,
+  User, PackageCheck, FileSignature, Receipt, HandCoins,
   ClipboardList, CircleDollarSign, RefreshCcw, TrendingUp, CheckCircle,
-  ArrowLeft, ArrowRight, Sparkles, Store, Warehouse, Globe,
+  ArrowLeft, Sparkles, Warehouse,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import SEOHead from "@/components/SEOHead";
@@ -29,6 +29,12 @@ const ALL_FEATURES = [
   { id: "suppliers", label: "الموردين", desc: "بيانات ومتابعة الموردين", icon: Building2, color: "from-lime-500 to-lime-600" },
   { id: "returns", label: "المرتجعات", desc: "إدارة مرتجعات الزباين", icon: RefreshCcw, color: "from-rose-500 to-rose-600" },
   { id: "analytics", label: "التحليلات", desc: "تقارير وإحصائيات المبيعات", icon: TrendingUp, color: "from-fuchsia-500 to-fuchsia-600" },
+];
+
+const SUGGESTED_PACKS = [
+  { name: "محل صغير", features: ["products", "orders", "invoices", "customers", "inventory", "expenses"], desc: "لل中小 المتاجر والمحلات" },
+  { name: "شركة متوسطة", features: ["products", "orders", "invoices", "customers", "employees", "shipping", "analytics"], desc: "للشركات المتوسطة والمستودعات" },
+  { name: "محل ملابس", features: ["products", "orders", "invoices", "customers", "returns", "inventory", "expenses"], desc: "مخصص لمحلات الملابس" },
 ];
 
 const MAX_FEATURES = 7;
@@ -63,6 +69,12 @@ export default function OnboardingPage() {
       if (selectedCount >= MAX_FEATURES) return prev;
       return { ...prev, [id]: true };
     });
+  };
+
+  const applyPack = (featureIds: string[]) => {
+    const newSelected: Record<string, boolean> = {};
+    featureIds.forEach(id => { newSelected[id] = true; });
+    setSelected(newSelected);
   };
 
   const handleComplete = async () => {
@@ -100,7 +112,7 @@ export default function OnboardingPage() {
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-blue-50" dir="rtl">
       <SEOHead title="إعداد المتجر - StockFlow" description="اختار المميزات اللي محتاجها لمتجرك" canonical="https://stockflow.vexonet.online/onboarding" />
 
-      {/* Header */}
+      {/* Header with Progress */}
       <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-40">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
@@ -108,9 +120,19 @@ export default function OnboardingPage() {
             <span className="text-lg font-bold text-gray-900">Stock<span className="text-orange-500">Flow</span></span>
           </div>
           {step === "features" && (
-            <div className="flex items-center gap-2 text-sm text-gray-500">
-              <span className={`font-bold text-orange-500`}>{selectedCount}</span>
-              <span>/ {MAX_FEATURES} مميزة</span>
+            <div className="flex items-center gap-3">
+              <div className="hidden sm:flex items-center gap-2 text-sm text-gray-500">
+                <span className="font-bold text-orange-500">{selectedCount}</span>
+                <span>/ {MAX_FEATURES}</span>
+              </div>
+              <div className="w-32 h-2 bg-gray-100 rounded-full overflow-hidden">
+                <motion.div
+                  className="h-full bg-gradient-to-r from-orange-400 to-orange-500 rounded-full"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${(selectedCount / MAX_FEATURES) * 100}%` }}
+                  transition={{ duration: 0.3 }}
+                />
+              </div>
             </div>
           )}
         </div>
@@ -127,7 +149,7 @@ export default function OnboardingPage() {
               </motion.div>
               <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">أهلاً بيك في StockFlow!</h1>
               <p className="text-lg text-gray-500 mb-3">هنخصص المتجر بتاعك حسب احتياجك</p>
-              <p className="text-sm text-gray-400 mb-8">اختار <span className="font-bold text-orange-500">7 مميزات</span> بس من اللي محتاجها — تقدر تغيرهم أي وقت</p>
+              <p className="text-sm text-gray-400 mb-8">اختار <span className="font-bold text-orange-500">7 مميزات</span> بس من اللي محتاجها</p>
 
               <div className="mb-8">
                 <label className="block text-sm font-medium text-gray-700 mb-2 text-right">اسم المتجر</label>
@@ -138,6 +160,23 @@ export default function OnboardingPage() {
                   placeholder="مثال: محل أحمد للملابس"
                   className="w-full px-5 py-4 rounded-2xl border-2 border-gray-200 text-center text-lg font-medium focus:outline-none focus:border-orange-400 focus:ring-4 focus:ring-orange-100 transition-all"
                 />
+              </div>
+
+              {/* Quick Packs */}
+              <div className="mb-8">
+                <p className="text-sm text-gray-500 mb-3">أو اختار جاهز:</p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {SUGGESTED_PACKS.map((pack) => (
+                    <button
+                      key={pack.name}
+                      onClick={() => applyPack(pack.features)}
+                      className="p-4 rounded-2xl border-2 border-gray-200 bg-white hover:border-orange-300 hover:bg-orange-50 transition-all text-right"
+                    >
+                      <p className="font-bold text-gray-900 text-sm">{pack.name}</p>
+                      <p className="text-xs text-gray-500 mt-1">{pack.desc}</p>
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <button onClick={() => setStep("features")}
@@ -154,7 +193,7 @@ export default function OnboardingPage() {
                 <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">اختار مميزاتك</h2>
                 <p className="text-gray-500">اضغط على المميزات اللي محتاجها — اختار {MAX_FEATURES} بالكتير</p>
                 {selectedCount >= MAX_FEATURES && (
-                  <p className="text-orange-500 text-sm font-medium mt-2">وصلت الحد الأقصى! اضغط على مميزة عشان تلغي اختيارها</p>
+                  <motion.p initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="text-orange-500 text-sm font-medium mt-2">وصلت الحد الأقصى!</motion.p>
                 )}
               </div>
 

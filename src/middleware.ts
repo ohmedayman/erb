@@ -1,9 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-// Admin emails - must match src/lib/admin-config.ts
-const ADMIN_EMAILS = ["admin@stockflow.com", "m44408335@gmail.com", "admin@stockflow.vexonet.online"];
-
 export function middleware(request: NextRequest) {
   const response = NextResponse.next();
   const { pathname } = request.nextUrl;
@@ -59,48 +56,6 @@ export function middleware(request: NextRequest) {
   const publicPaths = ["/", "/login", "/signup", "/checkout", "/privacy", "/terms", "/setup", "/offline"];
   if (publicPaths.includes(pathname) || pathname.startsWith("/api/auth")) {
     return response;
-  }
-
-  // ========================================
-  // 3. Auth check for protected routes
-  // ========================================
-  // Check for Supabase auth cookie (sb-<project-ref>-auth-token)
-  const authCookie = request.cookies.get("sb-gecangkwnbaznrrkmdyd-auth-token");
-
-  // Also check localStorage-based auth (sent via cookie or header)
-  const isLoggedIn = request.cookies.get("isLoggedIn")?.value;
-  const userCookie = request.cookies.get("user")?.value;
-
-  // Protected routes that require authentication
-  const protectedPaths = ["/dashboard", "/onboarding", "/admin"];
-  const isProtected = protectedPaths.some(p => pathname.startsWith(p));
-
-  if (isProtected) {
-    // Allow if has Supabase auth cookie OR localStorage-based auth
-    const hasAuth = authCookie || isLoggedIn || userCookie;
-
-    if (!hasAuth) {
-      // Redirect to login
-      const loginUrl = new URL("/login", request.url);
-      loginUrl.searchParams.set("redirect", pathname);
-      return NextResponse.redirect(loginUrl);
-    }
-
-    // Admin routes - check if user is admin
-    if (pathname.startsWith("/admin")) {
-      if (userCookie) {
-        try {
-          const user = JSON.parse(decodeURIComponent(userCookie));
-          const email = (user.email || "").toLowerCase();
-          if (!ADMIN_EMAILS.includes(email) && user.role !== "admin") {
-            return NextResponse.redirect(new URL("/dashboard", request.url));
-          }
-        } catch {
-          // If can't parse, redirect to login
-          return NextResponse.redirect(new URL("/login", request.url));
-        }
-      }
-    }
   }
 
   return response;

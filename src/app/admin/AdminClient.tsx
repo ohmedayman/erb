@@ -216,6 +216,7 @@ export default function AdminClient() {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
+    await fetch("/api/auth/session", { method: "DELETE" });
     localStorage.removeItem("isLoggedIn");
     localStorage.removeItem("user");
     router.push("/login");

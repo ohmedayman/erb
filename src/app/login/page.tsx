@@ -130,6 +130,29 @@ export default function LoginPage() {
           localStorage.setItem("store", JSON.stringify({ id: storeData.id, name: storeData.name }));
         }
 
+        // Determine subscription status for auth cookie
+        let subStatus = "pending";
+        if (!orders || orders.length === 0) {
+          subStatus = "none";
+        } else if (orders[0].status === "approved") {
+          subStatus = "approved";
+        } else if (orders[0].status === "pending") {
+          subStatus = "pending";
+        } else {
+          subStatus = "rejected";
+        }
+
+        // Set auth cookie for middleware
+        await fetch("/api/auth/session", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userId: data.user.id,
+            email: data.user.email,
+            subscriptionStatus: subStatus,
+          }),
+        });
+
         if (!orders || orders.length === 0) {
           // No subscription order — go to checkout
           router.push("/checkout");

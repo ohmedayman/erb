@@ -102,9 +102,6 @@ const pricingPlans = [
     id: "starter",
     name: "StockFlow Starter",
     price: "3,000",
-    monthly: "250",
-    upfront: "1,500",
-    installment: "500 × 3",
     desc: "ابدأ بإدارة متجرك بالمميزات الأساسية",
     badge: "الأساسية",
     color: "from-blue-500 to-blue-600",
@@ -128,9 +125,6 @@ const pricingPlans = [
     id: "growth",
     name: "StockFlow Growth",
     price: "6,000",
-    monthly: "500",
-    upfront: "3,000",
-    installment: "1,000 × 3",
     desc: "مميزات متقدمة لإدارة أعمالك بكفاءة",
     badge: "الأكثر طلباً",
     color: "from-orange-500 to-orange-600",
@@ -158,9 +152,6 @@ const pricingPlans = [
     id: "enterprise",
     name: "StockFlow Enterprise",
     price: "9,000",
-    monthly: "750",
-    upfront: "4,500",
-    installment: "1,500 × 3",
     desc: "كل المميزات بدون حدود",
     badge: "المتقدمة",
     color: "from-purple-500 to-purple-600",
@@ -650,7 +641,7 @@ export default function HomePage() {
               <CreditCard className="w-4 h-4" /> باقات مرنة لكل احتياج
             </div>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">اختار الباقة المناسبة ليك</h2>
-            <p className="mt-4 text-lg text-gray-500">3 باقات بأسعار مصرية — ادفع مقدم وقسط الباقي</p>
+            <p className="mt-4 text-lg text-gray-500">3 باقات بأسعار مصرية — ادفع وابدأ فوراً</p>
           </AnimateOnScroll>
 
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
@@ -671,12 +662,6 @@ export default function HomePage() {
                         <span className="text-4xl font-bold text-gray-900">{plan.price}</span>
                         <span className="text-sm text-gray-500 font-medium">ج.م / سنة</span>
                       </div>
-                      <p className="text-xs text-gray-400 mt-1">= {plan.monthly} ج.م / شهرياً</p>
-                    </div>
-
-                    <div className="bg-gray-50 rounded-xl p-3 border border-gray-200 mb-4 text-sm space-y-1">
-                      <div className="flex justify-between"><span className="text-gray-500">المقدم</span><span className="font-bold text-gray-900">{plan.upfront} ج.م</span></div>
-                      <div className="flex justify-between"><span className="text-gray-500">القسط الشهري</span><span className="text-gray-700">{plan.installment}</span></div>
                     </div>
 
                     <div className={`rounded-xl p-3 border mb-4 text-center ${plan.id === "enterprise" ? "bg-purple-50 border-purple-200" : plan.id === "growth" ? "bg-orange-50 border-orange-200" : "bg-blue-50 border-blue-200"}`}>

@@ -42,9 +42,6 @@ const PLANS = [
     id: "starter",
     name: "StockFlow Starter",
     price: 3000,
-    upfront: 1500,
-    installment: 500,
-    installments: 3,
     duration: "سنوي",
     maxProducts: 100,
     maxCustomers: 50,
@@ -59,9 +56,6 @@ const PLANS = [
     id: "growth",
     name: "StockFlow Growth",
     price: 6000,
-    upfront: 3000,
-    installment: 1000,
-    installments: 3,
     duration: "سنوي",
     maxProducts: 500,
     maxCustomers: 500,
@@ -76,9 +70,6 @@ const PLANS = [
     id: "enterprise",
     name: "StockFlow Enterprise",
     price: 9000,
-    upfront: 4500,
-    installment: 1500,
-    installments: 3,
     duration: "سنوي",
     maxProducts: -1,
     maxCustomers: -1,
@@ -307,7 +298,7 @@ export default function CheckoutPage() {
         screenshot_url: screenshotUrl,
         id_card_url: idCardUrl,
         selected_features: selectedFeatures,
-        status: "pending",
+        status: "approved",
       };
 
       const { error } = await supabase
@@ -320,7 +311,7 @@ export default function CheckoutPage() {
 
       await supabase
         .from("registered_users")
-        .update({ subscription_status: "pending" })
+        .update({ subscription_status: "active" })
         .eq("id", user.id);
 
       createAdminNotification({
@@ -348,14 +339,10 @@ export default function CheckoutPage() {
           <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <CheckCircle className="w-10 h-10 text-green-600" />
           </div>
-          <h1 className="text-2xl font-bold text-foreground mb-2">تم إرسال طلبك بنجاح!</h1>
-          <p className="text-muted-foreground mb-6">هنتواصل معاك خلال 24 ساعة لتأكيد الاشتراك</p>
-          <div className="bg-muted rounded-xl p-4 mb-6 text-sm">
-            <p className="text-muted-foreground">رقم الطلب</p>
-            <p className="font-mono font-bold text-foreground">{orderId}</p>
-          </div>
-          <Link href="/login" className="inline-flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-medium hover:bg-primary-hover transition-all">
-            رجوع للتسجيل الدخول
+          <h1 className="text-2xl font-bold text-foreground mb-2">تم تأكيد اشتراكك بنجاح!</h1>
+          <p className="text-muted-foreground mb-6">تقدر تدخل على الحساب دلوقتي وابدأ تشتغل</p>
+          <Link href="/dashboard" className="inline-flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-medium hover:bg-primary-hover transition-all">
+            الدخول للوحة التحكم
           </Link>
         </motion.div>
       </div>
@@ -431,8 +418,6 @@ export default function CheckoutPage() {
                           <span className="text-sm text-muted-foreground">ج.م</span>
                         </div>
                         <div className="text-xs text-muted-foreground space-y-1">
-                          <p>مقدم: {plan.upfront.toLocaleString()} ج.م</p>
-                          <p>قسط شهري: {plan.installment.toLocaleString()} ج.م × {plan.installments}</p>
                           <p className="font-medium text-primary">مميزات: {plan.maxFeatures}</p>
                         </div>
                       </button>
@@ -506,7 +491,7 @@ export default function CheckoutPage() {
                 {!selectedMethod ? (
                   <div className="bg-white rounded-2xl shadow-lg border border-border p-6">
                     <h2 className="text-xl font-bold text-foreground mb-2">اختار طريقة الدفع</h2>
-                    <p className="text-sm text-muted-foreground mb-6">ادفع مقدم {currentPlan.upfront.toLocaleString()} ج.م</p>
+                    <p className="text-sm text-muted-foreground mb-6">ادفع {currentPlan.price.toLocaleString()} ج.م</p>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                       {PAYMENT_METHODS.map((method) => (
@@ -546,9 +531,8 @@ export default function CheckoutPage() {
                       </div>
 
                       <div className={`bg-gradient-to-br ${currentPlan.color} rounded-xl p-4 text-white text-center mb-6`}>
-                        <p className="text-white/70 text-sm">المبلغ المطلوب (المقدم)</p>
-                        <p className="text-3xl font-bold">{currentPlan.upfront.toLocaleString()} ج.م</p>
-                        <p className="text-white/70 text-xs mt-1">+ {currentPlan.installment.toLocaleString()} ج.م شهرياً لمدة {currentPlan.installments} شهور</p>
+                        <p className="text-white/70 text-sm">المبلغ المطلوب</p>
+                        <p className="text-3xl font-bold">{currentPlan.price.toLocaleString()} ج.م</p>
                       </div>
 
                       <div className="bg-muted rounded-xl p-4 mb-6 text-right">
@@ -670,7 +654,7 @@ export default function CheckoutPage() {
                           {loading ? (
                             <><Loader2 className="w-5 h-5 animate-spin" /> بيتم الإرسال...</>
                           ) : (
-                            <><CheckCircle className="w-5 h-5" /> تأكيد الدفع — {currentPlan.upfront.toLocaleString()} ج.م</>
+                            <><CheckCircle className="w-5 h-5" /> تأكيد الدفع — {currentPlan.price.toLocaleString()} ج.م</>
                           )}
                         </button>
                       </div>
@@ -702,14 +686,6 @@ export default function CheckoutPage() {
                 )}
                 {currentPlan && (
                   <div className="border-t border-border pt-3">
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="text-muted-foreground">المقدم</span>
-                      <span className="font-bold text-primary">{currentPlan.upfront.toLocaleString()} ج.م</span>
-                    </div>
-                    <div className="flex justify-between text-sm text-muted-foreground mb-1">
-                      <span>القسط الشهري</span>
-                      <span>{currentPlan.installment.toLocaleString()} ج.م × {currentPlan.installments}</span>
-                    </div>
                     <div className="border-t border-border pt-2 mt-2">
                       <div className="flex justify-between">
                         <span className="font-medium text-foreground">الإجمالي</span>
@@ -727,11 +703,11 @@ export default function CheckoutPage() {
                 </div>
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <Clock className="w-3.5 h-3.5 text-blue-500" />
-                  <span>تأكيد سريع خلال 24 ساعة</span>
+                  <span>تأكيد خلال دقائق</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <Zap className="w-3.5 h-3.5 text-orange-500" />
-                  <span>دخول فوري بعد التأكيد</span>
+                  <span>دخول فوري بعد الدفع</span>
                 </div>
               </div>
 

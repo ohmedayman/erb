@@ -8,7 +8,7 @@ import { getSecurityStats, blockIP, unblockIP, isIPBlocked } from "./rate-limite
 
 export interface SecurityEvent {
   id: string;
-  type: "brute_force" | "xss_attempt" | "sql_injection" | "rate_limit" | "suspicious_header" | "unauthorized_access" | "data_breach_attempt";
+  type: "brute_force" | "xss_attempt" | "sql_injection" | "rate_limit" | "suspicious_header" | "unauthorized_access" | "data_breach_attempt" | "suspicious_activity" | "path_traversal" | "command_injection" | "scanner_detected" | "attack_path_probing" | "session_hijack" | "ids_block";
   ip: string;
   userAgent: string;
   path: string;

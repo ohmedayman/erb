@@ -174,12 +174,22 @@ export default function LoginPage() {
           return;
         }
 
+        // Admin with no subscription record → go to admin panel
+        if (isAdmin) {
+          router.push("/admin");
+          return;
+        }
+
         router.push("/checkout");
         return;
       }
 
-      // Pending order → show waiting message
+      // Pending order → show waiting message (admin goes to admin panel)
       if (orders[0].status === "pending") {
+        if (isAdmin) {
+          router.push("/admin");
+          return;
+        }
         setServerError("طلبك قيد المراجعة من الإدارة. هتتقبل في أقرب وقت! 🕐");
         setLoading(false);
         return;
@@ -210,7 +220,11 @@ export default function LoginPage() {
         return;
       }
 
-      // Rejected
+      // Rejected (admin goes to admin panel)
+      if (isAdmin) {
+        router.push("/admin");
+        return;
+      }
       setServerError("تم رفض طلب اشتراكك. تواصل مع الدعم على 01028707543");
       setLoading(false);
     } catch {

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Warehouse, Eye, EyeOff, Globe, Mail, Lock, Loader2, CheckCircle } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { trackUserActivity } from "@/lib/user-activity";
 import Image from "next/image";
 import SEOHead from "@/components/SEOHead";
 
@@ -85,6 +86,14 @@ export default function LoginPage() {
           storeId: data.user.id,
         }));
         localStorage.setItem("isLoggedIn", "true");
+
+        // Track login activity
+        trackUserActivity({
+          userId: data.user.id,
+          email: data.user.email || email,
+          name: data.user.user_metadata?.full_name || data.user.email,
+          eventType: "login",
+        }).catch(() => {});
 
         if (isAdmin) {
           router.push("/admin");

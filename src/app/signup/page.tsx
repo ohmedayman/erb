@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Warehouse, Eye, EyeOff, Globe, CheckCircle, Mail, Lock, User, Loader2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { trackUserActivity } from "@/lib/user-activity";
 import Image from "next/image";
 import SEOHead from "@/components/SEOHead";
 
@@ -140,6 +141,14 @@ export default function SignupPage() {
           features: ["products", "orders", "invoices", "customers", "inventory", "expenses", "employees", "shipping", "installments", "accounts", "purchaseOrders", "warehouses", "suppliers", "returns", "analytics"],
           onboardingDone: true,
         }));
+
+        // Track signup activity
+        trackUserActivity({
+          userId: data.user.id,
+          email: data.user.email || formData.email,
+          name: formData.name.trim(),
+          eventType: "signup",
+        }).catch(() => {});
 
         router.push("/dashboard");
       }

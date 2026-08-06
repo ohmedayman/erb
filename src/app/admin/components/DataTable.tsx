@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Search, ChevronLeft, ChevronRight, Edit3, Trash2, Eye } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, Edit3, Trash2, Eye, ChevronDown, ChevronUp } from "lucide-react";
 
 interface Column<T> {
   key: string;
@@ -19,6 +19,8 @@ interface DataTableProps<T> {
   searchPlaceholder?: string;
   searchKeys?: string[];
   pageSize?: number;
+  expandable?: boolean;
+  renderExpanded?: (item: T) => React.ReactNode;
 }
 
 export default function DataTable<T extends { id: string }>({
@@ -30,9 +32,12 @@ export default function DataTable<T extends { id: string }>({
   searchPlaceholder = "بحث...",
   searchKeys = [],
   pageSize = 15,
+  expandable = false,
+  renderExpanded,
 }: DataTableProps<T>) {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [expandedRow, setExpandedRow] = useState<string | null>(null);
 
   const filtered = data.filter((item) => {
     if (!search) return true;
@@ -77,37 +82,56 @@ export default function DataTable<T extends { id: string }>({
           </thead>
           <tbody>
             {paged.map((item, i) => (
-              <tr key={item.id} className={`border-b border-slate-800 hover:bg-slate-800/50 transition-colors ${i % 2 === 0 ? "bg-[#0f172a]" : "bg-[#131c2e]"}`}>
-                {columns.map((col) => (
-                  <td key={col.key} className={`px-4 py-3 text-slate-300 ${col.hideOnMobile ? "hidden lg:table-cell" : ""}`}>
-                    {col.render ? col.render(item) : (item as any)[col.key] ?? "-"}
-                  </td>
-                ))}
-                {(onView || onEdit || onDelete) && (
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-1">
-                      {onView && (
-                        <button onClick={() => onView(item)} className="p-1.5 rounded-lg hover:bg-slate-700 text-slate-400 hover:text-white transition-colors" title="عرض">
-                          <Eye className="w-4 h-4" />
-                        </button>
-                      )}
-                      {onEdit && (
-                        <button onClick={() => onEdit(item)} className="p-1.5 rounded-lg hover:bg-blue-500/20 text-slate-400 hover:text-blue-400 transition-colors" title="تعديل">
-                          <Edit3 className="w-4 h-4" />
-                        </button>
-                      )}
-                      {onDelete && (
-                        <button onClick={() => onDelete(item)} className="p-1.5 rounded-lg hover:bg-red-500/20 text-slate-400 hover:text-red-400 transition-colors" title="حذف">
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      )}
-                    </div>
-                  </td>
+              <>
+                <tr key={item.id} className={`border-b border-slate-800 hover:bg-slate-800/50 transition-colors ${i % 2 === 0 ? "bg-[#0f172a]" : "bg-[#131c2e]"}`}>
+                  {expandable && (
+                    <td className="px-2 py-3 w-8">
+                      <button
+                        onClick={() => setExpandedRow(expandedRow === item.id ? null : item.id)}
+                        className="p-1 rounded hover:bg-slate-700 text-slate-400 hover:text-white transition-colors"
+                      >
+                        {expandedRow === item.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                      </button>
+                    </td>
+                  )}
+                  {columns.map((col) => (
+                    <td key={col.key} className={`px-4 py-3 text-slate-300 ${col.hideOnMobile ? "hidden lg:table-cell" : ""}`}>
+                      {col.render ? col.render(item) : (item as any)[col.key] ?? "-"}
+                    </td>
+                  ))}
+                  {(onView || onEdit || onDelete) && (
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-1">
+                        {onView && (
+                          <button onClick={() => onView(item)} className="p-1.5 rounded-lg hover:bg-slate-700 text-slate-400 hover:text-white transition-colors" title="عرض">
+                            <Eye className="w-4 h-4" />
+                          </button>
+                        )}
+                        {onEdit && (
+                          <button onClick={() => onEdit(item)} className="p-1.5 rounded-lg hover:bg-blue-500/20 text-slate-400 hover:text-blue-400 transition-colors" title="تعديل">
+                            <Edit3 className="w-4 h-4" />
+                          </button>
+                        )}
+                        {onDelete && (
+                          <button onClick={() => onDelete(item)} className="p-1.5 rounded-lg hover:bg-red-500/20 text-slate-400 hover:text-red-400 transition-colors" title="حذف">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  )}
+                </tr>
+                {expandable && expandedRow === item.id && renderExpanded && (
+                  <tr key={`${item.id}-expanded`}>
+                    <td colSpan={columns.length + 2} className="p-0">
+                      {renderExpanded(item)}
+                    </td>
+                  </tr>
                 )}
-              </tr>
+              </>
             ))}
             {paged.length === 0 && (
-              <tr><td colSpan={columns.length + 1} className="text-center py-12 text-slate-500">لا توجد بيانات</td></tr>
+              <tr><td colSpan={columns.length + 2} className="text-center py-12 text-slate-500">لا توجد بيانات</td></tr>
             )}
           </tbody>
         </table>

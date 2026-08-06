@@ -16,7 +16,7 @@ export function generateSEOMetadata({
   description,
   keywords = [],
   path = "",
-  image = "/og-image.png",
+  image = "/og-image.svg",
   type = "website",
 }: SEOProps): Metadata {
   const url = `${siteUrl}${path}`;

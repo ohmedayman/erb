@@ -81,7 +81,7 @@ export const metadata: Metadata = {
       "نظام إدارة مخازن ومخزون متكامل للشركات المصرية. أدر منتجاتك وعملاءك وفواتيرك في مكان واحد. تقارير لحظية، باركود، شحن، نقاط بيع.",
     images: [
       {
-        url: `${siteUrl}/og-image.png`,
+        url: `${siteUrl}/og-image.svg`,
         width: 1200,
         height: 630,
         alt: "StockFlow - نظام إدارة المخازن",
@@ -93,7 +93,7 @@ export const metadata: Metadata = {
     title: "StockFlow - نظام إدارة المخازن والمخزون الاحترافي",
     description:
       "نظام إدارة مخازن ومخزون متكامل للشركات المصرية. أدر منتجاتك وعملاءك وفواتيرك في مكان واحد.",
-    images: [`${siteUrl}/og-image.png`],
+    images: [`${siteUrl}/og-image.svg`],
   },
   robots: {
     index: true,

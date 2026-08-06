@@ -19,7 +19,7 @@ export default function SEOHead({
   keywords,
   ogTitle,
   ogDescription,
-  ogImage = "https://stockflow.vexonet.online/og-image.png",
+  ogImage = "https://stockflow.vexonet.online/og-image.svg",
   canonical,
   jsonLd,
 }: SEOHeadProps) {

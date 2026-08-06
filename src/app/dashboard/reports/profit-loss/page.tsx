@@ -10,6 +10,7 @@ import {
   Download,
 } from "lucide-react";
 import { getDocsFromCollection } from "@/lib/localdb";
+import { generateReportPDF } from "@/lib/pdf-export";
 
 interface MonthlyBreakdown {
   month: string;
@@ -138,12 +139,11 @@ export default function ProfitLossPage() {
           </p>
         </div>
         <button
-          disabled
-          className="flex items-center gap-2 bg-muted text-muted-foreground px-4 py-2.5 rounded-lg text-sm font-medium cursor-not-allowed"
-          title="قريباً"
+          onClick={() => { if (data?.monthlyBreakdown?.length) generateReportPDF("تقرير الأرباح والخسائر", data.monthlyBreakdown.map(m => ({ month: m.month, revenue: m.revenue, expenses: m.expenses, profit: m.profit })), ["month", "revenue", "expenses", "profit"]); }}
+          className="flex items-center gap-2 bg-red-500 text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-red-600 transition-colors"
         >
           <Download className="w-4 h-4" />
-          تصدير التقرير
+          تصدير PDF
         </button>
       </div>
 

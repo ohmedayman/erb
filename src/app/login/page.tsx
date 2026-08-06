@@ -107,13 +107,7 @@ export default function LoginPage() {
         eventType: "login",
       }).catch(() => {});
 
-      // Admin goes straight to admin panel
-      if (isAdmin) {
-        router.push("/admin");
-        return;
-      }
-
-      // Check subscription status
+      // Check subscription status FIRST (for everyone, including admin emails)
       let orders: any[] | null = null;
       try {
         const res = await supabase
@@ -154,12 +148,16 @@ export default function LoginPage() {
         } catch {}
 
         if (subStatus === "approved") {
-          // Subscription approved but no order row — allow access
-          const prefs = JSON.parse(localStorage.getItem("user_prefs") || "null");
-          if (!prefs?.onboardingDone) {
-            router.push("/onboarding");
+          // Subscription approved — admin goes to admin, user goes to dashboard
+          if (isAdmin) {
+            router.push("/admin");
           } else {
-            router.push("/dashboard");
+            const prefs = JSON.parse(localStorage.getItem("user_prefs") || "null");
+            if (!prefs?.onboardingDone) {
+              router.push("/onboarding");
+            } else {
+              router.push("/dashboard");
+            }
           }
           return;
         }
@@ -187,7 +185,7 @@ export default function LoginPage() {
         return;
       }
 
-      // Approved → go to dashboard or onboarding
+      // Approved → go to dashboard or onboarding (admin goes to admin panel)
       if (orders[0].status === "approved") {
         // Also save onboarding prefs if not set
         const existingPrefs = JSON.parse(localStorage.getItem("user_prefs") || "null");
@@ -199,11 +197,15 @@ export default function LoginPage() {
           }));
         }
 
-        const prefs = JSON.parse(localStorage.getItem("user_prefs") || "null");
-        if (!prefs?.onboardingDone) {
-          router.push("/onboarding");
+        if (isAdmin) {
+          router.push("/admin");
         } else {
-          router.push("/dashboard");
+          const prefs = JSON.parse(localStorage.getItem("user_prefs") || "null");
+          if (!prefs?.onboardingDone) {
+            router.push("/onboarding");
+          } else {
+            router.push("/dashboard");
+          }
         }
         return;
       }

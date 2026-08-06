@@ -97,12 +97,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     const email = (user.email || "").toLowerCase();
     const isAdmin = isAdminEmail(email);
 
-    if (isAdmin) {
-      router.push("/admin");
-      return;
-    }
-
-    // Check subscription status - redirect to login if no valid subscription
+    // Check subscription status FIRST (for everyone, including admin emails)
     const checkSubscription = async () => {
       try {
         const { data: orders } = await supabase
@@ -121,6 +116,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             router.push("/login");
             return;
           }
+          if (orders[0].status === "approved" && isAdmin) {
+            router.push("/admin");
+            return;
+          }
         } else {
           // No orders - check registered_users
           const { data: regUser } = await supabase
@@ -131,7 +130,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
           const subStatus = regUser?.subscription_status;
           if (subStatus !== "approved" && subStatus !== "active") {
-            router.push("/checkout");
+            if (isAdmin) {
+              // Admin without subscription goes to checkout
+              router.push("/checkout");
+            } else {
+              router.push("/checkout");
+            }
+            return;
+          }
+          if (subStatus === "approved" && isAdmin) {
+            router.push("/admin");
             return;
           }
         }

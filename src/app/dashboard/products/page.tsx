@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Package, Plus, Search, Edit, Trash2, Printer, Minus, PlusIcon, Download, Image as ImageIcon, X } from "lucide-react";
+import Link from "next/link";
+import { Package, Plus, Search, Edit, Trash2, Printer, Minus, PlusIcon, Download, Image as ImageIcon, X, LayoutGrid, List, Upload } from "lucide-react";
 import { getDocsFromCollection, addDocToCollection, updateDocInCollection, deleteDocFromCollection } from "@/lib/localdb";
 import { exportToExcel } from "@/lib/excel";
 import ExcelImport from "@/components/ExcelImport";
@@ -53,6 +54,7 @@ export default function ProductsPage() {
   const [barcodeQty, setBarcodeQty] = useState(1);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
   const printRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -252,32 +254,17 @@ export default function ProductsPage() {
             <h1 className="text-2xl font-bold text-foreground">المنتجات</h1>
             <p className="text-muted-foreground text-sm mt-1">إدارة كتالوج المنتجات</p>
           </div>
-          <button onClick={() => { setEditingProduct(null); setShowModal(true); }} className="flex items-center gap-2 bg-primary text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-primary-hover transition-colors">
-            <Plus className="w-4 h-4" /> اضف منتج
-          </button>
-          <button onClick={() => exportToExcel(products.map(p => ({ name: p.name, sku: p.sku, category: p.category, price: p.price, stock: p.stock, minStock: p.minStock })), "products", "المنتجات")} className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-xl text-sm font-medium hover:bg-green-600 transition-colors">
-            <Download className="w-4 h-4" /> تصدير Excel
-          </button>
-          <ExcelImport
-            title="المنتجات"
-            columnMappings={[
-              { excelColumn: "الاسم", dbField: "name", label: "Name", required: true },
-              { excelColumn: "كود المنتج", dbField: "sku", label: "SKU" },
-              { excelColumn: "الفئة", dbField: "category", label: "Category" },
-              { excelColumn: "السعر", dbField: "price", label: "Price", required: true, transform: (v) => parseFloat(v) || 0 },
-              { excelColumn: "المخزون", dbField: "stock", label: "Stock", transform: (v) => parseInt(v) || 0 },
-              { excelColumn: "الحد الأدنى", dbField: "minStock", label: "Min Stock", transform: (v) => parseInt(v) || 10 },
-            ]}
-            sampleHeaders={["الاسم", "كود المنتج", "الفئة", "السعر", "المخزون", "الحد الأدنى"]}
-            onImport={async (data) => {
-              const user = JSON.parse(localStorage.getItem("user") || "{}");
-              for (const item of data) {
-                if (!item.name) continue;
-                await addDocToCollection("products", { ...item, storeId: user.storeId });
-              }
-              fetchProducts();
-            }}
-          />
+          <div className="flex flex-wrap items-center gap-2">
+            <Link href="/dashboard/products/import" className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors">
+              <Upload className="w-4 h-4" /> استيراد Excel
+            </Link>
+            <button onClick={() => exportToExcel(products.map(p => ({ name: p.name, sku: p.sku, category: p.category, price: p.price, stock: p.stock, minStock: p.minStock })), "products", "المنتجات")} className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-xl text-sm font-medium hover:bg-green-600 transition-colors">
+              <Download className="w-4 h-4" /> تصدير
+            </button>
+            <button onClick={() => { setEditingProduct(null); setShowModal(true); }} className="flex items-center gap-2 bg-primary text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-primary-hover transition-colors">
+              <Plus className="w-4 h-4" /> اضف منتج
+            </button>
+          </div>
         </div>
 
         <div className="bg-card rounded-xl border border-border p-4">
@@ -286,11 +273,92 @@ export default function ProductsPage() {
               <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input type="text" placeholder="البحث عن منتجات..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full pl-4 pr-10 py-2 bg-muted rounded-lg text-sm text-right focus:outline-none focus:ring-2 focus:ring-primary/50" />
             </div>
+            <div className="flex gap-1 bg-muted rounded-lg p-1">
+              <button onClick={() => setViewMode("grid")} className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${viewMode === "grid" ? "bg-primary text-white shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>
+                <LayoutGrid className="w-4 h-4" />
+              </button>
+              <button onClick={() => setViewMode("table")} className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${viewMode === "table" ? "bg-primary text-white shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>
+                <List className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         </div>
 
         <div className="bg-card rounded-xl border border-border overflow-hidden">
-          {/* Desktop Table */}
+          {/* Grid View */}
+          {viewMode === "grid" ? (
+            <div className="p-4">
+              {loading ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                  {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                    <div key={i} className="animate-pulse">
+                      <div className="bg-muted rounded-xl aspect-square mb-3" />
+                      <div className="bg-muted rounded h-4 w-3/4 mb-2" />
+                      <div className="bg-muted rounded h-3 w-1/2" />
+                    </div>
+                  ))}
+                </div>
+              ) : filtered.length === 0 ? (
+                <div className="py-12 text-center text-muted-foreground text-sm">
+                  <Package className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                  <p className="font-medium">مفيش منتجات</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                  {filtered.map((product) => (
+                    <div key={product.id} className="group bg-card rounded-xl border border-border hover:border-primary/30 hover:shadow-lg transition-all overflow-hidden">
+                      {/* Image */}
+                      <div className="relative aspect-square bg-muted overflow-hidden">
+                        {product.imageUrl ? (
+                          <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Package className="w-12 h-12 text-muted-foreground/30" />
+                          </div>
+                        )}
+                        {/* Status Badge */}
+                        <div className="absolute top-2 right-2">
+                          <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold backdrop-blur-sm ${
+                            product.stock > (product.minStock || 10) ? "bg-green-500/90 text-white" :
+                            product.stock > 0 ? "bg-yellow-500/90 text-white" :
+                            "bg-red-500/90 text-white"
+                          }`}>
+                            {product.stock > (product.minStock || 10) ? "متوفر" : product.stock > 0 ? "قليل" : "خلص"}
+                          </span>
+                        </div>
+                        {/* Quick Actions */}
+                        <div className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                          <button onClick={() => { setBarcodeProduct(product); setBarcodeQty(1); }} className="w-8 h-8 bg-white/90 backdrop-blur-sm rounded-lg flex items-center justify-center hover:bg-white transition-colors shadow-sm" title="باركود">
+                            <Printer className="w-3.5 h-3.5 text-gray-700" />
+                          </button>
+                          <button onClick={() => { setEditingProduct(product); setImagePreview(product.imageUrl || null); setShowModal(true); }} className="w-8 h-8 bg-white/90 backdrop-blur-sm rounded-lg flex items-center justify-center hover:bg-white transition-colors shadow-sm" title="تعديل">
+                            <Edit className="w-3.5 h-3.5 text-gray-700" />
+                          </button>
+                          <button onClick={() => handleDelete(product.id)} className="w-8 h-8 bg-white/90 backdrop-blur-sm rounded-lg flex items-center justify-center hover:bg-red-50 transition-colors shadow-sm" title="حذف">
+                            <Trash2 className="w-3.5 h-3.5 text-red-500" />
+                          </button>
+                        </div>
+                      </div>
+                      {/* Info */}
+                      <div className="p-3">
+                        <h3 className="text-sm font-semibold text-foreground truncate">{product.name}</h3>
+                        <p className="text-xs text-muted-foreground mt-0.5 font-mono">{product.sku || "بدون رمز"}</p>
+                        <div className="flex items-center justify-between mt-2">
+                          <span className="text-sm font-bold text-primary">{(product.price || 0).toLocaleString("ar-EG")} ج.م</span>
+                          <span className="text-xs text-muted-foreground">م: {product.stock}</span>
+                        </div>
+                        {product.category && (
+                          <span className="inline-flex mt-2 px-2 py-0.5 bg-muted rounded text-[10px] text-muted-foreground">{product.category}</span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : (
+          /* Table View */
+          <>
           <div className="hidden md:block overflow-x-auto">
             <table className="w-full">
               <thead>
@@ -360,7 +428,7 @@ export default function ProductsPage() {
             </table>
           </div>
 
-          {/* Mobile Cards */}
+          {/* Mobile Cards - only show in table mode */}
           <div className="md:hidden divide-y divide-border">
             {loading ? (
               <div className="p-4 space-y-3">
@@ -416,6 +484,8 @@ export default function ProductsPage() {
               ))
             )}
           </div>
+          </>
+          )}
         </div>
       </div>
 

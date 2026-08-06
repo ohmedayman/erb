@@ -1,8 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ShoppingCart, Plus, Search } from "lucide-react";
+import { ShoppingCart, Plus, Search, Download } from "lucide-react";
 import { getDocsFromCollection, addDocToCollection } from "@/lib/localdb";
+import { exportToExcel } from "@/lib/excel";
+import { toast } from "@/components/Toast";
+
+const Skeleton = ({ className }: { className?: string }) => (
+  <div className={`animate-pulse bg-muted rounded ${className}`} />
+);
 
 export default function PurchaseOrdersPage() {
   const [purchaseOrders, setPurchaseOrders] = useState<any[]>([]);
@@ -39,18 +45,25 @@ export default function PurchaseOrdersPage() {
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
-    const user = JSON.parse(localStorage.getItem("user") || "{}");
-    await addDocToCollection("purchaseOrders", {
-      supplierName: newOrder.supplierName,
-      items: parseInt(newOrder.items),
-      total: parseFloat(newOrder.total),
-      expectedDate: newOrder.expectedDate || undefined,
-      status: "Pending",
-      storeId: user.storeId,
-    });
-    setShowModal(false);
-    setNewOrder({ supplierName: "", items: "", total: "", expectedDate: "" });
-    fetchPurchaseOrders();
+    try {
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      await addDocToCollection("purchaseOrders", {
+        supplierName: newOrder.supplierName,
+        items: parseInt(newOrder.items),
+        total: parseFloat(newOrder.total),
+        expectedDate: newOrder.expectedDate || undefined,
+        poNumber: `PO-${Date.now().toString(36).toUpperCase()}`,
+        status: "Pending",
+        storeId: user.storeId,
+        createdAt: new Date().toISOString(),
+      });
+      setShowModal(false);
+      setNewOrder({ supplierName: "", items: "", total: "", expectedDate: "" });
+      fetchPurchaseOrders();
+      toast.success("تم إضافة أوردر الشراء بنجاح");
+    } catch {
+      toast.error("فيه مشكلة حصلت");
+    }
   };
 
   const statusLabel = (status: string) => {
@@ -88,12 +101,17 @@ export default function PurchaseOrdersPage() {
             إدارة أوردرات الشراء من الموردين
           </p>
         </div>
-        <button
-          onClick={() => setShowModal(true)}
-          className="flex items-center gap-2 bg-primary text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-primary-hover transition-colors"
-        >
-          <Plus className="w-4 h-4" /> اضف أوردر شراء
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={() => exportToExcel(purchaseOrders.map(po => ({ poNumber: po.poNumber, supplierName: po.supplierName, items: po.items, total: po.total, status: po.status, expectedDate: po.expectedDate })), "purchase-orders", "أوردرات الشراء")} className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-xl text-sm font-medium hover:bg-green-600 transition-colors">
+            <Download className="w-4 h-4" /> تصدير
+          </button>
+          <button
+            onClick={() => setShowModal(true)}
+            className="flex items-center gap-2 bg-primary text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-primary-hover transition-colors"
+          >
+            <Plus className="w-4 h-4" /> اضف أوردر شراء
+          </button>
+        </div>
       </div>
 
       <div className="bg-card rounded-xl border border-border p-4">
@@ -139,20 +157,25 @@ export default function PurchaseOrdersPage() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td
-                    colSpan={6}
-                    className="px-5 py-8 text-center text-muted-foreground text-sm"
-                  >
-                    بيتحمّل...
+                  <td colSpan={6} className="px-5 py-4">
+                    <div className="space-y-3">
+                      {[1, 2, 3].map((i) => (
+                        <div key={i} className="flex items-center gap-3">
+                          <Skeleton className="h-4 w-24" />
+                          <Skeleton className="h-4 flex-1" />
+                          <Skeleton className="h-4 w-16" />
+                          <Skeleton className="h-4 w-20" />
+                          <Skeleton className="h-5 w-16 rounded-full" />
+                          <Skeleton className="h-4 w-24" />
+                        </div>
+                      ))}
+                    </div>
                   </td>
                 </tr>
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td
-                    colSpan={6}
-                    className="px-5 py-8 text-center text-muted-foreground text-sm"
-                  >
-                    مفيش أوردرات شراء
+                  <td colSpan={6} className="px-5 py-12 text-center text-muted-foreground text-sm">
+                    {search ? "مفيش نتايج للبحث ده" : "مفيش أوردرات شراء"}
                   </td>
                 </tr>
               ) : (
